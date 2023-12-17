@@ -17,11 +17,35 @@ onready var entrance: Node2D = get_node("Entrance")
 onready var door_container: Node2D = get_node("Doors")
 onready var enemy_positions_container: Node2D = get_node("EnemyPositions")
 onready var player_detector: Area2D = get_node("PlayerDetector")
+const BREAKABLE_SCENE: PackedScene = preload("res://Characters/Breakables/Breakable.tscn")  # Asegúrate de cambiar la ruta
 
+var breakable_positions: Array  # Almacena posiciones potenciales para spawnear Breakables
 
 func _ready() -> void:
 	num_enemies = enemy_positions_container.get_child_count()
+	determine_breakable_positions()
+	spawn_breakables(randi() % 3 + 1)
 	
+func determine_breakable_positions() -> void:
+	breakable_positions = []
+	for cell in tilemap.get_used_cells():
+		print(tilemap.tile_set.tile_get_name(tilemap.get_cellv(cell)))
+		# TODO: mapear el tilemap
+		if tilemap.tile_set.tile_get_name(tilemap.get_cellv(cell)) == "full tilemap.png 10":
+			breakable_positions.append(tilemap.map_to_world(cell))
+
+func spawn_breakables(count: int) -> void:
+
+	for i in range(count):
+		if breakable_positions.size() == 0:
+			return  # No hay más posiciones disponibles
+
+		var position_index = randi() % breakable_positions.size()
+		var breakable = BREAKABLE_SCENE.instance()
+		breakable.position = breakable_positions[position_index]
+		add_child(breakable)
+		print(breakable.position)
+		breakable_positions.remove(position_index)  # Eliminar la posición para evitar spawns superpuestos	
 	
 func _on_enemy_killed() -> void:
 	num_enemies -= 1

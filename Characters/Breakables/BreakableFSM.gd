@@ -13,7 +13,7 @@ func _ready() -> void:
 func _enter_state(_previous_state: int, new_state: int) -> void:
 	match new_state:
 		states.idle:
-			animation_player.play("idle")
+			pass
 		states.dead:
 			animation_player.play("dead")
 
