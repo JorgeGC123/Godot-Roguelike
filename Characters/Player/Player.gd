@@ -13,26 +13,12 @@ signal weapon_droped(index)
 onready var parent: Node2D = get_parent()
 onready var weapons: Node2D = get_node("Weapons")
 onready var dust_position: Position2D = get_node("DustPosition")
-var dash_speed: float = 300
-var dash_duration: float = 0.15
-var is_dashing: bool = false
-var dash_direction: Vector2 = Vector2()
-var dash_cooldown = 1
-var can_dash: bool = true
-# Variables para el cooldown
-onready var dash_timer: Timer = Timer.new() # Timer para el dash
-onready var cooldown_timer: Timer = Timer.new() # Timer para el cooldown
+onready var player_dash: PlayerDash = $PlayerDash # Asegúrate de que PlayerDash es un nodo hijo en la escena
 
 func _ready() -> void:
 	emit_signal("weapon_picked_up", weapons.get_child(0).get_texture())
 	
 	_restore_previous_state()
-	add_child(dash_timer)
-	dash_timer.connect("timeout", self, "_on_dash_timer_timeout")
-
-	add_child(cooldown_timer)
-	cooldown_timer.connect("timeout", self, "_on_cooldown_timer_timeout")
-	
 	
 func _restore_previous_state() -> void:
 	self.hp = SavedData.hp
@@ -51,6 +37,7 @@ func _restore_previous_state() -> void:
 	emit_signal("weapon_switched", weapons.get_child_count() - 1, SavedData.equipped_weapon_index)
 
 func _process(_delta: float) -> void:
+	player_dash._process(_delta)
 	var mouse_direction: Vector2 = (get_global_mouse_position() - global_position).normalized()
 	
 	if mouse_direction.x > 0 and animated_sprite.flip_h:
@@ -59,38 +46,12 @@ func _process(_delta: float) -> void:
 		animated_sprite.flip_h = true
 		
 	current_weapon.move(mouse_direction)
-	if Input.is_action_just_pressed("ui_dodge"):
-		print(Input.is_action_just_pressed("ui_dodge"))
-		print(not is_dashing)
-		print(not cooldown_timer.is_stopped())
-	if Input.is_action_just_pressed("ui_dodge") and not is_dashing and can_dash:
-		print('fok')
-		_start_dash()
+	
+	if Input.is_action_just_pressed("ui_dodge") and player_dash.is_dash_available():
+		player_dash.start_dash(mov_direction)
 
-	if is_dashing:
-		_handle_dash(_delta)
-		
-		
-func _start_dash():
-	is_dashing = true
-	can_dash = false # Deshabilitar el dash hasta que el cooldown termine
-	dash_timer.start(dash_duration)
-	cooldown_timer.start(dash_cooldown) 
-	dash_direction = mov_direction.normalized()
-	if dash_direction.length() == 0:
-		dash_direction = Vector2(1, 0) # Dash por defecto en alguna dirección si está parado
-
-	dash_timer.start(dash_duration)
-
-func _handle_dash(delta: float):
-	translate(dash_direction * dash_speed * delta)
-
-func _on_dash_timer_timeout():
-	is_dashing = false
-
-func _on_cooldown_timer_timeout():
-	print('xd');
-	can_dash = true # El cooldown ha terminado, listo para otro dash
+	if player_dash.is_dashing:
+		translate(player_dash.dash_direction * player_dash.dash_speed * _delta)
 		
 func get_input() -> void:
 	mov_direction = Vector2.ZERO

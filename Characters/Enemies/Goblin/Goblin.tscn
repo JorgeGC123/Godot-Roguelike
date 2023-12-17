@@ -7,6 +7,22 @@
 [ext_resource path="res://Characters/Enemies/Goblin/Goblin.gd" type="Script" id=5]
 [ext_resource path="res://Characters/Enemies/Goblin/GoblinFSM.gd" type="Script" id=6]
 
+[sub_resource type="AtlasTexture" id=13]
+atlas = ExtResource( 4 )
+region = Rect2( 0, 0, 16, 16 )
+
+[sub_resource type="AtlasTexture" id=14]
+atlas = ExtResource( 4 )
+region = Rect2( 16, 0, 16, 16 )
+
+[sub_resource type="AtlasTexture" id=15]
+atlas = ExtResource( 4 )
+region = Rect2( 32, 0, 16, 16 )
+
+[sub_resource type="AtlasTexture" id=16]
+atlas = ExtResource( 4 )
+region = Rect2( 48, 0, 16, 16 )
+
 [sub_resource type="AtlasTexture" id=1]
 atlas = ExtResource( 2 )
 region = Rect2( 0, 0, 16, 16 )
@@ -55,24 +71,13 @@ region = Rect2( 64, 0, 16, 16 )
 atlas = ExtResource( 3 )
 region = Rect2( 80, 0, 16, 16 )
 
-[sub_resource type="AtlasTexture" id=13]
-atlas = ExtResource( 4 )
-region = Rect2( 0, 0, 16, 16 )
-
-[sub_resource type="AtlasTexture" id=14]
-atlas = ExtResource( 4 )
-region = Rect2( 16, 0, 16, 16 )
-
-[sub_resource type="AtlasTexture" id=15]
-atlas = ExtResource( 4 )
-region = Rect2( 32, 0, 16, 16 )
-
-[sub_resource type="AtlasTexture" id=16]
-atlas = ExtResource( 4 )
-region = Rect2( 48, 0, 16, 16 )
-
 [sub_resource type="SpriteFrames" id=17]
 animations = [ {
+"frames": [ SubResource( 13 ), SubResource( 14 ), SubResource( 15 ), SubResource( 16 ) ],
+"loop": true,
+"name": "explosion",
+"speed": 5.0
+}, {
 "frames": [ SubResource( 1 ), SubResource( 2 ), SubResource( 3 ), SubResource( 4 ), SubResource( 5 ), SubResource( 6 ) ],
 "loop": true,
 "name": "idle",
@@ -81,11 +86,6 @@ animations = [ {
 "frames": [ SubResource( 7 ), SubResource( 8 ), SubResource( 9 ), SubResource( 10 ), SubResource( 11 ), SubResource( 12 ) ],
 "loop": true,
 "name": "move",
-"speed": 5.0
-}, {
-"frames": [ SubResource( 13 ), SubResource( 14 ), SubResource( 15 ), SubResource( 16 ) ],
-"loop": true,
-"name": "explosion",
 "speed": 5.0
 } ]
 
@@ -244,13 +244,14 @@ tracks/1/keys = {
 script = ExtResource( 5 )
 accerelation = 30
 max_speed = 75
+projectile_speed = 150
 
 [node name="FiniteStateMachine" parent="." index="0"]
 script = ExtResource( 6 )
 
 [node name="AnimatedSprite" parent="." index="1"]
 frames = SubResource( 17 )
-animation = "explosion"
+animation = "idle"
 frame = 3
 
 [node name="CollisionShape2D" parent="." index="2"]
