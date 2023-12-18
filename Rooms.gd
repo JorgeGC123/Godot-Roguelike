@@ -14,7 +14,7 @@ const LEFT_WALL_TILE_INDEX: int = 6
 export(int) var num_levels: int = 5
 
 onready var player: KinematicBody2D = get_parent().get_node("Player")
-
+onready var random_room_generator = preload("res://Rooms/RandomDungeonRoom/RandomRoomGenerator.gd").new()
 
 func _ready() -> void:
 	SavedData.num_floor += 1
@@ -44,21 +44,29 @@ func _spawn_rooms() -> void:
 						room = SPECIAL_ROOMS[randi() % SPECIAL_ROOMS.size()].instance()
 						special_room_spawned = true
 					else:
-						room = INTERMEDIATE_ROOMS[randi() % INTERMEDIATE_ROOMS.size()].instance()
-				
+						room = random_room_generator.generate_random_room()
+						#room = INTERMEDIATE_ROOMS[randi() % INTERMEDIATE_ROOMS.size()].instance()
+						
 			var previous_room_tilemap: TileMap = previous_room.get_node("TileMap")
 			var previous_room_door: StaticBody2D = previous_room.get_node("Doors/Door")
+			print("fok ",previous_room)
 			var exit_tile_pos: Vector2 = previous_room_tilemap.world_to_map(previous_room_door.position) + Vector2.UP * 2
 			
 			var corridor_height: int = randi() % 5 + 2
 			for y in corridor_height:
+				# chapucilla para conectar bien las habitaciones con los pasillos
 				previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(-2, -y), LEFT_WALL_TILE_INDEX)
+				previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(-2, -y+1), LEFT_WALL_TILE_INDEX)
 				previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(-1, -y), FLOOR_TILE_INDEX)
 				previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(0, -y), FLOOR_TILE_INDEX)
+				previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(-1, -y+1), FLOOR_TILE_INDEX)
+				previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(0, -y+1), FLOOR_TILE_INDEX)
 				previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(1, -y), RIGHT_WALL_TILE_INDEX)
+				previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(1, -y+1), RIGHT_WALL_TILE_INDEX)
 				
 			var room_tilemap: TileMap = room.get_node("TileMap")
 			room.position = previous_room_door.global_position + Vector2.UP * room_tilemap.get_used_rect().size.y * TILE_SIZE + Vector2.UP * (1 + corridor_height) * TILE_SIZE + Vector2.LEFT * room_tilemap.world_to_map(room.get_node("Entrance/Position2D2").position).x * TILE_SIZE
 			
 		add_child(room)
 		previous_room = room
+		

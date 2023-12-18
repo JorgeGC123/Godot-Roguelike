@@ -8,10 +8,8 @@ func _ready():
 	
 func _on_Area2D_body_entered(body):
 	if body is Player:
-		print('entro')
 		body.near_breakable = self  # Establece que el jugador está cerca de un Breakable
 
 func _on_Area2D_body_exited(body):
 	if body is Player:
-		print('salgo')
 		body.near_breakable = null  # Establece que el jugador ya no está cerca de un Breakable

@@ -121,9 +121,7 @@ func pick_up_weapon(weapon: Node2D) -> void:
 func pick_up_breakable(breakable: Node) -> void:
 	if held_breakable and is_instance_valid(held_breakable):
 		var global_drop_position = global_position + Vector2(0, -15)
-		print(held_breakable.get_parent())
 		remove_child(held_breakable)
-		print(breakableScene)
 		breakableScene.add_child(held_breakable) 
 		held_breakable.global_position = global_drop_position
 		held_breakable = null  # Resetear la referencia

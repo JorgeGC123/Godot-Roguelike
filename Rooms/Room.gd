@@ -23,6 +23,7 @@ var breakable_positions: Array  # Almacena posiciones potenciales para spawnear 
 
 func _ready() -> void:
 	num_enemies = enemy_positions_container.get_child_count()
+	print(num_enemies)
 	determine_breakable_positions()
 	spawn_breakables(randi() % 3 + 1)
 	
@@ -52,7 +53,9 @@ func _on_enemy_killed() -> void:
 	
 	
 func _open_doors() -> void:
+	print('damn')
 	for door in door_container.get_children():
+		print(door)
 		door.open()
 		
 		
@@ -83,6 +86,7 @@ func _spawn_enemies() -> void:
 
 
 func _on_PlayerDetector_body_entered(_body: KinematicBody2D) -> void:
+	print('damn')
 	player_detector.queue_free()
 	if num_enemies > 0:
 		_close_entrance()
