@@ -1,11 +1,11 @@
 extends Character
-
+class_name Player
 const DUST_SCENE: PackedScene = preload("res://Characters/Player/Dust.tscn")
 
 enum {UP, DOWN}
 
 var current_weapon: Node2D
-
+export (PackedScene) var Player
 signal weapon_switched(prev_index, new_index)
 signal weapon_picked_up(weapon_texture)
 signal weapon_droped(index)
@@ -14,6 +14,9 @@ onready var parent: Node2D = get_parent()
 onready var weapons: Node2D = get_node("Weapons")
 onready var dust_position: Position2D = get_node("DustPosition")
 onready var player_dash: PlayerDash = $PlayerDash # Asegúrate de que PlayerDash es un nodo hijo en la escena
+var near_breakable: Node = null
+var held_breakable: Node = null 
+var breakableScene: Node2D = null
 
 func _ready() -> void:
 	emit_signal("weapon_picked_up", weapons.get_child(0).get_texture())
@@ -52,6 +55,10 @@ func _process(_delta: float) -> void:
 
 	if player_dash.is_dashing:
 		translate(player_dash.dash_direction * player_dash.dash_speed * _delta)
+		
+
+	if Input.is_action_just_pressed("ui_interact"):
+		pick_up_breakable(near_breakable) 
 		
 func get_input() -> void:
 	mov_direction = Vector2.ZERO
@@ -110,6 +117,27 @@ func pick_up_weapon(weapon: Node2D) -> void:
 	emit_signal("weapon_picked_up", weapon.get_texture())
 	emit_signal("weapon_switched", prev_index, new_index)
 	
+
+func pick_up_breakable(breakable: Node) -> void:
+	if held_breakable and is_instance_valid(held_breakable):
+		var global_drop_position = global_position + Vector2(0, -15)
+		print(held_breakable.get_parent())
+		remove_child(held_breakable)
+		print(breakableScene)
+		breakableScene.add_child(held_breakable) 
+		held_breakable.global_position = global_drop_position
+		held_breakable = null  # Resetear la referencia
+		return  
+
+
+	held_breakable = breakable
+	if held_breakable and is_instance_valid(held_breakable):
+		breakableScene = breakable.get_parent()
+		breakableScene.remove_child(breakable)
+		add_child(breakable)
+		breakable.position = Vector2(0, -15)  # Ajusta esta posición según necesites
+		near_breakable = null
+
 	
 func _drop_weapon() -> void:
 	SavedData.weapons.remove(current_weapon.get_index() - 1)

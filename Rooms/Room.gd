@@ -29,7 +29,6 @@ func _ready() -> void:
 func determine_breakable_positions() -> void:
 	breakable_positions = []
 	for cell in tilemap.get_used_cells():
-		print(tilemap.tile_set.tile_get_name(tilemap.get_cellv(cell)))
 		# TODO: mapear el tilemap
 		if tilemap.tile_set.tile_get_name(tilemap.get_cellv(cell)) == "full tilemap.png 10":
 			breakable_positions.append(tilemap.map_to_world(cell))
@@ -44,7 +43,6 @@ func spawn_breakables(count: int) -> void:
 		var breakable = BREAKABLE_SCENE.instance()
 		breakable.position = breakable_positions[position_index]
 		add_child(breakable)
-		print(breakable.position)
 		breakable_positions.remove(position_index)  # Eliminar la posición para evitar spawns superpuestos	
 	
 func _on_enemy_killed() -> void:
