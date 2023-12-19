@@ -23,7 +23,6 @@ var breakable_positions: Array  # Almacena posiciones potenciales para spawnear 
 
 func _ready() -> void:
 	num_enemies = enemy_positions_container.get_child_count()
-	print(num_enemies)
 	determine_breakable_positions()
 	spawn_breakables(randi() % 3 + 1)
 	
