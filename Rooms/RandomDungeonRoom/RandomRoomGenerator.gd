@@ -24,9 +24,15 @@ func generate_random_room() -> DungeonRoom:
 	# añadir la entrada
 	
 	var entrance_node = room_instance.get_node("Entrance")
+	var position2d2 = Position2D.new()  # Crear una instancia de Position2D
+	position2d2.name = "Position2D2"
+	position2d2.position = Vector2(door_x_position * TILE_SIZE, room_size.y * TILE_SIZE)
+	print(position2d2.position)
+	print("entrance position ",position2d2.position)
+	entrance_node.add_child(position2d2)
 	var position2d = Position2D.new()  # Crear una instancia de Position2D
-	position2d.name = "Position2D2"
-	position2d.position = Vector2(door_x_position * TILE_SIZE, room_size.y * TILE_SIZE)
+	position2d.name = "Position2D"
+	position2d.position = Vector2(door_x_position * TILE_SIZE-1, room_size.y * TILE_SIZE)
 	print(position2d.position)
 	print("entrance position ",position2d.position)
 	entrance_node.add_child(position2d)
@@ -37,14 +43,14 @@ func generate_random_room() -> DungeonRoom:
 	var rectangle_shape = RectangleShape2D.new()
 	rectangle_shape.extents = Vector2(TILE_SIZE * 2, TILE_SIZE) / 2  # El tamaño cubre dos tiles
 	collision_shape.shape = rectangle_shape
-	collision_shape.position = position2d.position - Vector2(0, TILE_SIZE)  # Posición encima de entrance_pos
+	collision_shape.position = position2d2.position - Vector2(0, TILE_SIZE)  # Posición encima de entrance_pos
 	collision_shape.disabled = false
 	player_detector_node.add_child(collision_shape)
 	
 	print(collision_shape.position)
 	
 	var door_position = Vector2(door_x_position, 0)  # Puerta siempre en la fila superior
-	var entrance_position = Vector2(door_x_position, int(room_size.y - 1))  # Suponiendo que la entrada está siempre en la fila inferior
+	var entrance_position = Vector2(door_x_position, int(room_size.y - 1)) 
 	generate_room_tiles(room_instance.get_node("TileMap") as TileMap, room_size, entrance_position, door_position)
 	rooms.append(room_instance)
 	return room_instance
@@ -59,21 +65,35 @@ func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vec
 			# Comprobar si la posición actual es donde debe estar el CollisionShape2D
 			if current_pos == entrance_pos - Vector2(0, 1) or current_pos == entrance_pos - Vector2(1, 1):
 				row_string += "C"
-			elif current_pos == door_pos or current_pos == entrance_pos:
-				# Establecer tile de suelo para puerta y entrada, y su adyacente
+			# Tratar door_pos
+			elif current_pos == door_pos:
+				# Establecer tile de suelo para la puerta y su adyacente
 				room_tilemap.set_cell(x, y, FLOOR_TILE_ID)
 				room_tilemap.set_cell(x-1, y, FLOOR_TILE_ID)
-				if x == 0:
-					row_string += str(FLOOR_TILE_ID)  # Solo si la puerta/entrada está al principio
-				elif x > 0 and len(row_string) > 0:
-					# Aquí ajustamos el string de la fila para los dos tiles de suelo
-					row_string = row_string.substr(0, row_string.length() - 1) + str(FLOOR_TILE_ID) + str(FLOOR_TILE_ID)
+				# Ajustar el string de la fila para los dos tiles de suelo
+				row_string = adjust_floor_tiles_in_string(row_string, x)
+			# Tratar entrance_pos
+			elif current_pos == entrance_pos:
+				# Establecer tile de suelo para la entrada y su adyacente
+				room_tilemap.set_cell(x, y, FLOOR_TILE_ID)
+				room_tilemap.set_cell(x-1, y, FLOOR_TILE_ID)
+				# Ajustar el string de la fila para los dos tiles de suelo
+				row_string = adjust_floor_tiles_in_string(row_string, x)
 			else:
+				# Otros tiles
 				var tile_id = get_tile_id_for_position(x, y, size, entrance_pos)
 				room_tilemap.set_cell(x, y, tile_id)
 				row_string += str(tile_id)
 		room_string += row_string + "\n"
 	print(room_string)
+
+func adjust_floor_tiles_in_string(row_string: String, x: int) -> String:
+	# Esta función ajusta la cadena de la fila para incluir dos tiles de suelo
+	if x == 0:
+		return str(FLOOR_TILE_ID)  # Solo si la puerta/entrada está al principio
+	elif x > 0 and len(row_string) > 0:
+		return row_string.substr(0, row_string.length() - 1) + str(FLOOR_TILE_ID) + str(FLOOR_TILE_ID)
+	return row_string
 
 
 func get_tile_id_for_position(x: int, y: int, size: Vector2, entrance: Vector2) -> int:
