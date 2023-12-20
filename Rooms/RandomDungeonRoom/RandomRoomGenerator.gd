@@ -4,6 +4,8 @@ const TILE_SIZE = 16
 const MAX_ROOM_SIZE = Vector2(15, 15)
 const MIN_ROOM_SIZE = Vector2(5, 5)
 const WALL_TILE_ID = 2
+const LEFT_WALL_TILE_ID = 6
+const RIGHT_WALL_TILE_ID = 5
 const FLOOR_TILE_ID = 14
 
 var rooms = []
@@ -12,7 +14,7 @@ var door_scene = preload("res://Rooms/Furniture and Traps/Door.tscn") # Asegúra
 func generate_random_room() -> DungeonRoom:
 	var room_scene = load("res://Rooms/RandomDungeonRoom/RandomDungeonRoom.tscn") # Asegúrate de tener el camino correcto a la escena de DungeonRoom.
 	var room_instance = room_scene.instance()
-	var room_size = Vector2(rand_range(MIN_ROOM_SIZE.x, MAX_ROOM_SIZE.x), rand_range(MIN_ROOM_SIZE.y, MAX_ROOM_SIZE.y))
+	var room_size = Vector2(rand_range(MIN_ROOM_SIZE.x, MAX_ROOM_SIZE.x), rand_range(MIN_ROOM_SIZE.y, MAX_ROOM_SIZE.y) + 1)
 	# Instanciar y añadir la puerta
 	var door_instance = door_scene.instance()
 	var doors_node = room_instance.get_node("Doors")
@@ -61,6 +63,14 @@ func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vec
 	print('generando room')
 	var room_string = ""
 	print('enemy positions ',enemy_positions)
+	# Ajustar la fila superior de la pared
+	for x in range(size.x):
+		if x == 0:
+			room_tilemap.set_cell(x, 0, WALL_TILE_ID)  # Esquina superior izquierda
+		elif x == int(size.x) - 1:
+			room_tilemap.set_cell(x, 0, WALL_TILE_ID)  # Esquina superior derecha
+		else:
+			room_tilemap.set_cell(x, 0, WALL_TILE_ID)  # Pared superior
 	for y in range(size.y):
 		var row_string = ""
 		for x in range(size.x):
@@ -104,10 +114,27 @@ func adjust_floor_tiles_in_string(row_string: String, x: int) -> String:
 
 
 func get_tile_id_for_position(x: int, y: int, size: Vector2, entrance: Vector2) -> int:
-	if x == 0 or y == 0 or x == int(size.x)-1 or y == int(size.y)-1:
-		return WALL_TILE_ID
+	if y == 0:
+		if x == 0:
+			return LEFT_WALL_TILE_ID  # Esquina superior izquierda
+		elif x == int(size.x) - 1:
+			return RIGHT_WALL_TILE_ID  # Esquina superior derecha
+		else:
+			return WALL_TILE_ID  # Pared superior
+	elif y == int(size.y) - 1:
+		if x == 0:
+			return LEFT_WALL_TILE_ID  # Esquina inferior izquierda
+		elif x == int(size.x) - 1:
+			return RIGHT_WALL_TILE_ID  # Esquina inferior derecha
+		else:
+			return WALL_TILE_ID  # Pared inferior
+	elif x == 0:
+		return LEFT_WALL_TILE_ID  # Pared izquierda
+	elif x == int(size.x) - 1:
+		return RIGHT_WALL_TILE_ID  # Pared derecha
 	else:
-		return FLOOR_TILE_ID
+		return FLOOR_TILE_ID  # Suelo
+	
 
 func generate_enemy_positions(room_instance: DungeonRoom, room_size: Vector2, entrance_pos: Vector2) -> Array:
 	var enemy_positions_node = room_instance.get_node("EnemyPositions")

@@ -35,7 +35,7 @@ func determine_breakable_positions() -> void:
 
 func spawn_breakables(count: int) -> void:
 
-	for i in range(count):
+	for _i in range(count):
 		if breakable_positions.size() == 0:
 			return  # No hay más posiciones disponibles
 
