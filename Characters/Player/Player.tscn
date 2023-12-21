@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=2]
+[gd_scene load_steps=33 format=2]
 
 [ext_resource path="res://Characters/Character.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/knight_idle_spritesheet.png" type="Texture" id=2]
@@ -93,6 +93,33 @@ animations = [ {
 
 [sub_resource type="CircleShape2D" id=18]
 radius = 4.0
+
+[sub_resource type="Animation" id=24]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimatedSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 2 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("AnimatedSprite:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 0.0 ]
+}
 
 [sub_resource type="Animation" id=19]
 tracks/0/type = "value"
@@ -258,6 +285,34 @@ tracks/2/keys = {
 } ]
 }
 
+[sub_resource type="Animation" id=23]
+resource_name = "roll"
+length = 0.4
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimatedSprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 2, 3, 4, 5 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("AnimatedSprite:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3, 0.4 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ 0.0, -90.0, -180.0, -235.0, 0.0 ]
+}
+
 [node name="Player" instance=ExtResource( 1 )]
 collision_layer = 2
 collision_mask = 5
@@ -271,17 +326,19 @@ script = ExtResource( 5 )
 [node name="AnimatedSprite" parent="." index="1"]
 frames = SubResource( 17 )
 animation = "idle"
-frame = 5
+frame = 2
 
 [node name="CollisionShape2D" parent="." index="2"]
 position = Vector2( 0, 3 )
 shape = SubResource( 18 )
 
 [node name="AnimationPlayer" parent="." index="3"]
+anims/RESET = SubResource( 24 )
 anims/dead = SubResource( 19 )
 anims/hurt = SubResource( 20 )
 anims/idle = SubResource( 21 )
 anims/move = SubResource( 22 )
+anims/roll = SubResource( 23 )
 
 [node name="Weapons" type="Node2D" parent="." index="4"]
 

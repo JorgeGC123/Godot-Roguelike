@@ -17,6 +17,7 @@ onready var player_dash: PlayerDash = $PlayerDash # Asegúrate de que PlayerDash
 var near_breakable: Node = null
 var held_breakable: Node = null 
 var breakableScene: Node2D = null
+onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
 
 func _ready() -> void:
 	emit_signal("weapon_picked_up", weapons.get_child(0).get_texture())
@@ -52,6 +53,7 @@ func _process(_delta: float) -> void:
 	
 	if Input.is_action_just_pressed("ui_dodge") and player_dash.is_dash_available():
 		player_dash.start_dash(mov_direction)
+		animation_player.play("roll")
 
 	if player_dash.is_dashing:
 		translate(player_dash.dash_direction * player_dash.dash_speed * _delta)
