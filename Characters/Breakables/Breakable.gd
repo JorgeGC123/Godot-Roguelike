@@ -2,7 +2,7 @@ extends Character
 
 var held_breakable: Node = null
 onready var tween: Tween = Tween.new()
-onready var tooltip: Label = $Tooltip  # Asegúrate de tener un nodo Label como hijo para el tooltip
+onready var tooltip: Label = get_node("Node2D/Tooltip")  # Asegúrate de tener un nodo Label como hijo para el tooltip
 var initial_tooltip_position: Vector2
 
 func _ready():

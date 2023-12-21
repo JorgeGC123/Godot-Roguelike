@@ -132,7 +132,10 @@ shape = SubResource( 10 )
 
 [node name="Tween" type="Tween" parent="." index="5"]
 
-[node name="Tooltip" type="Label" parent="." index="6"]
+[node name="Node2D" type="Node2D" parent="." index="6"]
+z_index = 5
+
+[node name="Tooltip" type="Label" parent="Node2D" index="0"]
 margin_right = 40.0
 margin_bottom = 14.0
 
