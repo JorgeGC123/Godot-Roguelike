@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://Characters/Character.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Art/v1.1 dungeon crawler 16x16 pixel pack/props_itens/barrel.png" type="Texture" id=2]
@@ -103,6 +103,9 @@ tracks/2/keys = {
 [sub_resource type="CircleShape2D" id=10]
 radius = 9.0
 
+[sub_resource type="OccluderPolygon2D" id=11]
+polygon = PoolVector2Array( -5, -8, -5, 7, 4, 7, 4, -8 )
+
 [node name="Breakable" instance=ExtResource( 1 )]
 collision_layer = 4
 collision_mask = 4
@@ -138,6 +141,9 @@ z_index = 5
 [node name="Tooltip" type="Label" parent="Node2D" index="0"]
 margin_right = 40.0
 margin_bottom = 14.0
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="." index="7"]
+occluder = SubResource( 11 )
 
 [connection signal="body_entered" from="Area2D" to="." method="_on_Area2D_body_entered"]
 [connection signal="body_exited" from="Area2D" to="." method="_on_Area2D_body_exited"]

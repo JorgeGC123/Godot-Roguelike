@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Rooms/Furniture and Traps/Torch.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Characters/Breakables/Breakable.tscn" type="PackedScene" id=2]
+
+[node name="BreakableTorch" instance=ExtResource( 2 )]
+
+[node name="AnimatedSprite" parent="." index="1"]
+visible = false
+
+[node name="Torch2" parent="." index="7" instance=ExtResource( 1 )]
+position = Vector2( 0, -1 )
+energy = 0.73
