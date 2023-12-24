@@ -159,7 +159,7 @@ func _drop_weapon() -> void:
 	hitbox_instance.knockback_force = force;
 	weapon_to_drop.add_child(hitbox_instance)
 	weapon_to_drop.show()
-
+	weapon_to_drop.get_node("AnimationPlayer").play("throw")
 	weapon_to_drop.interpolate_pos(position, position + throw_dir * force)
 	weapon_to_drop.remove_child(hitbox_instance)
 		
