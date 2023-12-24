@@ -4,7 +4,9 @@ signal dash_started
 signal dash_ended
 
 var dash_speed: float = 300
-var dash_duration: float = 0.15
+onready var animation_player = get_parent().get_node("AnimationPlayer");
+onready var animated_sprite = get_parent().get_node("AnimatedSprite")
+var dash_duration: float = 0.2 # ajustar con el valor de la animación en el editor TODO: dinámico
 var dash_cooldown: float = 1.0
 var is_dashing: bool = false
 var dash_direction: Vector2 = Vector2()
@@ -25,8 +27,9 @@ func start_dash(direction: Vector2):
 		return
 	dash_direction = direction.normalized()
 	if dash_direction.length() == 0:
-		dash_direction = Vector2(1, 0)
+		return
 	is_dashing = true
+	animation_player.play("roll")
 	emit_signal("dash_started", dash_direction)
 	dash_timer.start(dash_duration)
 

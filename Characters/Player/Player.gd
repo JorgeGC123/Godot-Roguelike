@@ -41,7 +41,7 @@ func _restore_previous_state() -> void:
 	emit_signal("weapon_switched", weapons.get_child_count() - 1, SavedData.equipped_weapon_index)
 
 func _process(_delta: float) -> void:
-	player_dash._process(_delta)
+	
 	var mouse_direction: Vector2 = (get_global_mouse_position() - global_position).normalized()
 	
 	if mouse_direction.x > 0 and animated_sprite.flip_h:
@@ -51,9 +51,10 @@ func _process(_delta: float) -> void:
 		
 	current_weapon.move(mouse_direction)
 	
+	player_dash._process(_delta)
 	if Input.is_action_just_pressed("ui_dodge") and player_dash.is_dash_available():
 		player_dash.start_dash(mov_direction)
-		animation_player.play("roll")
+
 
 	if player_dash.is_dashing:
 		translate(player_dash.dash_direction * player_dash.dash_speed * _delta)
@@ -63,6 +64,10 @@ func _process(_delta: float) -> void:
 		pick_up_breakable(near_breakable) 
 		
 func get_input() -> void:
+	# Verificar si el jugador está realizando un dash
+	if player_dash.is_dashing:
+		return  # No procesar entradas de movimiento durante el dash
+
 	mov_direction = Vector2.ZERO
 	if Input.is_action_pressed("ui_down"):
 		mov_direction += Vector2.DOWN
