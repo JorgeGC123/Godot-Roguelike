@@ -147,6 +147,7 @@ tracks/3/keys = {
 
 [sub_resource type="Animation" id=20]
 resource_name = "hurt"
+length = 0.4
 tracks/0/type = "value"
 tracks/0/path = NodePath("AnimatedSprite:animation")
 tracks/0/interp = 1
