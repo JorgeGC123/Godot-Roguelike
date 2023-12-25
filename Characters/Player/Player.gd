@@ -5,6 +5,7 @@ const DUST_SCENE: PackedScene = preload("res://Characters/Player/Dust.tscn")
 enum {UP, DOWN}
 
 var current_weapon: Node2D
+var lantern: Lantern
 export (PackedScene) var Player
 signal weapon_switched(prev_index, new_index)
 signal weapon_picked_up(weapon_texture)
@@ -13,7 +14,7 @@ signal weapon_droped(index)
 onready var parent: Node2D = get_parent()
 onready var weapons: Node2D = get_node("Weapons")
 onready var dust_position: Position2D = get_node("DustPosition")
-onready var player_dash: PlayerDash = $PlayerDash # Asegúrate de que PlayerDash es un nodo hijo en la escena
+onready var player_dash: PlayerDash = $PlayerDash
 var near_breakable: Node = null
 var held_breakable: Node = null 
 var breakableScene: Node2D = null
@@ -26,6 +27,7 @@ func _ready() -> void:
 	
 func _restore_previous_state() -> void:
 	self.hp = SavedData.hp
+	print(SavedData.weapons)
 	for weapon in SavedData.weapons:
 		weapon = weapon.duplicate()
 		weapon.position = Vector2.ZERO
@@ -39,6 +41,17 @@ func _restore_previous_state() -> void:
 	current_weapon.show()
 	
 	emit_signal("weapon_switched", weapons.get_child_count() - 1, SavedData.equipped_weapon_index)
+	print(SavedData.items)
+	for item in SavedData.items:
+		if is_instance_valid(item) and item is Lantern:
+			item.set_position(Vector2.ZERO)
+			item.following_player = true
+			item.set_process(true)
+			lantern = item.duplicate()
+			lantern.show()
+			self.add_child(item)
+			SavedData.items.erase(item)
+
 
 func _process(_delta: float) -> void:
 	

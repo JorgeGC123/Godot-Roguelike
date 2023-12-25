@@ -12,6 +12,7 @@ func _on_Lantern_body_entered(player: KinematicBody2D) -> void:
 	player.add_child(self)
 	set_position(Vector2.ZERO)  # Esto colocará la linterna en el centro del player.
 	following_player = true
+	SavedData.items.append(self.duplicate())
 
 
 func _process(delta: float) -> void:
