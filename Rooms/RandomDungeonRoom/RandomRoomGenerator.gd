@@ -7,9 +7,13 @@ const WALL_TILE_ID = 2
 const LEFT_WALL_TILE_ID = 6
 const RIGHT_WALL_TILE_ID = 5
 const FLOOR_TILE_ID = 14
+const RIGHT_WINDOW_TILE_ID = 8
 
 var rooms = []
-var door_scene = preload("res://Rooms/Furniture and Traps/Door.tscn") # Asegúrate de tener el camino correcto a la escena de la puerta.
+var door_scene = preload("res://Rooms/Furniture and Traps/Door.tscn") 
+var breakable_torch_scene = preload("res://Characters/Breakables/Torch/BreakableTorch.tscn")
+var clean_light_scene = preload("res://Characters/Breakables/Torch/CleanLight.tscn")
+var god_rays_scene = preload("res://Godrays/SunGodRays.tscn")
 
 func generate_random_room() -> DungeonRoom:
 	var room_scene = load("res://Rooms/RandomDungeonRoom/RandomDungeonRoom.tscn") # Asegúrate de tener el camino correcto a la escena de DungeonRoom.
@@ -38,9 +42,32 @@ func generate_random_room() -> DungeonRoom:
 	print(position2d.position)
 	print("entrance position ",position2d.position)
 	entrance_node.add_child(position2d)
+
+	# Añadir BreakableTorch en una posición aleatoria de la pared superior
+	var breakable_torch_instance = breakable_torch_scene.instance()
+	var torch_x_position = randi() % (int(room_size.x) - 2) + 1
+	while torch_x_position == door_x_position:
+		torch_x_position = randi() % (int(room_size.x) - 2) + 1
+	breakable_torch_instance.position = Vector2(torch_x_position * TILE_SIZE, 6)
+	room_instance.add_child(breakable_torch_instance)
+
+	# Añadir la ventana y los godrays:
+	var margin = max(1, int(room_size.y / 4))  # Por ejemplo, excluimos el 25% superior e inferior
+	var central_range_start = margin
+	var central_range_end = int(room_size.y) - margin
+	# Elegir una posición 'y' dentro del rango central
+	var window_y_position = randi() % (central_range_end - central_range_start) + central_range_start
+	# Asegurarse de que la posición 'y' es válida (por si acaso)
+	window_y_position = clamp(window_y_position, 1, int(room_size.y) - 2)
+	var clean_light_instance = clean_light_scene.instance()
+	var godray_instance = god_rays_scene.instance()
+	var window_world_position = room_instance.get_node("TileMap").map_to_world(Vector2(room_size.x - 1, window_y_position))
+	clean_light_instance.position = window_world_position
+	godray_instance.position = window_world_position
+	room_instance.add_child(clean_light_instance)
+	room_instance.add_child(godray_instance	)
 	# Añadir el CollisionShape2D al nodo PlayerDetector
 	var player_detector_node = room_instance.get_node("PlayerDetector")
-
 	var collision_shape = CollisionShape2D.new()
 	var rectangle_shape = RectangleShape2D.new()
 	rectangle_shape.extents = Vector2(TILE_SIZE * 2, TILE_SIZE) / 2  # El tamaño cubre dos tiles
@@ -54,12 +81,12 @@ func generate_random_room() -> DungeonRoom:
 	var door_position = Vector2(door_x_position, 0)  # Puerta siempre en la fila superior
 	var entrance_position = Vector2(door_x_position, int(room_size.y - 1)) 
 	var enemy_positions = generate_enemy_positions(room_instance, room_size, entrance_position)
-	generate_room_tiles(room_instance.get_node("TileMap") as TileMap, room_size, entrance_position, door_position,enemy_positions)
+	generate_room_tiles(room_instance.get_node("TileMap") as TileMap, room_size, entrance_position, door_position,enemy_positions,window_y_position)
 
 	rooms.append(room_instance)
 	return room_instance
 
-func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vector2, door_pos: Vector2, enemy_positions: Array) -> void:
+func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vector2, door_pos: Vector2, enemy_positions: Array,window_y_position) -> void:
 	print('generando room')
 	var room_string = ""
 	print('enemy positions ',enemy_positions)
@@ -96,6 +123,8 @@ func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vec
 				room_tilemap.set_cell(x-1, y, FLOOR_TILE_ID)
 				# Ajustar el string de la fila para los dos tiles de suelo
 				row_string = adjust_floor_tiles_in_string(row_string, x)
+			elif x == int(size.x) - 1 and y == window_y_position:
+				room_tilemap.set_cell(x, y, RIGHT_WINDOW_TILE_ID)
 			else:
 				# Otros tiles
 				var tile_id = get_tile_id_for_position(x, y, size, entrance_pos)

@@ -14,7 +14,7 @@ extents = Vector2( 32, 24 )
 
 [sub_resource type="GDScript" id=4]
 
-[sub_resource type="Shader" id=3]
+[sub_resource type="Shader" id=6]
 code = "/*
 Shader from Godot Shaders - the free shader library.
 godotshaders.com/shader/god-rays
@@ -125,7 +125,7 @@ void fragment()
 script = SubResource( 4 )
 
 [sub_resource type="ShaderMaterial" id=5]
-shader = SubResource( 3 )
+shader = SubResource( 6 )
 shader_param/angle = -2.0
 shader_param/position = 1.0
 shader_param/spread = 0.091
