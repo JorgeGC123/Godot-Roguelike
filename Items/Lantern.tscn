@@ -1,0 +1,49 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://Items/Lantern.gd" type="Script" id=1]
+[ext_resource path="res://Art/v1.1 dungeon crawler 16x16 pixel pack/props_itens/potion_red.png" type="Texture" id=2]
+[ext_resource path="res://Rooms/Furniture and Traps/Torch.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Art/Lantern/Lantern4trans.png" type="Texture" id=4]
+[ext_resource path="res://Art/Lantern/Lantern5.png" type="Texture" id=5]
+[ext_resource path="res://Art/Lantern/Lantern2trans.png" type="Texture" id=6]
+[ext_resource path="res://Art/Lantern/Lantern1trans.png" type="Texture" id=7]
+[ext_resource path="res://Art/Lantern/Lantern3trans.png" type="Texture" id=8]
+
+[sub_resource type="CapsuleShape2D" id=1]
+radius = 3.05273
+height = 5.61857
+
+[sub_resource type="AnimatedTexture" id=2]
+frames = 5
+fps = 5.0
+frame_0/texture = ExtResource( 6 )
+frame_0/delay_sec = 0.1
+frame_1/texture = ExtResource( 7 )
+frame_1/delay_sec = 0.0
+frame_2/texture = ExtResource( 8 )
+frame_2/delay_sec = 0.0
+frame_3/texture = ExtResource( 4 )
+frame_3/delay_sec = 0.0
+frame_4/texture = ExtResource( 5 )
+frame_4/delay_sec = 0.0
+
+[node name="Lantern" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource( 1 )
+
+[node name="Sprite" type="Sprite" parent="."]
+texture = ExtResource( 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2( -0.28093, -0.374577 )
+shape = SubResource( 1 )
+
+[node name="Tween" type="Tween" parent="."]
+
+[node name="Lantern" parent="." instance=ExtResource( 3 )]
+texture = SubResource( 2 )
+texture_scale = 1.5
+energy = 0.8
+
+[connection signal="body_entered" from="." to="." method="_on_Lantern_body_entered"]
