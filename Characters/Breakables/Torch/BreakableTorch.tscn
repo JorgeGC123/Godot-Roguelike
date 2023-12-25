@@ -10,4 +10,6 @@ visible = false
 
 [node name="Torch2" parent="." index="7" instance=ExtResource( 1 )]
 position = Vector2( 0, -1 )
-energy = 0.73
+
+[node name="LightOccluder2D" parent="." index="8"]
+visible = false

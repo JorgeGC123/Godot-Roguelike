@@ -5,7 +5,7 @@ const INTERMEDIATE_ROOMS: Array = [preload("res://Rooms/Room0.tscn"), preload("r
 const SPECIAL_ROOMS: Array = [preload("res://Rooms/SpecialRoom0.tscn"), preload("res://Rooms/SpecialRoom1.tscn")]
 const END_ROOMS: Array = [preload("res://Rooms/EndRoom0.tscn")]
 const SLIME_BOSS_SCENE: PackedScene = preload("res://Rooms/SlimeBossRoom.tscn")
-
+var is_day = rand_range(-10, 10)
 const TILE_SIZE: int = 16
 const FLOOR_TILE_INDEX: int = 14
 const RIGHT_WALL_TILE_INDEX: int = 5
