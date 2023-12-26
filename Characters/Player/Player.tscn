@@ -358,7 +358,11 @@ tracks/2/keys = {
 collision_layer = 2
 collision_mask = 5
 script = ExtResource( 4 )
+stamina = 100
 hp = 4
+stamina_recovery_rate = 1
+stamina_recovery_interval = 0.1
+stamina_recovery_delay = 1.0
 Player = null
 
 [node name="FiniteStateMachine" parent="." index="0"]
@@ -367,6 +371,7 @@ script = ExtResource( 5 )
 [node name="AnimatedSprite" parent="." index="1"]
 frames = SubResource( 17 )
 animation = "roll"
+frame = 2
 
 [node name="CollisionShape2D" parent="." index="2"]
 position = Vector2( 0, 3 )

@@ -209,6 +209,7 @@ tracks/2/keys = {
 script = ExtResource( 2 )
 ranged_weapon = true
 rotation_offset = 180
+BASIC_ATTACK_STAMINA = 10
 
 [node name="Sprite" parent="Node2D" index="0"]
 material = SubResource( 2 )

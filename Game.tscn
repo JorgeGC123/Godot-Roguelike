@@ -23,15 +23,32 @@ script = ExtResource( 7 )
 [node name="HealthBar" type="TextureProgress" parent="UI"]
 margin_left = 10.0
 margin_top = 10.0
-margin_right = 80.0
-margin_bottom = 16.0
+margin_right = 90.0
+margin_bottom = 26.0
 mouse_filter = 2
 value = 23.0
 texture_over = ExtResource( 5 )
 texture_progress = ExtResource( 6 )
-tint_progress = Color( 0.498039, 0.0313726, 0.0313726, 1 )
+tint_progress = Color( 0.537255, 0.117647, 0.117647, 1 )
 
 [node name="Tween" type="Tween" parent="UI/HealthBar"]
+
+[node name="StaminaBar" type="TextureProgress" parent="UI"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -470.0
+margin_top = -107.0
+margin_right = -390.0
+margin_bottom = -91.0
+mouse_filter = 2
+value = 23.0
+texture_over = ExtResource( 5 )
+texture_progress = ExtResource( 6 )
+tint_progress = Color( 0.666667, 0.435294, 0.105882, 1 )
+
+[node name="Tween" type="Tween" parent="UI/StaminaBar"]
 
 [node name="PanelContainer" type="PanelContainer" parent="UI"]
 anchor_left = 0.5
@@ -44,9 +61,6 @@ margin_right = 7.0
 margin_bottom = -16.0
 grow_horizontal = 2
 custom_styles/panel = SubResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Inventory" type="HBoxContainer" parent="UI/PanelContainer"]
 margin_left = 2.0
@@ -64,6 +78,7 @@ max_hp = 4
 [node name="Camera2D" type="Camera2D" parent="."]
 
 [connection signal="hp_changed" from="Player" to="UI" method="_on_Player_hp_changed"]
+[connection signal="stamina_changed" from="Player" to="UI" method="_on_Player_stamina_changed"]
 [connection signal="weapon_droped" from="Player" to="UI" method="_on_Player_weapon_droped"]
 [connection signal="weapon_picked_up" from="Player" to="UI" method="_on_Player_weapon_picked_up"]
 [connection signal="weapon_switched" from="Player" to="UI" method="_on_Player_weapon_switched"]

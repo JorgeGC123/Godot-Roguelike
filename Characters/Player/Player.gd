@@ -39,6 +39,7 @@ func _restore_previous_state() -> void:
 		
 	current_weapon = weapons.get_child(SavedData.equipped_weapon_index)
 	current_weapon.show()
+	current_weapon.player=self
 	
 	emit_signal("weapon_switched", weapons.get_child_count() - 1, SavedData.equipped_weapon_index)
 	print(SavedData.items)
@@ -117,6 +118,7 @@ func _switch_weapon(direction: int) -> void:
 	current_weapon.hide()
 	current_weapon = weapons.get_child(index)
 	current_weapon.show()
+	current_weapon.player = self
 	SavedData.equipped_weapon_index = index
 	
 	emit_signal("weapon_switched", prev_index, index)
@@ -133,7 +135,7 @@ func pick_up_weapon(weapon: Node2D) -> void:
 	current_weapon.hide()
 	current_weapon.cancel_attack()
 	current_weapon = weapon
-	
+	current_weapon.player = self
 	emit_signal("weapon_picked_up", weapon.get_texture())
 	emit_signal("weapon_switched", prev_index, new_index)
 	

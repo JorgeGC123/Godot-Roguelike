@@ -5,7 +5,7 @@ export(bool) var on_floor: bool = false
 
 export var ranged_weapon: bool = false
 export var rotation_offset: int = 0
-
+var player # referencia al player que la tiene equipada
 var can_active_ability: bool = true
 
 onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
@@ -17,6 +17,9 @@ onready var cool_down_timer: Timer = get_node("CoolDownTimer")
 onready var ui: CanvasLayer = get_node("UI")
 onready var ability_icon: TextureProgress = ui.get_node("AbilityIcon")
 
+export var BASIC_ATTACK_STAMINA = 50
+export var CHARGED_ATTACK_STAMINA = 70
+export var ABILITY_STAMINA = 70
 
 func _ready() -> void:
 	if not on_floor:
@@ -25,14 +28,15 @@ func _ready() -> void:
 
 
 func get_input() -> void:
-	if Input.is_action_just_pressed("ui_attack") and not animation_player.is_playing():
-		animation_player.play("charge")
-	elif Input.is_action_just_released("ui_attack"):
-		if animation_player.is_playing() and animation_player.current_animation == "charge":
+	if Input.is_action_pressed("ui_attack") and not animation_player.is_playing() and player.stamina > BASIC_ATTACK_STAMINA:
+		if player.stamina > CHARGED_ATTACK_STAMINA:
+			animation_player.play("charge")
+	elif Input.is_action_just_released("ui_attack") and player.stamina > BASIC_ATTACK_STAMINA:
+		#if animation_player.is_playing() and animation_player.current_animation == "charge":
 			animation_player.play("attack")
-		elif charge_particles.emitting:
+	if charge_particles.emitting and player.stamina > CHARGED_ATTACK_STAMINA and Input.is_action_just_released("ui_attack"):
 			animation_player.play("strong_attack")
-	elif Input.is_action_just_pressed("ui_active_ability") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability:
+	elif Input.is_action_just_pressed("ui_active_ability") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and player.stamina > ABILITY_STAMINA:
 		can_active_ability = false
 		cool_down_timer.start()
 		ui.recharge_ability_animation(cool_down_timer.wait_time)
@@ -102,3 +106,19 @@ func hide() -> void:
 	
 func get_texture() -> Texture:
 	return get_node("Node2D/Sprite").texture
+
+
+func stamina_tax(amount: int) -> void:
+	var character = get_parent().get_parent() # TODO: mejorar esto
+	if(character is Player):
+		character.reduce_stamina(amount)
+
+func _on_AnimationPlayer_animation_started(anim_name:String):
+	if anim_name == "attack":
+		stamina_tax(BASIC_ATTACK_STAMINA) # TODO: constantes y futuros incrementos/decrementos por skills pasivas
+	elif anim_name == "attack2":
+		stamina_tax(BASIC_ATTACK_STAMINA)
+	elif anim_name == "strong_attack":
+		stamina_tax(CHARGED_ATTACK_STAMINA)
+	elif anim_name == "active_ability":
+		stamina_tax(ABILITY_STAMINA)

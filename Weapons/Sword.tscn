@@ -476,7 +476,6 @@ visible = false
 position = Vector2( 18, 0 )
 texture = ExtResource( 2 )
 hframes = 3
-frame = 2
 
 [node name="AnimationPlayer" parent="." index="3"]
 anims/active_ability = ExtResource( 5 )
@@ -495,4 +494,5 @@ wait_time = 0.5
 one_shot = true
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_finished"]
+[connection signal="animation_started" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_started"]
 [connection signal="timeout" from="SecondAttackTimer" to="." method="_on_SecondAttackTimer_timeout"]
