@@ -467,6 +467,7 @@ knockback_force = 200
 
 [node name="CollisionShape2D" parent="Node2D/Sprite/Hitbox" index="0"]
 shape = SubResource( 1 )
+disabled = true
 
 [node name="ChargeParticles" parent="Node2D/Sprite" index="1"]
 position = Vector2( 5.65685, -4.24264 )
@@ -494,5 +495,4 @@ wait_time = 0.5
 one_shot = true
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_finished"]
-[connection signal="animation_started" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_started"]
 [connection signal="timeout" from="SecondAttackTimer" to="." method="_on_SecondAttackTimer_timeout"]
