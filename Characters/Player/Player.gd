@@ -59,7 +59,10 @@ func _restore_previous_state() -> void:
 func _process(_delta: float) -> void:
 	
 	var mouse_direction: Vector2 = (get_global_mouse_position() - global_position).normalized()
-	
+	var window_size: Vector2 = OS.get_window_size()
+	var mouse_pos = get_global_mouse_position()
+	$Camera2D.offset_h = (mouse_pos.x - global_position.x) / (window_size.x/2)
+	$Camera2D.offset_v = (mouse_pos.y - global_position.y) / (window_size.y/2)
 	if mouse_direction.x > 0 and animated_sprite.flip_h:
 		animated_sprite.flip_h = false
 	elif mouse_direction.x < 0 and not animated_sprite.flip_h:
