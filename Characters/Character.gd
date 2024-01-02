@@ -16,7 +16,7 @@ onready var stamina_delay_timer: Timer = Timer.new()  # Timer para el delay
 export(int) var stamina_recovery_rate: int = 1  # Cantidad de stamina recuperada por tick
 export(float) var stamina_recovery_interval: float = 0.1  # Intervalo de recuperación en segundos
 export(float) var stamina_recovery_delay: float = 1.0  # Delay antes de la recuperación
-
+onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
 export(int) var accerelation: int = 40
 export(int) var max_speed: int = 100
 
@@ -27,6 +27,11 @@ onready var animated_sprite: AnimatedSprite = get_node("AnimatedSprite")
 
 var mov_direction: Vector2 = Vector2.ZERO
 var velocity: Vector2 = Vector2.ZERO
+
+# señales pa multiplayer
+signal position_changed(new_pos)
+signal flip_h_changed(flip_h)
+signal animation_changed(anim_name)
 
 func _ready():
 	add_child(stamina_timer)
@@ -43,7 +48,7 @@ func _ready():
 func _physics_process(_delta: float) -> void:
 	velocity = move_and_slide(velocity)
 	velocity = lerp(velocity, Vector2.ZERO, FRICTION)
-	
+	emit_signal("position_changed", position)
 	
 func move() -> void:
 	mov_direction = mov_direction.normalized()

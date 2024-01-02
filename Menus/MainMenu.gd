@@ -6,3 +6,7 @@ func _on_SinglePlayer_pressed():
 
 func _on_Quit_pressed():
 	 get_tree().quit()
+
+
+func _on_Multiplayer_pressed():
+	SceneTransistor.start_transition_to("res://Menus/Multiplayer.tscn")

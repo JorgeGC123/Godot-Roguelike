@@ -18,7 +18,7 @@ onready var player_dash: PlayerDash = $PlayerDash
 var near_breakable: Node = null
 var held_breakable: Node = null 
 var breakableScene: Node2D = null
-onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
+
 
 export var DASH_STAMINA = 30
 
@@ -68,6 +68,7 @@ func _process(_delta: float) -> void:
 	elif mouse_direction.x < 0 and not animated_sprite.flip_h:
 		animated_sprite.flip_h = true
 		
+	emit_signal("flip_h_changed", animated_sprite.flip_h)
 	current_weapon.move(mouse_direction)
 	
 	player_dash._process(_delta)
@@ -204,3 +205,6 @@ func switch_camera() -> void:
 	main_scene_camera.position = position
 	main_scene_camera.current = true
 	get_node("Camera2D").current = false
+
+func _on_AnimationPlayer_animation_started(anim_name: String) -> void:
+	emit_signal("animation_changed", anim_name)

@@ -76,6 +76,7 @@ config/icon="res://icon.png"
 
 SceneTransistor="*res://Autoloads/SceneTransistor.tscn"
 SavedData="*res://Autoloads/SavedData.gd"
+Client="*res://Autoloads/Client.gd"
 
 [display]
 
