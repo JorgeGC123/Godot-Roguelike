@@ -9,7 +9,7 @@ var body_inside: bool = false
 
 onready var collision_shape: CollisionShape2D = get_child(0)
 onready var timer: Timer = Timer.new()
-
+signal mpdamage(damage)
 
 func _init() -> void:
 	var __ = connect("body_entered", self, "_on_body_entered")
@@ -36,7 +36,15 @@ func _on_body_exited(_body: KinematicBody2D) -> void:
 	
 	
 func _collide(body: KinematicBody2D) -> void:
+	print('maldicion hijo')
+	print(body)
+	print(body.has_method("take_damage"))
 	if body == null or not body.has_method("take_damage"):
 		queue_free()
 	else:
+		print('dano takeadisimo, emitiendo señal')
+		print(body)
 		body.take_damage(damage, knockback_direction, knockback_force)
+		#print("Escena actual: ", current_scene)
+		print("el body de ",int(body.name)," siente el dolor")
+		emit_signal("mpdamage",int(body.name),damage, knockback_direction, knockback_force)

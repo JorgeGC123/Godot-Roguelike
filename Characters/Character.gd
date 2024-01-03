@@ -33,6 +33,7 @@ signal position_changed(new_pos)
 signal flip_h_changed(flip_h)
 signal animation_changed(anim_name)
 
+
 func _ready():
 	add_child(stamina_timer)
 	stamina_timer.wait_time = stamina_recovery_interval
@@ -43,7 +44,10 @@ func _ready():
 	stamina_delay_timer.wait_time = stamina_recovery_delay
 	stamina_delay_timer.one_shot = true
 	stamina_delay_timer.connect("timeout", self, "_on_StaminaDelayTimer_timeout")
-	print("Timers added and connected.")
+
+func initialize(id: int, name: String, character_index: int):
+	self.name = str(id)
+	print('id player: ',self.name)
 
 func _physics_process(_delta: float) -> void:
 	velocity = move_and_slide(velocity)
@@ -61,6 +65,7 @@ func move() -> void:
 	
 func take_damage(dam: int, dir: Vector2, force: int) -> void:
 	if state_machine.state != state_machine.states.hurt and state_machine.state != state_machine.states.dead:
+		print("estoy sintiendo el dolor")
 		_spawn_hit_effect()
 		self.hp -= dam
 		if name == "Player":
@@ -68,6 +73,10 @@ func take_damage(dam: int, dir: Vector2, force: int) -> void:
 			if hp == 0:
 				SceneTransistor.start_transition_to("res://Game.tscn")
 				SavedData.reset_data()
+		elif name == "MultiplayerCharacter":
+			if hp == 0:
+				print('me muerto')
+				queue_free()
 		if hp > 0:
 			state_machine.set_state(state_machine.states.hurt)
 			velocity += dir * force
@@ -77,9 +86,7 @@ func take_damage(dam: int, dir: Vector2, force: int) -> void:
 		
 func reduce_stamina(cost: int) -> void:
 	self.stamina -= cost
-	print("Stamina reduced: ", self.stamina)
 	start_stamina_regeneration()
-	print("start_stamina_regeneration called.")
 
 func set_hp(new_hp: int) -> void:
 	hp = clamp(new_hp, 0, max_hp)
@@ -92,22 +99,17 @@ func set_stamina(new_stamina: int) -> void:
 func start_stamina_regeneration():
 	if stamina_delay_timer.is_stopped() and stamina_timer:
 		stamina_delay_timer.start()
-		print("Delay timer started.")
 
 func _on_StaminaDelayTimer_timeout():
 	if stamina_timer.is_stopped():
 		stamina_timer.start()
-		print("Stamina recovery timer started.")
 
 func _on_StaminaTimer_timeout():
-	print("Timer timeout: current stamina = ", stamina)
 	if stamina_delay_timer.is_stopped():
 		if stamina < max_stamina:
 			set_stamina(stamina + stamina_recovery_rate)
-			print("Stamina increased: ", stamina)
 			if stamina >= max_stamina:
 				stamina_timer.stop()
-				print("Timer stopped.")
 
 func _spawn_hit_effect() -> void:
 	var hit_effect: Sprite = HIT_EFFECT_SCENE.instance()

@@ -49,7 +49,6 @@ func _spawn_rooms() -> void:
 						
 			var previous_room_tilemap: TileMap = previous_room.get_node("TileMap")
 			var previous_room_door: StaticBody2D = previous_room.get_node("Doors/Door")
-			print("fok ",previous_room)
 			var exit_tile_pos: Vector2 = previous_room_tilemap.world_to_map(previous_room_door.position) + Vector2.UP * 2
 			
 			var corridor_height: int = randi() % 5 + 2
