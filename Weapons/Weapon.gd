@@ -21,6 +21,9 @@ export var BASIC_ATTACK_STAMINA = 50
 export var CHARGED_ATTACK_STAMINA = 70
 export var ABILITY_STAMINA = 70
 
+# para multiplayer
+signal weapon_animation_changed(anim_name)
+
 func _ready() -> void:
 	if not on_floor:
 		player_detector.set_collision_mask_bit(0, false)
@@ -31,16 +34,20 @@ func get_input() -> void:
 	if Input.is_action_pressed("ui_attack") and not animation_player.is_playing() and player.stamina > BASIC_ATTACK_STAMINA:
 		if player.stamina > CHARGED_ATTACK_STAMINA:
 			animation_player.play("charge")
+			emit_signal("weapon_animation_changed", "charge")
 	elif Input.is_action_just_released("ui_attack") and player.stamina > BASIC_ATTACK_STAMINA:
 		#if animation_player.is_playing() and animation_player.current_animation == "charge":
 			animation_player.play("attack")
+			emit_signal("weapon_animation_changed", "attack")
 	if charge_particles.emitting and player.stamina > CHARGED_ATTACK_STAMINA and Input.is_action_just_released("ui_attack"):
 			animation_player.play("strong_attack")
+			emit_signal("weapon_animation_changed", "strong_attack")
 	elif Input.is_action_just_pressed("ui_active_ability") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and player.stamina > ABILITY_STAMINA:
 		can_active_ability = false
 		cool_down_timer.start()
 		ui.recharge_ability_animation(cool_down_timer.wait_time)
 		animation_player.play("active_ability")
+		emit_signal("weapon_animation_changed", "active_ability")
 			
 			
 func move(mouse_direction: Vector2) -> void:

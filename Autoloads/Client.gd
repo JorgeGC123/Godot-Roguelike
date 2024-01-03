@@ -72,6 +72,7 @@ remote func pre_configure_game() -> void:
 	get_tree().current_scene = game
 	
 	var my_player: KinematicBody2D = preload("res://Characters/Player/Player.tscn").instance()
+	var my_weapon = my_player.get_node("Weapons/Sword")
 	var my_weapon_hitbox = my_player.get_node("Weapons/Sword/Node2D/Sprite/Hitbox")
 	my_player.call_deferred("initialize",get_tree().get_network_unique_id(), my_info.name,my_info.character_index)
 	game.add_child(my_player)
@@ -85,6 +86,8 @@ remote func pre_configure_game() -> void:
 		printerr("Error connecting animation_changed signal")
 	if my_weapon_hitbox.connect("mpdamage", self, "_on_player_damaged"):
 		printerr("Error connecting damage signal")
+	if my_weapon.connect("weapon_animation_changed", self, "_on_weapon_animation_changed"):
+		printerr("Error connecting weapon_animation signal")
 	
 	for player_id in player_info:
 		if player_id != get_tree().get_network_unique_id():
@@ -111,6 +114,10 @@ func _on_flip_h_changed(flip_h: bool) -> void:
 func _on_animation_changed(anim_name: String) -> void:
 	print("anim cliente")
 	rpc_id(1, "change_player_anim", anim_name)
+
+func _on_weapon_animation_changed(anim_name: String) -> void:
+	print("anim espada cliente")
+	rpc_id(1, "change_weapon_anim", anim_name)
 	
 func _on_player_damaged(id: int, dam: int, knockback_direction: Vector2, knockback_force: int) -> void:
 	print('vamos a ver')
@@ -134,6 +141,11 @@ remote func update_player_anim(id: int, anim_name: String) -> void:
 	print("deberia de playear")
 	print(anim_name)
 	player_info[id].instance.animation_player.play(anim_name)
+
+remote func update_weapon_anim(id: int, anim_name: String) -> void:
+	print("deberia de playear")
+	print(anim_name)
+	player_info[id].instance.get_node("Weapons/Sword").animation_player.play(anim_name)
 	
 	
 remote func remove_player(id: int) -> void:
