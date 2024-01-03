@@ -88,7 +88,8 @@ remote func pre_configure_game() -> void:
 		printerr("Error connecting damage signal")
 	if my_weapon.connect("weapon_animation_changed", self, "_on_weapon_animation_changed"):
 		printerr("Error connecting weapon_animation signal")
-	
+	if my_weapon.connect("weapon_moved", self, "_on_weapon_move"):
+		printerr("Error connecting weapon_moved signal")
 	for player_id in player_info:
 		if player_id != get_tree().get_network_unique_id():
 			var player: KinematicBody2D = preload("res://Characters/Multiplayer/MultiplayerCharacter.tscn").instance()
@@ -118,6 +119,10 @@ func _on_animation_changed(anim_name: String) -> void:
 func _on_weapon_animation_changed(anim_name: String) -> void:
 	print("anim espada cliente")
 	rpc_id(1, "change_weapon_anim", anim_name)
+
+func _on_weapon_move(scale_y,rotation,hitbox_knockback) -> void:
+	print("anim espada cliente")
+	rpc_id(1, "move_weapon", scale_y,rotation,hitbox_knockback)
 	
 func _on_player_damaged(id: int, dam: int, knockback_direction: Vector2, knockback_force: int) -> void:
 	print('vamos a ver')
@@ -141,6 +146,13 @@ remote func update_player_anim(id: int, anim_name: String) -> void:
 	print("deberia de playear")
 	print(anim_name)
 	player_info[id].instance.animation_player.play(anim_name)
+
+remote func move_weapon_client(id: int, scale_y,rotation,hitbox_knockback) -> void:
+	print("deberia de mover")
+	var weapon = player_info[id].instance.get_node("Weapons/Sword")
+	weapon.scale.y = scale_y
+	weapon.rotation = rotation
+	weapon.hitbox.knockback_direction = hitbox_knockback
 
 remote func update_weapon_anim(id: int, anim_name: String) -> void:
 	print("deberia de playear")

@@ -23,6 +23,7 @@ export var ABILITY_STAMINA = 70
 
 # para multiplayer
 signal weapon_animation_changed(anim_name)
+signal weapon_moved(scale_y,rotation,hitbox_knockback)
 
 func _ready() -> void:
 	if not on_floor:
@@ -61,6 +62,8 @@ func move(mouse_direction: Vector2) -> void:
 				scale.y = -1
 			elif scale.y == -1 and mouse_direction.x > 0:
 				scale.y = 1
+
+	emit_signal("weapon_moved", scale.y,rotation,hitbox.knockback_direction)
 			
 			
 func cancel_attack() -> void:
