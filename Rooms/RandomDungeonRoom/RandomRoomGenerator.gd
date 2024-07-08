@@ -10,10 +10,10 @@ const FLOOR_TILE_ID = 14
 const RIGHT_WINDOW_TILE_ID = 8
 
 var rooms = []
-var door_scene = preload("res://Rooms/Furniture and Traps/Door.tscn") 
-var breakable_torch_scene = preload("res://Characters/Breakables/Torch/BreakableTorch.tscn")
-var clean_light_scene = preload("res://Characters/Breakables/Torch/CleanLight.tscn")
-var god_rays_scene = preload("res://Godrays/SunGodRays.tscn")
+var door_scene = preload ("res://Rooms/Furniture and Traps/Door.tscn")
+var breakable_torch_scene = preload ("res://Characters/Breakables/Torch/BreakableTorch.tscn")
+var clean_light_scene = preload ("res://Characters/Breakables/Torch/CleanLight.tscn")
+var god_rays_scene = preload ("res://Godrays/SunGodRays.tscn")
 
 func generate_random_room() -> DungeonRoom:
 	var room_scene = load("res://Rooms/RandomDungeonRoom/RandomDungeonRoom.tscn") # Asegúrate de tener el camino correcto a la escena de DungeonRoom.
@@ -24,23 +24,23 @@ func generate_random_room() -> DungeonRoom:
 	var doors_node = room_instance.get_node("Doors")
 	var door_x_position = randi() % (int(room_size.x) - 4) + 2
 	door_instance.position = Vector2(door_x_position * TILE_SIZE, 0)
-	doors_node.add_child(door_instance)  # Añade la puerta al nodo "Doors"
-	print("Door position ",door_instance.position)
+	doors_node.add_child(door_instance) # Añade la puerta al nodo "Doors"
+	print("Door position ", door_instance.position)
 	#var room_tilemap = room_instance.get_node("TileMap") as TileMap
 	# añadir la entrada
 	
 	var entrance_node = room_instance.get_node("Entrance")
-	var position2d2 = Position2D.new()  # Crear una instancia de Position2D
+	var position2d2 = Position2D.new() # Crear una instancia de Position2D
 	position2d2.name = "Position2D2"
 	position2d2.position = Vector2(door_x_position * TILE_SIZE, room_size.y * TILE_SIZE)
 	print(position2d2.position)
-	print("entrance position ",position2d2.position)
+	print("entrance position ", position2d2.position)
 	entrance_node.add_child(position2d2)
-	var position2d = Position2D.new()  # Crear una instancia de Position2D
+	var position2d = Position2D.new() # Crear una instancia de Position2D
 	position2d.name = "Position2D"
-	position2d.position = Vector2(door_x_position * TILE_SIZE-1, room_size.y * TILE_SIZE)
+	position2d.position = Vector2(door_x_position * TILE_SIZE - 1, room_size.y * TILE_SIZE)
 	print(position2d.position)
-	print("entrance position ",position2d.position)
+	print("entrance position ", position2d.position)
 	entrance_node.add_child(position2d)
 
 	# Añadir BreakableTorch en una posición aleatoria de la pared superior
@@ -52,7 +52,7 @@ func generate_random_room() -> DungeonRoom:
 	room_instance.add_child(breakable_torch_instance)
 
 	# Añadir la ventana y los godrays:
-	var margin = max(1, int(room_size.y / 4))  # Por ejemplo, excluimos el 25% superior e inferior
+	var margin = max(1, int(room_size.y / 4)) # Por ejemplo, excluimos el 25% superior e inferior
 	var central_range_start = margin
 	var central_range_end = int(room_size.y) - margin
 	# Elegir una posición 'y' dentro del rango central
@@ -65,46 +65,46 @@ func generate_random_room() -> DungeonRoom:
 	clean_light_instance.position = window_world_position
 	godray_instance.position = window_world_position
 	room_instance.add_child(clean_light_instance)
-	room_instance.add_child(godray_instance	)
+	room_instance.add_child(godray_instance)
 	# Añadir el CollisionShape2D al nodo PlayerDetector
 	var player_detector_node = room_instance.get_node("PlayerDetector")
 	var collision_shape = CollisionShape2D.new()
 	var rectangle_shape = RectangleShape2D.new()
-	rectangle_shape.extents = Vector2(TILE_SIZE * 2, TILE_SIZE) / 2  # El tamaño cubre dos tiles
+	rectangle_shape.extents = Vector2(TILE_SIZE * 2, TILE_SIZE) / 2 # El tamaño cubre dos tiles
 	collision_shape.shape = rectangle_shape
-	collision_shape.position = position2d2.position - Vector2(0, TILE_SIZE)  # Posición encima de entrance_pos
+	collision_shape.position = position2d2.position - Vector2(0, TILE_SIZE) # Posición encima de entrance_pos
 	collision_shape.disabled = false
 	player_detector_node.add_child(collision_shape)
 	
 	print(collision_shape.position)
 	
-	var door_position = Vector2(door_x_position, 0)  # Puerta siempre en la fila superior
-	var entrance_position = Vector2(door_x_position, int(room_size.y - 1)) 
+	var door_position = Vector2(door_x_position, 0) # Puerta siempre en la fila superior
+	var entrance_position = Vector2(door_x_position, int(room_size.y - 1))
 	var enemy_positions = generate_enemy_positions(room_instance, room_size, entrance_position)
-	generate_room_tiles(room_instance.get_node("TileMap") as TileMap, room_size, entrance_position, door_position,enemy_positions,window_y_position)
+	generate_room_tiles(room_instance.get_node("TileMap") as TileMap, room_size, entrance_position, door_position, enemy_positions, window_y_position)
 
 	rooms.append(room_instance)
 	return room_instance
 
-func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vector2, door_pos: Vector2, enemy_positions: Array,window_y_position) -> void:
+func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vector2, door_pos: Vector2, enemy_positions: Array, window_y_position) -> void:
 	print('generando room')
 	var room_string = ""
-	print('enemy positions ',enemy_positions)
+	print('enemy positions ', enemy_positions)
 	# Ajustar la fila superior de la pared
 	for x in range(size.x):
 		if x == 0:
-			room_tilemap.set_cell(x, 0, WALL_TILE_ID)  # Esquina superior izquierda
+			room_tilemap.set_cell(x, 0, WALL_TILE_ID) # Esquina superior izquierda
 		elif x == int(size.x) - 1:
-			room_tilemap.set_cell(x, 0, WALL_TILE_ID)  # Esquina superior derecha
+			room_tilemap.set_cell(x, 0, WALL_TILE_ID) # Esquina superior derecha
 		else:
-			room_tilemap.set_cell(x, 0, WALL_TILE_ID)  # Pared superior
+			room_tilemap.set_cell(x, 0, WALL_TILE_ID) # Pared superior
 	for y in range(size.y):
 		var row_string = ""
 		for x in range(size.x):
 			var current_pos = Vector2(x, y)
 			# Comprueba si la posición actual es una posición de enemigo
 			if current_pos in enemy_positions:
-				row_string += "E"  # 'E' representa a un enemigo
+				row_string += "E" # 'E' representa a un enemigo
 				room_tilemap.set_cell(x, y, 14)
 			elif current_pos == entrance_pos - Vector2(0, 1) or current_pos == entrance_pos - Vector2(1, 1):
 				row_string += "C"
@@ -113,14 +113,14 @@ func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vec
 			elif current_pos == door_pos:
 				# Establecer tile de suelo para la puerta y su adyacente
 				room_tilemap.set_cell(x, y, FLOOR_TILE_ID)
-				room_tilemap.set_cell(x-1, y, FLOOR_TILE_ID)
+				room_tilemap.set_cell(x - 1, y, FLOOR_TILE_ID)
 				# Ajustar el string de la fila para los dos tiles de suelo
 				row_string = adjust_floor_tiles_in_string(row_string, x)
 			# Tratar entrance_pos
 			elif current_pos == entrance_pos:
 				# Establecer tile de suelo para la entrada y su adyacente
 				room_tilemap.set_cell(x, y, FLOOR_TILE_ID)
-				room_tilemap.set_cell(x-1, y, FLOOR_TILE_ID)
+				room_tilemap.set_cell(x - 1, y, FLOOR_TILE_ID)
 				# Ajustar el string de la fila para los dos tiles de suelo
 				row_string = adjust_floor_tiles_in_string(row_string, x)
 			elif x == int(size.x) - 1 and y == window_y_position:
@@ -136,66 +136,69 @@ func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vec
 func adjust_floor_tiles_in_string(row_string: String, x: int) -> String:
 	# Esta función ajusta la cadena de la fila para incluir dos tiles de suelo
 	if x == 0:
-		return str(FLOOR_TILE_ID)  # Solo si la puerta/entrada está al principio
+		return str(FLOOR_TILE_ID) # Solo si la puerta/entrada está al principio
 	elif x > 0 and len(row_string) > 0:
 		return row_string.substr(0, row_string.length() - 1) + str(FLOOR_TILE_ID) + str(FLOOR_TILE_ID)
 	return row_string
 
-
 func get_tile_id_for_position(x: int, y: int, size: Vector2, entrance: Vector2) -> int:
 	if y == 0:
 		if x == 0:
-			return LEFT_WALL_TILE_ID  # Esquina superior izquierda
+			return LEFT_WALL_TILE_ID # Esquina superior izquierda
 		elif x == int(size.x) - 1:
-			return RIGHT_WALL_TILE_ID  # Esquina superior derecha
+			return RIGHT_WALL_TILE_ID # Esquina superior derecha
 		else:
-			return WALL_TILE_ID  # Pared superior
+			return WALL_TILE_ID # Pared superior
 	elif y == int(size.y) - 1:
 		if x == 0:
-			return LEFT_WALL_TILE_ID  # Esquina inferior izquierda
+			return LEFT_WALL_TILE_ID # Esquina inferior izquierda
 		elif x == int(size.x) - 1:
-			return RIGHT_WALL_TILE_ID  # Esquina inferior derecha
+			return RIGHT_WALL_TILE_ID # Esquina inferior derecha
 		else:
-			return WALL_TILE_ID  # Pared inferior
+			return WALL_TILE_ID # Pared inferior
 	elif x == 0:
-		return LEFT_WALL_TILE_ID  # Pared izquierda
+		return LEFT_WALL_TILE_ID # Pared izquierda
 	elif x == int(size.x) - 1:
-		return RIGHT_WALL_TILE_ID  # Pared derecha
+		return RIGHT_WALL_TILE_ID # Pared derecha
 	else:
-		return FLOOR_TILE_ID  # Suelo
-	
+		return FLOOR_TILE_ID # Suelo
 
 func generate_enemy_positions(room_instance: DungeonRoom, room_size: Vector2, entrance_pos: Vector2) -> Array:
-	var enemy_positions_node = room_instance.get_node("EnemyPositions")
-	var num_enemy_positions = rand_range(1, 3)
-	var margin = 4
-	var enemy_positions = []
+    var enemy_positions_node = room_instance.get_node("EnemyPositions")
+    var num_enemy_positions = int(rand_range(1, 4)) # Genera 1-3 enemigos
+    var margin = 4
+    var enemy_positions = []
+    var available_positions = generate_available_positions(room_size, entrance_pos, margin)
 
-	for _i in range(num_enemy_positions):
-		var position_valid = false
-		var potential_position = Vector2()
+    for _i in range(num_enemy_positions):
+        if available_positions.empty():
+            break
+        
+        var position_index = randi() % available_positions.size()
+        var chosen_position = available_positions[position_index]
+        
+        var position = Position2D.new()
+        position.position = chosen_position * TILE_SIZE
+        enemy_positions_node.add_child(position)
+        enemy_positions.append(chosen_position)
+        
+        # Remove the chosen position and its immediate neighbors
+        available_positions = remove_nearby_positions(available_positions, chosen_position, 2)
 
-		while not position_valid:
-			potential_position.x = rand_range(1, room_size.x - 2)
-			potential_position.y = rand_range(1, room_size.y - 2)
-			
-			position_valid = true
-			for mx in range(-margin, margin + 1):
-				for my in range(-margin, margin + 1):
-					if potential_position == entrance_pos + Vector2(mx, my):
-						position_valid = false
-						break
-				if not position_valid:
-					break
+    return enemy_positions
 
-		if position_valid:
-			var position = Position2D.new()
-			# Redondear las posiciones a enteros
-			var rounded_x = int(potential_position.x)
-			var rounded_y = int(potential_position.y)
-			position.position = Vector2(rounded_x, rounded_y) * TILE_SIZE
-			enemy_positions_node.add_child(position)
-			enemy_positions.append(Vector2(rounded_x, rounded_y))
+func generate_available_positions(room_size: Vector2, entrance_pos: Vector2, margin: int) -> Array:
+    var available_positions = []
+    for x in range(1, int(room_size.x) - 1):
+        for y in range(1, int(room_size.y) - 1):
+            var pos = Vector2(x, y)
+            if pos.distance_to(entrance_pos) > margin:
+                available_positions.append(pos)
+    return available_positions
 
-	return enemy_positions
-		
+func remove_nearby_positions(positions: Array, center: Vector2, radius: int) -> Array:
+    var new_positions = []
+    for pos in positions:
+        if pos.distance_to(center) > radius:
+            new_positions.append(pos)
+    return new_positions
