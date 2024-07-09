@@ -15,6 +15,8 @@ export(int) var num_levels: int = 5
 
 onready var player: KinematicBody2D = get_parent().get_node("Player")
 onready var random_room_generator = preload("res://Rooms/RandomDungeonRoom/RandomRoomGenerator.gd").new()
+onready var advanced_room_generator = preload("res://Rooms/RandomDungeonRoom/AdvancedRoomGenerator.gd").new()
+
 
 func _ready() -> void:
 	SavedData.num_floor += 1
@@ -44,7 +46,8 @@ func _spawn_rooms() -> void:
 						room = SPECIAL_ROOMS[randi() % SPECIAL_ROOMS.size()].instance()
 						special_room_spawned = true
 					else:
-						room = random_room_generator.generate_random_room()
+						#room = random_room_generator.generate_random_room()
+						room = advanced_room_generator.generate_random_room()
 						#room = INTERMEDIATE_ROOMS[randi() % INTERMEDIATE_ROOMS.size()].instance()
 						
 			var previous_room_tilemap: TileMap = previous_room.get_node("TileMap")
