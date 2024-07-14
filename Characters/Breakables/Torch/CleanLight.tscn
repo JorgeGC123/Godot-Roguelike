@@ -5,9 +5,6 @@
 
 [node name="CleanLight" instance=ExtResource( 2 )]
 
-[node name="AnimatedSprite" parent="." index="1"]
-visible = false
-
 [node name="CollisionShape2D" parent="." index="2"]
 disabled = true
 
@@ -24,3 +21,6 @@ shadow_enabled = true
 shadow_gradient_length = 38.3
 shadow_filter = 1
 shadow_filter_smooth = 15.6
+
+[node name="AnimatedSprite" parent="." index="9"]
+visible = false
