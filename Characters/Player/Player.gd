@@ -152,14 +152,14 @@ func pick_up_weapon(weapon: Node2D) -> void:
 
 func pick_up_breakable(breakable: Node) -> void:
 	if held_breakable and is_instance_valid(held_breakable):
-		var global_drop_position = global_position + Vector2(0, -15)
+		var current_orbit_position = held_breakable.global_position  # Obtener la posición actual en la órbita
 		remove_child(held_breakable)
-		breakableScene.add_child(held_breakable) 
-		held_breakable.global_position = global_drop_position
+		breakableScene.add_child(held_breakable)
+		held_breakable.global_position = current_orbit_position  # Usar la posición actual en la órbita
+		held_breakable.is_orbiting = false  # Detener órbita al soltar
 		held_breakable = null  # Resetear la referencia
 		print('lo soltamos')
 		return  
-
 
 	held_breakable = breakable
 	if held_breakable and is_instance_valid(held_breakable):
@@ -168,6 +168,8 @@ func pick_up_breakable(breakable: Node) -> void:
 		add_child(breakable)
 		breakable.position = Vector2(0, -15)  # Ajusta esta posición según necesites
 		near_breakable = null
+		held_breakable.player = self  # Establecer la referencia al jugador
+		held_breakable.is_orbiting = true  # Iniciar órbita al recoger
 		print('lo pillamos?')
 
 	
@@ -225,6 +227,7 @@ func _throw_breakable() -> void:
 		remove_child(held_breakable)
 		breakableScene.add_child(held_breakable)
 		held_breakable.global_position = initial_pos
+		held_breakable.is_orbiting = false  # Detener órbita al lanzar
 		held_breakable.interpolate_pos(initial_pos, final_pos)
 
 		held_breakable = null

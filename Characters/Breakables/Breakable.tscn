@@ -112,8 +112,6 @@ collision_mask = 4
 script = ExtResource( 5 )
 max_hp = 1
 hp = 1
-damage = 1
-knockback_force = 300
 
 [node name="FiniteStateMachine" parent="." index="0"]
 script = ExtResource( 4 )
