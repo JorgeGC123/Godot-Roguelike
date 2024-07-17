@@ -5,11 +5,11 @@
 
 [node name="BreakableTorch" instance=ExtResource( 2 )]
 
-[node name="AnimatedSprite" parent="." index="1"]
-visible = false
-
 [node name="Torch2" parent="." index="7" instance=ExtResource( 1 )]
 position = Vector2( 0, -1 )
 
 [node name="LightOccluder2D" parent="." index="8"]
+visible = false
+
+[node name="AnimatedSprite" parent="." index="9"]
 visible = false
