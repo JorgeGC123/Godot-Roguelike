@@ -42,3 +42,6 @@ func _enter_state(_previous_state: int, _new_state: int) -> void:
 	
 func _exit_state(_state_exited: int) -> void:
 	pass
+
+func flipear_verticalmente() -> void:
+	animation_player.get_parent().scale.y *= -1

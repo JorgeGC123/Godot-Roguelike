@@ -16,3 +16,5 @@ func _enter_state(_previous_state: int, new_state: int) -> void:
 			pass
 		states.dead:
 			animation_player.play("dead")
+			flipear_verticalmente()
+

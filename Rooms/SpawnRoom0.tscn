@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Rooms/Room.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Rooms/Furniture and Traps/Door.tscn" type="PackedScene" id=2]
@@ -9,6 +9,7 @@
 [ext_resource path="res://Rooms/Furniture and Traps/Stairs.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Characters/Breakables/Torch/CleanLight.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Characters/Breakables/Torch/BreakableTorch.tscn" type="PackedScene" id=9]
+[ext_resource path="res://Characters/NPC/BaseNeutralNPC.tscn" type="PackedScene" id=10]
 
 [sub_resource type="GDScript" id=2]
 
@@ -195,3 +196,6 @@ scale = Vector2( 0.703125, 1 )
 [node name="BreakableTorch2" parent="." index="18" instance=ExtResource( 9 )]
 position = Vector2( 159, 24 )
 scale = Vector2( 0.703125, 1 )
+
+[node name="Boy" parent="." index="19" instance=ExtResource( 10 )]
+position = Vector2( 34, 76 )
