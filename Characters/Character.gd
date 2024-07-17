@@ -117,7 +117,10 @@ func _spawn_hit_effect(dir: Vector2) -> void:
 	if has_blood:
 		var blood_effect: Particles2D = BLOOD_EFFECT_SCENE.instance()
 		blood_effect.global_rotation = dir.angle()
-		blood_effect.global_position = global_position + dir # Establecer la posición global antes de desatachearlo
+		blood_effect.global_position = global_position + dir
 
 		var main_scene = get_tree().root 
 		main_scene.add_child(blood_effect)
+
+		# Añadir la partícula a la lista en el singleton de la escena para luego borrarlas
+		SceneTransistor.add_blood_effect(blood_effect)
