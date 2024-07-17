@@ -104,6 +104,9 @@ func get_input() -> void:
 			_switch_weapon(UP)
 		elif Input.is_action_just_released("ui_next_weapon"):
 			_switch_weapon(DOWN)
+		elif Input.is_action_just_pressed("ui_throw") and held_breakable and is_instance_valid(held_breakable):
+			print("throweo el breakable bro")
+			_throw_breakable()
 		elif Input.is_action_just_pressed("ui_throw") and current_weapon.get_index() != 0:
 			_drop_weapon()
 		
@@ -154,6 +157,7 @@ func pick_up_breakable(breakable: Node) -> void:
 		breakableScene.add_child(held_breakable) 
 		held_breakable.global_position = global_drop_position
 		held_breakable = null  # Resetear la referencia
+		print('lo soltamos')
 		return  
 
 
@@ -164,6 +168,7 @@ func pick_up_breakable(breakable: Node) -> void:
 		add_child(breakable)
 		breakable.position = Vector2(0, -15)  # Ajusta esta posición según necesites
 		near_breakable = null
+		print('lo pillamos?')
 
 	
 func _drop_weapon() -> void:
@@ -208,3 +213,19 @@ func switch_camera() -> void:
 
 func _on_AnimationPlayer_animation_started(anim_name: String) -> void:
 	emit_signal("animation_changed", anim_name)
+
+func _throw_breakable() -> void:
+	if held_breakable and is_instance_valid(held_breakable):
+		var throw_dir: Vector2 = (get_global_mouse_position() - global_position).normalized()
+		var force: int = 100
+
+		var initial_pos = held_breakable.global_position
+		var final_pos = global_position + throw_dir * force
+
+		remove_child(held_breakable)
+		breakableScene.add_child(held_breakable)
+		held_breakable.global_position = initial_pos
+		held_breakable.interpolate_pos(initial_pos, final_pos)
+
+		held_breakable = null
+		print("breakable lanzado")

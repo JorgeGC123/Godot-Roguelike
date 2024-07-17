@@ -112,6 +112,8 @@ collision_mask = 4
 script = ExtResource( 5 )
 max_hp = 1
 hp = 1
+damage = 1
+knockback_force = 300
 
 [node name="FiniteStateMachine" parent="." index="0"]
 script = ExtResource( 4 )
@@ -146,5 +148,13 @@ frames = SubResource( 2 )
 animation = "idle"
 frame = 0
 
+[node name="Hitbox" type="Area2D" parent="." index="9"]
+collision_layer = 0
+collision_mask = 20
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" index="0"]
+shape = SubResource( 10 )
+
 [connection signal="body_entered" from="Area2D" to="." method="_on_Area2D_body_entered"]
 [connection signal="body_exited" from="Area2D" to="." method="_on_Area2D_body_exited"]
+[connection signal="area_entered" from="Hitbox" to="." method="_on_Hitbox_body_entered"]
