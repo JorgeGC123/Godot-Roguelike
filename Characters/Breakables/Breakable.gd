@@ -6,6 +6,7 @@ onready var tooltip: Label = get_node("Node2D/Tooltip")  # Asegúrate de tener u
 var initial_tooltip_position: Vector2
 
 func _ready():
+	has_blood = false
 	add_child(tween)
 	tooltip.visible = false  # El tooltip se inicia invisible
 	var font = DynamicFont.new()
