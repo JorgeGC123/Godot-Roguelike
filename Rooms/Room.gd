@@ -47,8 +47,8 @@ func spawn_breakables(count: int) -> void:
 	
 func _on_enemy_killed() -> void:
 	num_enemies -= 1
-	if num_enemies == 0:
-		_open_doors()
+	# if num_enemies == 0:
+	# 	_open_doors()
 	
 	
 func _open_doors() -> void:

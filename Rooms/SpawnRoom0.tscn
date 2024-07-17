@@ -170,6 +170,7 @@ position = Vector2( 17, 101 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerDetector" index="0"]
 position = Vector2( 112, 48 )
 shape = SubResource( 1 )
+disabled = true
 
 [node name="WarHammer" parent="." index="11" instance=ExtResource( 4 )]
 position = Vector2( 208, 88 )

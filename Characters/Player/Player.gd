@@ -16,6 +16,7 @@ onready var weapons: Node2D = get_node("Weapons")
 onready var dust_position: Position2D = get_node("DustPosition")
 onready var player_dash: PlayerDash = $PlayerDash
 var near_breakable: Node = null
+var near_door: Node = null
 var held_breakable: Node = null 
 var breakableScene: Node2D = null
 
@@ -82,7 +83,10 @@ func _process(_delta: float) -> void:
 		
 
 	if Input.is_action_just_pressed("ui_interact"):
-		pick_up_breakable(near_breakable) 
+		if near_door and ! near_door.is_open:
+			near_door.open()
+		else:
+			pick_up_breakable(near_breakable) 
 		
 func get_input() -> void:
 	# Verificar si el jugador está realizando un dash
