@@ -17,6 +17,7 @@ onready var dust_position: Position2D = get_node("DustPosition")
 onready var player_dash: PlayerDash = $PlayerDash
 var near_breakable: Node = null
 var near_door: Node = null
+var near_npc: Node = null
 var held_breakable: Node = null 
 var breakableScene: Node2D = null
 
@@ -83,6 +84,8 @@ func _process(_delta: float) -> void:
 		
 
 	if Input.is_action_just_pressed("ui_interact"):
+		if near_npc and !near_npc.is_talking():
+			near_npc.trigger_dialog()
 		if near_door and ! near_door.is_open:
 			near_door.open()
 		else:
@@ -92,6 +95,9 @@ func get_input() -> void:
 	# Verificar si el jugador está realizando un dash
 	if player_dash.is_dashing:
 		return  # No procesar entradas de movimiento durante el dash
+
+	if near_npc and near_npc.is_talking():
+		return
 
 	mov_direction = Vector2.ZERO
 	if Input.is_action_pressed("ui_down"):

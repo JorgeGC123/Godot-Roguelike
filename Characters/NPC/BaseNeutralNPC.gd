@@ -13,7 +13,7 @@ var knockback_direction: Vector2 = Vector2.ZERO
 var knockback_force: int = 0
 var is_interpolating: bool = false # Bandera para indicar si está interpolando
 var is_orbiting: bool = false
-
+var conversation = preload("res://addons/basicdialogue.tres")
 # Cargar el shader
 onready var outline_shader = preload ("res://Shaders/outline_shader.gdshader")
 onready var original_material = null
@@ -32,12 +32,14 @@ func _ready():
 	hitbox.monitoring = false # Inicialmente desactivar la hitbox
 
 func _on_Area2D_body_entered(body):
-	if body is Player:
+	if body is Player and state_machine.state != state_machine.states.dead:
 		apply_outline()
+		body.near_npc = self
 
 func _on_Area2D_body_exited(body):
 	if body is Player:
 		remove_outline()
+		body.near_npc = null
 
 func apply_outline():
 	if original_material == null:
@@ -46,3 +48,11 @@ func apply_outline():
 
 func remove_outline():
 	animated_sprite.material = original_material
+
+func trigger_dialog():
+	if state_machine.state != state_machine.states.dead:
+		DialogueManager.fetch_basic_dialogue("basicdialogue", \
+			conversation)
+	
+func is_talking():
+	return DialogueManager.is_dialogue_running

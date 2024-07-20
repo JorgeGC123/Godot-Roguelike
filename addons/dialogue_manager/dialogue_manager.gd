@@ -134,6 +134,13 @@ func show_example_dialogue_balloon(title: String, local_resource: DialogueResour
 		get_tree().current_scene.add_child(balloon)
 		show_example_dialogue_balloon(yield(balloon, "actioned"), local_resource, extra_game_states)
 
+func fetch_basic_dialogue(title: String, local_resource: DialogueResource = null, extra_game_states: Array = []) -> void:
+	var dialogue_line = yield(get_next_dialogue_line(title, local_resource, extra_game_states), "completed")
+	if dialogue_line != null:
+		var balloon = preload("res://addons/dialogue_manager/basic_dialogue/basic_dialogue.tscn").instance()
+		balloon.dialogue_line = dialogue_line
+		get_tree().current_scene.add_child(balloon)
+		fetch_basic_dialogue(yield(balloon, "actioned"), local_resource, extra_game_states)
 
 ### Dotnet bridge
 
@@ -313,6 +320,7 @@ func set_is_dialogue_running(is_running: bool) -> void:
 		if is_running:
 			emit_signal("dialogue_started")
 		else:
+			yield(get_tree().create_timer(0.40), "timeout")
 			emit_signal("dialogue_finished")
 			
 	is_dialogue_running = is_running
