@@ -184,6 +184,7 @@ position = Vector2( 167, 55 )
 position = Vector2( 82, 75 )
 
 [node name="Lantern" parent="." index="15" instance=ExtResource( 6 )]
+visible = false
 position = Vector2( 155, 119 )
 
 [node name="Stairs" parent="." index="16" instance=ExtResource( 7 )]
