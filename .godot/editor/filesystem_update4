@@ -1,0 +1,17 @@
+res://Autoloads/Client.gd
+res://default_env.tres
+res://Menus/MainMenu.tscn
+res://Characters/Breakables/Breakable.tscn
+res://Menus/MainMenu.gd
+res://Game.gd
+res://Characters/Breakables/Breakable.gd
+res://Rooms.gd
+res://UI.gd
+res://Items/HealthPotion.gd
+res://Rooms/RandomDungeonRoom/RandomRoomGenerator.gd
+res://Rooms/RandomDungeonRoom/AdvancedRoomGenerator.gd
+res://Items/Lantern.gd
+res://Rooms/Furniture and Traps/Door.gd
+res://Shaders/outline_shader.gdshader
+res://Characters/NPC/BaseNeutralNPC.gd
+res://Rooms/Room.gd

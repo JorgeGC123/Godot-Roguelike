@@ -3,10 +3,10 @@ class_name FiniteStateMachine
 
 var states: Dictionary = {}
 var previous_state: int = -1
-var state: int = -1 setget set_state
+var state: int = -1: set = set_state
 
-onready var parent: Character = get_parent()
-onready var animation_player: AnimationPlayer = parent.get_node("AnimationPlayer")
+@onready var parent: Character = get_parent()
+@onready var animation_player: AnimationPlayer = parent.get_node("AnimationPlayer")
 
 
 func _physics_process(delta: float) -> void:

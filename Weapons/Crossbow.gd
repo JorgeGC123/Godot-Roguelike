@@ -4,9 +4,9 @@ const ARROW_SCENE: PackedScene = preload("res://Weapons/Arrow.tscn")
 
 
 func shoot(offset: int) -> void:
-	var arrow: Area2D = ARROW_SCENE.instance()
+	var arrow: Area2D = ARROW_SCENE.instantiate()
 	get_tree().current_scene.add_child(arrow)
-	arrow.launch(global_position, Vector2.LEFT.rotated(deg2rad(rotation_degrees + offset)), 400)
+	arrow.launch(global_position, Vector2.LEFT.rotated(deg_to_rad(rotation_degrees + offset)), 400)
 	stamina_tax(BASIC_ATTACK_STAMINA)
 	
 	

@@ -1,6 +1,6 @@
 extends Weapon
 
-onready var second_attack_timer: Timer = get_node("SecondAttackTimer")  # Asumiendo que has añadido este nodo
+@onready var second_attack_timer: Timer = get_node("SecondAttackTimer")  # Asumiendo que has añadido este nodo
 
 var in_first_attack: bool = false
 var in_second_attack: bool = false

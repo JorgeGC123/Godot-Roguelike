@@ -1,12 +1,12 @@
 extends StaticBody2D
 
-onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
+@onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
 # Cargar el shader
-onready var animated_sprite: AnimatedSprite = get_node("AnimatedSprite")
-onready var outline_shader = preload ("res://Shaders/outline_shader.gdshader")
-onready var original_material = null
-export var is_open = false
-onready var outline_material = ShaderMaterial.new()
+@onready var animated_sprite: AnimatedSprite2D = get_node("AnimatedSprite2D")
+@onready var outline_shader = preload ("res://Shaders/outline_shader.gdshader")
+@onready var original_material = null
+@export var is_open = false
+@onready var outline_material = ShaderMaterial.new()
 
 func open() -> void:
 	if !is_open:

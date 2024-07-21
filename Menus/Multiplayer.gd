@@ -3,13 +3,13 @@ extends Control
 var game_started: bool = false
 
 
-onready var create_dialog: AcceptDialog = get_node("CreateDialog")
-onready var create_dialog_label: Label = create_dialog.get_node("ScrollContainer/VBoxContainer/Label")
-onready var create_dialog_player_list: VBoxContainer = create_dialog.get_node("ScrollContainer/VBoxContainer/PlayerList")
+@onready var create_dialog: AcceptDialog = get_node("CreateDialog")
+@onready var create_dialog_label: Label = create_dialog.get_node("ScrollContainer/VBoxContainer/Label")
+@onready var create_dialog_player_list: VBoxContainer = create_dialog.get_node("ScrollContainer/VBoxContainer/PlayerList")
 
-onready var join_dialog: WindowDialog = get_node("JoinDialog")
-onready var join_room_label: Label = join_dialog.get_node("WaitScrollContainer/VBoxContainer/Label")
-onready var join_player_list: VBoxContainer = join_dialog.get_node("WaitScrollContainer/VBoxContainer/PlayerList")
+@onready var join_dialog: Window = get_node("JoinDialog")
+@onready var join_room_label: Label = join_dialog.get_node("WaitScrollContainer/VBoxContainer/Label")
+@onready var join_player_list: VBoxContainer = join_dialog.get_node("WaitScrollContainer/VBoxContainer/PlayerList")
 
 
 func update_room(room_id: int) -> void:

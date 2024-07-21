@@ -1,33 +1,33 @@
-extends KinematicBody2D
-class_name Character, "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/knight_idle_anim_f0.png"
+extends CharacterBody2D
+class_name Character
 
 const HIT_EFFECT_SCENE: PackedScene = preload ("res://Characters/HitEffect.tscn")
 const BLOOD_EFFECT_SCENE: PackedScene = preload ("res://Characters/BloodSplash.tscn")
 
 const FRICTION: float = 0.15
-export(int) var has_blood: bool = true
-export(int) var max_hp: int = 2
-export(int) var max_stamina: int = 100
-export(int) var stamina: int = 100 setget set_stamina
-export(int) var hp: int = 2 setget set_hp
+@export var has_blood: int = true
+@export var max_hp: int = 2
+@export var max_stamina: int = 100
+@export var stamina: int = 100: set = set_stamina
+@export var hp: int = 2: set = set_hp
 signal hp_changed(new_hp)
 signal stamina_changed(new_stamina)
-onready var stamina_timer: Timer = Timer.new()
-onready var stamina_delay_timer: Timer = Timer.new() # Timer para el delay
-export(int) var stamina_recovery_rate: int = 1 # Cantidad de stamina recuperada por tick
-export(float) var stamina_recovery_interval: float = 0.1 # Intervalo de recuperación en segundos
-export(float) var stamina_recovery_delay: float = 1.0 # Delay antes de la recuperación
-onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
-export(int) var accerelation: int = 40
-export(int) var max_speed: int = 100
+@onready var stamina_timer: Timer = Timer.new()
+@onready var stamina_delay_timer: Timer = Timer.new() # Timer para el delay
+@export var stamina_recovery_rate: int = 1 # Cantidad de stamina recuperada por tick
+@export var stamina_recovery_interval: float = 0.1 # Intervalo de recuperación en segundos
+@export var stamina_recovery_delay: float = 1.0 # Delay antes de la recuperación
+@onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
+@export var accerelation: int = 40
+@export var max_speed: int = 100
 
-export(bool) var flying: bool = false
+@export var flying: bool = false
 
-onready var state_machine: Node = get_node("FiniteStateMachine")
-onready var animated_sprite: AnimatedSprite = get_node("AnimatedSprite")
+@onready var state_machine: Node = get_node("FiniteStateMachine")
+@onready var animated_sprite: AnimatedSprite2D = get_node("AnimatedSprite2D")
 
 var mov_direction: Vector2 = Vector2.ZERO
-var velocity: Vector2 = Vector2.ZERO
+#var velocity: Vector2 = Vector2.ZERO
 
 # señales pa multiplayer
 signal position_changed(new_pos)
@@ -38,19 +38,21 @@ func _ready():
 	add_child(stamina_timer)
 	stamina_timer.wait_time = stamina_recovery_interval
 	stamina_timer.one_shot = false
-	stamina_timer.connect("timeout", self, "_on_StaminaTimer_timeout")
+	stamina_timer.connect("timeout", Callable(self, "_on_StaminaTimer_timeout"))
 
 	add_child(stamina_delay_timer)
 	stamina_delay_timer.wait_time = stamina_recovery_delay
 	stamina_delay_timer.one_shot = true
-	stamina_delay_timer.connect("timeout", self, "_on_StaminaDelayTimer_timeout")
+	stamina_delay_timer.connect("timeout", Callable(self, "_on_StaminaDelayTimer_timeout"))
 
 func initialize(id: int, name: String, character_index: int):
 	self.name = str(id)
 	print('id player: ', self.name)
 
 func _physics_process(_delta: float) -> void:
-	velocity = move_and_slide(velocity)
+	set_velocity(velocity)
+	move_and_slide()
+	velocity = velocity
 	velocity = lerp(velocity, Vector2.ZERO, FRICTION)
 	emit_signal("position_changed", position)
 	
@@ -111,11 +113,11 @@ func _on_StaminaTimer_timeout():
 				stamina_timer.stop()
 
 func _spawn_hit_effect(dir: Vector2) -> void:
-	var hit_effect: Sprite = HIT_EFFECT_SCENE.instance()
+	var hit_effect: Sprite2D = HIT_EFFECT_SCENE.instantiate()
 	add_child(hit_effect)
 	
 	if has_blood:
-		var blood_effect: Particles2D = BLOOD_EFFECT_SCENE.instance()
+		var blood_effect: GPUParticles2D = BLOOD_EFFECT_SCENE.instantiate()
 		blood_effect.global_rotation = dir.angle()
 		blood_effect.global_position = global_position + dir
 

@@ -6,4 +6,4 @@
 [node name="RoomWithWeapon" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 
-[node name="WeaponPos" type="Position2D" parent="." index="8"]
+[node name="WeaponPos" type="Marker2D" parent="." index="8"]

@@ -1,19 +1,19 @@
 extends Area2D
 class_name Hitbox
 
-export(int) var damage: int = 1
+@export var damage: int = 1
 var knockback_direction: Vector2 = Vector2.ZERO
-export(int) var knockback_force: int = 300
+@export var knockback_force: int = 300
 
 var body_inside: bool = false
 
-onready var collision_shape: CollisionShape2D = get_child(0)
-onready var timer: Timer = Timer.new()
+@onready var collision_shape: CollisionShape2D = get_child(0)
+@onready var timer: Timer = Timer.new()
 signal mpdamage(damage)
 
 func _init() -> void:
-	var __ = connect("body_entered", self, "_on_body_entered")
-	__ = connect("body_exited", self, "_on_body_exited")
+	var __ = connect("body_entered", Callable(self, "_on_body_entered"))
+	__ = connect("body_exited", Callable(self, "_on_body_exited"))
 	
 	
 func _ready() -> void:
@@ -27,15 +27,15 @@ func _on_body_entered(body: PhysicsBody2D) -> void:
 	timer.start()
 	while body_inside:
 		_collide(body)
-		yield(timer, "timeout")
+		await timer.timeout
 	
 	
-func _on_body_exited(_body: KinematicBody2D) -> void:
+func _on_body_exited(_body: CharacterBody2D) -> void:
 	body_inside = false
 	timer.stop()
 	
 	
-func _collide(body: KinematicBody2D) -> void:
+func _collide(body: CharacterBody2D) -> void:
 	print('maldicion hijo')
 	print(body)
 	print(body.has_method("take_damage"))

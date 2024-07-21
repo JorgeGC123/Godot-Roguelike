@@ -4,8 +4,8 @@ signal dash_started
 signal dash_ended
 
 var dash_speed: float = 300
-onready var animation_player = get_parent().get_node("AnimationPlayer");
-onready var animated_sprite = get_parent().get_node("AnimatedSprite")
+@onready var animation_player = get_parent().get_node("AnimationPlayer");
+@onready var animated_sprite = get_parent().get_node("AnimatedSprite2D")
 var dash_duration: float = 0.2 # ajustar con el valor de la animación en el editor TODO: dinámico
 var dash_cooldown: float = 1.0
 var is_dashing: bool = false
@@ -16,7 +16,7 @@ var cooldown_remaining: float = 0.0  # Tiempo restante de cooldown
 
 func _ready():
 	add_child(dash_timer)
-	dash_timer.connect("timeout", self, "_on_dash_timer_timeout")
+	dash_timer.connect("timeout", Callable(self, "_on_dash_timer_timeout"))
 
 func _process(delta: float):
 	if cooldown_remaining > 0:

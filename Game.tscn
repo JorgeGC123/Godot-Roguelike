@@ -3,8 +3,8 @@
 [ext_resource path="res://Characters/Player/Player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Game.gd" type="Script" id=3]
 [ext_resource path="res://Rooms.gd" type="Script" id=4]
-[ext_resource path="res://Art/v1.1 dungeon crawler 16x16 pixel pack/ui (new)/health_ui.png" type="Texture" id=5]
-[ext_resource path="res://Art/progress bar.png" type="Texture" id=6]
+[ext_resource path="res://Art/v1.1 dungeon crawler 16x16 pixel pack/ui (new)/health_ui.png" type="Texture2D" id=5]
+[ext_resource path="res://Art/progress bar.png" type="Texture2D" id=6]
 [ext_resource path="res://UI.gd" type="Script" id=7]
 
 [sub_resource type="StyleBoxFlat" id=1]
@@ -20,11 +20,11 @@ script = ExtResource( 3 )
 [node name="UI" type="CanvasLayer" parent="."]
 script = ExtResource( 7 )
 
-[node name="HealthBar" type="TextureProgress" parent="UI"]
-margin_left = 10.0
-margin_top = 10.0
-margin_right = 90.0
-margin_bottom = 26.0
+[node name="HealthBar" type="TextureProgressBar" parent="UI"]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 90.0
+offset_bottom = 26.0
 mouse_filter = 2
 value = 23.0
 texture_over = ExtResource( 5 )
@@ -33,15 +33,15 @@ tint_progress = Color( 0.537255, 0.117647, 0.117647, 1 )
 
 [node name="Tween" type="Tween" parent="UI/HealthBar"]
 
-[node name="StaminaBar" type="TextureProgress" parent="UI"]
+[node name="StaminaBar" type="TextureProgressBar" parent="UI"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-margin_left = -470.0
-margin_top = -107.0
-margin_right = -390.0
-margin_bottom = -91.0
+offset_left = -470.0
+offset_top = -107.0
+offset_right = -390.0
+offset_bottom = -91.0
 mouse_filter = 2
 value = 23.0
 texture_over = ExtResource( 5 )
@@ -55,18 +55,18 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-margin_left = -7.0
-margin_top = -30.0
-margin_right = 7.0
-margin_bottom = -16.0
+offset_left = -7.0
+offset_top = -30.0
+offset_right = 7.0
+offset_bottom = -16.0
 grow_horizontal = 2
-custom_styles/panel = SubResource( 1 )
+theme_override_styles/panel = SubResource( 1 )
 
 [node name="Inventory" type="HBoxContainer" parent="UI/PanelContainer"]
-margin_left = 2.0
-margin_top = 2.0
-margin_right = 12.0
-margin_bottom = 12.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 12.0
+offset_bottom = 12.0
 
 [node name="Rooms" type="Navigation2D" parent="."]
 script = ExtResource( 4 )

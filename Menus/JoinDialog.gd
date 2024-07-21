@@ -1,12 +1,12 @@
-extends WindowDialog
+extends Window
 
-onready var connect_container: VBoxContainer = get_node("ConnectVBoxContainer")
-onready var error_label: Label = get_node("ConnectVBoxContainer/ErrorLabel")
-onready var spin_box: SpinBox = connect_container.get_node("SpinBox")
-onready var connect_button: Button = connect_container.get_node("ConnectButton")
+@onready var connect_container: VBoxContainer = get_node("ConnectVBoxContainer")
+@onready var error_label: Label = get_node("ConnectVBoxContainer/ErrorLabel")
+@onready var spin_box: SpinBox = connect_container.get_node("SpinBox")
+@onready var connect_button: Button = connect_container.get_node("ConnectButton")
 
-onready var wait_container: ScrollContainer = get_node("WaitScrollContainer")
-onready var room_label: Label = wait_container.get_node("VBoxContainer/Label")
+@onready var wait_container: ScrollContainer = get_node("WaitScrollContainer")
+@onready var room_label: Label = wait_container.get_node("VBoxContainer/Label")
 
 
 func _on_ConnectButton_pressed() -> void:

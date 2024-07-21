@@ -4,10 +4,10 @@ extends Node2D
 func _init() -> void:
 	randomize()
 	
-	var screen_size: Vector2 = OS.get_screen_size()
-	var window_size: Vector2 = OS.get_window_size()
-	Engine.target_fps = 60
-	OS.set_window_position(screen_size * 0.5 - window_size * 0.5)
+	# var screen_size: Vector2 = DisplayServer.screen_get_size()
+	# var window_size: Vector2 = get_window().get_size()
+
+	# get_window().set_position(screen_size * 0.5 - window_size * 0.5)
 	
 	
 func _input(event: InputEvent) -> void:

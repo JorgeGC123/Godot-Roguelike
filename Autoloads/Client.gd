@@ -24,32 +24,32 @@ func create_room() -> void:
 func connect_to_server(room_id: int = 0) -> void:
 	room = room_id
 	
-	var peer: NetworkedMultiplayerENet = NetworkedMultiplayerENet.new()
+	var peer: ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 	if peer.create_client(SERVER_ADDRESS, SERVER_PORT):
 		printerr("Error creating the client")
 	get_tree().network_peer = peer
 	
-	if get_tree().connect("connected_to_server", self, "_connected_ok", [], CONNECT_DEFERRED):
+	if get_tree().connect("connected_to_server", Callable(self, "_connected_ok").bind(), CONNECT_DEFERRED):
 		printerr("Failed to connect connected_server")
-	if get_tree().connect("connection_failed", self, "_connected_fail", [], CONNECT_DEFERRED):
+	if get_tree().connect("connection_failed", Callable(self, "_connected_fail").bind(), CONNECT_DEFERRED):
 		printerr("Failed to connect connection_failed")
-	if get_tree().connect("server_disconnected", self, "_server_disconnected", [], CONNECT_DEFERRED):
+	if get_tree().connect("server_disconnected", Callable(self, "_server_disconnected").bind(), CONNECT_DEFERRED):
 		printerr("Failed to connect server_diconnected")
 		
 		
 func stop() -> void:
 	print("Disconnecting from server")
 	
-	get_tree().disconnect("connected_to_server", self, "_connected_ok")
-	get_tree().disconnect("connection_failed", self, "_connected_fail")
-	get_tree().disconnect("server_disconnected", self, "_server_disconnected")
+	get_tree().disconnect("connected_to_server", Callable(self, "_connected_ok"))
+	get_tree().disconnect("connection_failed", Callable(self, "_connected_fail"))
+	get_tree().disconnect("server_disconnected", Callable(self, "_server_disconnected"))
 	
 	get_tree().network_peer = null
 	
 	_remove_all_players()
 	
 	
-remote func register_player(id: int, info: Dictionary) -> void:
+@rpc("any_peer") func register_player(id: int, info: Dictionary) -> void:
 	player_info[id] = info
 	get_tree().current_scene.add_player_to_ui(info.name)
 	
@@ -58,7 +58,7 @@ func start_game() -> void:
 	rpc_id(1, "start_game")
 	
 	
-remote func pre_configure_game() -> void:
+@rpc("any_peer") func pre_configure_game() -> void:
 	print("pre_configure_game called")
 	
 	# Avoids closing the server when the popup_hide signal of the popups is sent
@@ -67,32 +67,32 @@ remote func pre_configure_game() -> void:
 	get_tree().paused = true
 	
 	get_tree().current_scene.queue_free()
-	var game: Node2D = preload("res://Rooms/SpawnRoom0.tscn").instance()
+	var game: Node2D = preload("res://Rooms/SpawnRoom0.tscn").instantiate()
 	get_tree().root.add_child(game)
 	get_tree().current_scene = game
 	
-	var my_player: KinematicBody2D = preload("res://Characters/Player/Player.tscn").instance()
+	var my_player: CharacterBody2D = preload("res://Characters/Player/Player.tscn").instantiate()
 	var my_weapon = my_player.get_node("Weapons/Sword")
-	var my_weapon_hitbox = my_player.get_node("Weapons/Sword/Node2D/Sprite/Hitbox")
-	my_player.call_deferred("initialize",get_tree().get_network_unique_id(), my_info.name,my_info.character_index)
+	var my_weapon_hitbox = my_player.get_node("Weapons/Sword/Node2D/Sprite2D/Hitbox")
+	my_player.call_deferred("initialize",get_tree().get_unique_id(), my_info.name,my_info.character_index)
 	game.add_child(my_player)
-	player_info[get_tree().get_network_unique_id()].instance = my_player
+	player_info[get_tree().get_unique_id()].instance = my_player
 	
-	if my_player.connect("position_changed", self, "_on_position_changed"):
+	if my_player.connect("position_changed", Callable(self, "_on_position_changed")):
 		printerr("Error connecting position_changed signal")
-	if my_player.connect("flip_h_changed", self, "_on_flip_h_changed"):
+	if my_player.connect("flip_h_changed", Callable(self, "_on_flip_h_changed")):
 		printerr("Error connecting flip_h_changed signal")
-	if my_player.connect("animation_changed", self, "_on_animation_changed"):
+	if my_player.connect("animation_changed", Callable(self, "_on_animation_changed")):
 		printerr("Error connecting animation_changed signal")
-	if my_weapon_hitbox.connect("mpdamage", self, "_on_player_damaged"):
+	if my_weapon_hitbox.connect("mpdamage", Callable(self, "_on_player_damaged")):
 		printerr("Error connecting damage signal")
-	if my_weapon.connect("weapon_animation_changed", self, "_on_weapon_animation_changed"):
+	if my_weapon.connect("weapon_animation_changed", Callable(self, "_on_weapon_animation_changed")):
 		printerr("Error connecting weapon_animation signal")
-	if my_weapon.connect("weapon_moved", self, "_on_weapon_move"):
+	if my_weapon.connect("weapon_moved", Callable(self, "_on_weapon_move")):
 		printerr("Error connecting weapon_moved signal")
 	for player_id in player_info:
-		if player_id != get_tree().get_network_unique_id():
-			var player: KinematicBody2D = preload("res://Characters/Multiplayer/MultiplayerCharacter.tscn").instance()
+		if player_id != get_tree().get_unique_id():
+			var player: CharacterBody2D = preload("res://Characters/Multiplayer/MultiplayerCharacter.tscn").instantiate()
 			player.call_deferred("initialize",player_id, my_info.name,my_info.character_index)
 			game.add_child(player)
 			player_info[player_id].instance = player
@@ -100,12 +100,12 @@ remote func pre_configure_game() -> void:
 	rpc_id(1, "done_preconfiguring")
 	
 	
-remote func done_preconfiguring() -> void:
+@rpc("any_peer") func done_preconfiguring() -> void:
 	get_tree().paused = false
 	
 	
 func _on_position_changed(new_pos: Vector2) -> void:
-	rpc_unreliable_id(1, "change_player_pos", new_pos)
+	rpc_id(1, "change_player_pos", new_pos)
 	
 	
 func _on_flip_h_changed(flip_h: bool) -> void:
@@ -130,37 +130,37 @@ func _on_player_damaged(id: int, dam: int, knockback_direction: Vector2, knockba
 	print(dam)
 	rpc_id(1, "damage_player", id, dam, knockback_direction, knockback_force)
 
-remote func damage(id: int, dam: int, knockback_direction: Vector2, knockback_force: int) -> void:
+@rpc("any_peer") func damage(id: int, dam: int, knockback_direction: Vector2, knockback_force: int) -> void:
 	print("daño sincronizado")
 	player_info[id].instance.take_damage(dam, knockback_direction, knockback_force)
 
-remote func update_player_pos(id: int, pos: Vector2) -> void:
+@rpc("any_peer") func update_player_pos(id: int, pos: Vector2) -> void:
 	player_info[id].instance.position = pos
 	
 	
-remote func update_player_flip_h(id: int, flip_h: bool) -> void:
+@rpc("any_peer") func update_player_flip_h(id: int, flip_h: bool) -> void:
 	player_info[id].instance.animated_sprite.flip_h = flip_h
 	
 	
-remote func update_player_anim(id: int, anim_name: String) -> void:
+@rpc("any_peer") func update_player_anim(id: int, anim_name: String) -> void:
 	print("deberia de playear")
 	print(anim_name)
 	player_info[id].instance.animation_player.play(anim_name)
 
-remote func move_weapon_client(id: int, scale_y,rotation,hitbox_knockback) -> void:
+@rpc("any_peer") func move_weapon_client(id: int, scale_y,rotation,hitbox_knockback) -> void:
 	print("deberia de mover")
 	var weapon = player_info[id].instance.get_node("Weapons/Sword")
 	weapon.scale.y = scale_y
 	weapon.rotation = rotation
 	weapon.hitbox.knockback_direction = hitbox_knockback
 
-remote func update_weapon_anim(id: int, anim_name: String) -> void:
+@rpc("any_peer") func update_weapon_anim(id: int, anim_name: String) -> void:
 	print("deberia de playear")
 	print(anim_name)
 	player_info[id].instance.get_node("Weapons/Sword").animation_player.play(anim_name)
 	
 	
-remote func remove_player(id: int) -> void:
+@rpc("any_peer") func remove_player(id: int) -> void:
 	if get_tree().current_scene.name == "Menu":
 		# Remove it from the UI
 		get_tree().current_scene.remove_player(player_info.keys().find(id))
@@ -201,6 +201,6 @@ func _server_disconnected() -> void:
 	stop()
 
 
-remote func update_room(room_id: int) -> void:
+@rpc("any_peer") func update_room(room_id: int) -> void:
 	if get_tree().current_scene.name == "MultiplayerMenu":
 		get_tree().current_scene.update_room(room_id)

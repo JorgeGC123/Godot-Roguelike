@@ -14,20 +14,20 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -26.5
-margin_top = -22.0
-margin_right = 26.5
-margin_bottom = 22.0
+offset_left = -26.5
+offset_top = -22.0
+offset_right = 26.5
+offset_bottom = 22.0
 
 [node name="CreateButton" type="Button" parent="VBoxContainer"]
-margin_right = 53.0
-margin_bottom = 20.0
+offset_right = 53.0
+offset_bottom = 20.0
 text = "Create"
 
 [node name="JoinButton" type="Button" parent="VBoxContainer"]
-margin_top = 24.0
-margin_right = 53.0
-margin_bottom = 44.0
+offset_top = 24.0
+offset_right = 53.0
+offset_bottom = 44.0
 text = "Join"
 
 [node name="CreateDialog" type="AcceptDialog" parent="."]
@@ -35,47 +35,47 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -87.0
-margin_top = -42.0
-margin_right = 87.0
-margin_bottom = 42.0
-popup_exclusive = true
+offset_left = -87.0
+offset_top = -42.0
+offset_right = 87.0
+offset_bottom = 42.0
+exclusive = true
 window_title = "Waiting for players"
 dialog_hide_on_ok = false
 
 [node name="ScrollContainer" type="ScrollContainer" parent="CreateDialog"]
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 166.0
-margin_bottom = 48.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 166.0
+offset_bottom = 48.0
 scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CreateDialog/ScrollContainer"]
-margin_right = 61.0
-margin_bottom = 18.0
+offset_right = 61.0
+offset_bottom = 18.0
 
 [node name="Label" type="Label" parent="CreateDialog/ScrollContainer/VBoxContainer"]
-margin_right = 61.0
-margin_bottom = 14.0
+offset_right = 61.0
+offset_bottom = 14.0
 text = "Loading..."
 
 [node name="PlayerList" type="VBoxContainer" parent="CreateDialog/ScrollContainer/VBoxContainer"]
-margin_top = 18.0
-margin_right = 61.0
-margin_bottom = 18.0
+offset_top = 18.0
+offset_right = 61.0
+offset_bottom = 18.0
 script = ExtResource( 3 )
 
-[node name="JoinDialog" type="WindowDialog" parent="."]
+[node name="JoinDialog" type="Window" parent="."]
 visible = true
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -83.5
-margin_top = -46.0
-margin_right = 83.5
-margin_bottom = 46.0
-popup_exclusive = true
+offset_left = -83.5
+offset_top = -46.0
+offset_right = 83.5
+offset_bottom = 46.0
+exclusive = true
 window_title = "Waiting for players"
 script = ExtResource( 2 )
 
@@ -85,17 +85,17 @@ anchor_bottom = 1.0
 
 [node name="ErrorLabel" type="Label" parent="JoinDialog/ConnectVBoxContainer"]
 visible = false
-margin_right = 167.0
-margin_bottom = 14.0
+offset_right = 167.0
+offset_bottom = 14.0
 
 [node name="SpinBox" type="SpinBox" parent="JoinDialog/ConnectVBoxContainer"]
-margin_right = 167.0
-margin_bottom = 24.0
+offset_right = 167.0
+offset_bottom = 24.0
 
 [node name="ConnectButton" type="Button" parent="JoinDialog/ConnectVBoxContainer"]
-margin_top = 28.0
-margin_right = 167.0
-margin_bottom = 48.0
+offset_top = 28.0
+offset_right = 167.0
+offset_bottom = 48.0
 text = "Connect"
 
 [node name="WaitScrollContainer" type="ScrollContainer" parent="JoinDialog"]
@@ -105,14 +105,14 @@ anchor_bottom = 1.0
 scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="JoinDialog/WaitScrollContainer"]
-margin_bottom = 18.0
+offset_bottom = 18.0
 
 [node name="Label" type="Label" parent="JoinDialog/WaitScrollContainer/VBoxContainer"]
-margin_bottom = 14.0
+offset_bottom = 14.0
 
 [node name="PlayerList" type="VBoxContainer" parent="JoinDialog/WaitScrollContainer/VBoxContainer"]
-margin_top = 18.0
-margin_bottom = 18.0
+offset_top = 18.0
+offset_bottom = 18.0
 script = ExtResource( 3 )
 
 [connection signal="pressed" from="VBoxContainer/CreateButton" to="." method="_on_CreateButton_pressed"]

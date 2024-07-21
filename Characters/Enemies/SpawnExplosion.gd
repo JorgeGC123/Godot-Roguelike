@@ -1,5 +1,5 @@
-extends AnimatedSprite
-
+extends AnimatedSprite2D
+var playing: int = 0
 
 func _ready() -> void:
 	playing = true

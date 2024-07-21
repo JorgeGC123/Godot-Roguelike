@@ -6,15 +6,15 @@ enum {UP, DOWN}
 
 var current_weapon: Node2D
 var lantern: Lantern
-export (PackedScene) var Player
+@export var Player: PackedScene
 signal weapon_switched(prev_index, new_index)
 signal weapon_picked_up(weapon_texture)
 signal weapon_droped(index)
 
-onready var parent: Node2D = get_parent()
-onready var weapons: Node2D = get_node("Weapons")
-onready var dust_position: Position2D = get_node("DustPosition")
-onready var player_dash: PlayerDash = $PlayerDash
+@onready var parent: Node2D = get_parent()
+@onready var weapons: Node2D = get_node("Weapons")
+@onready var dust_position: Marker2D = get_node("DustPosition")
+@onready var player_dash: PlayerDash = $PlayerDash
 var near_breakable: Node = null
 var near_door: Node = null
 var near_npc: Node = null
@@ -22,7 +22,7 @@ var held_breakable: Node = null
 var breakableScene: Node2D = null
 
 
-export var DASH_STAMINA = 30
+@export var DASH_STAMINA = 30
 
 func _ready() -> void:
 	emit_signal("weapon_picked_up", weapons.get_child(0).get_texture())
@@ -61,10 +61,10 @@ func _restore_previous_state() -> void:
 func _process(_delta: float) -> void:
 	
 	var mouse_direction: Vector2 = (get_global_mouse_position() - global_position).normalized()
-	var window_size: Vector2 = OS.get_window_size()
+	var window_size: Vector2 = get_window().get_size()
 	var mouse_pos = get_global_mouse_position()
-	$Camera2D.offset_h = (mouse_pos.x - global_position.x) / (window_size.x/2)
-	$Camera2D.offset_v = (mouse_pos.y - global_position.y) / (window_size.y/2)
+	$Camera2D.drag_horizontal_offset = (mouse_pos.x - global_position.x) / (window_size.x/2)
+	$Camera2D.drag_vertical_offset = (mouse_pos.y - global_position.y) / (window_size.y/2)
 	if mouse_direction.x > 0 and animated_sprite.flip_h:
 		animated_sprite.flip_h = false
 	elif mouse_direction.x < 0 and not animated_sprite.flip_h:
@@ -84,8 +84,8 @@ func _process(_delta: float) -> void:
 		
 
 	if Input.is_action_just_pressed("ui_interact"):
-		if near_npc and !near_npc.is_talking():
-			near_npc.trigger_dialog()
+		# if near_npc and !near_npc.is_talking():
+		# 	near_npc.trigger_dialog()
 		if near_door and ! near_door.is_open:
 			near_door.open()
 		else:
@@ -184,7 +184,7 @@ func pick_up_breakable(breakable: Node) -> void:
 
 	
 func _drop_weapon() -> void:
-	SavedData.weapons.remove(current_weapon.get_index() - 1)
+	SavedData.weapons.remove_at(current_weapon.get_index() - 1)
 	var weapon_to_drop: Node2D = current_weapon
 	_switch_weapon(UP)
 	
@@ -193,7 +193,7 @@ func _drop_weapon() -> void:
 	weapons.call_deferred("remove_child", weapon_to_drop)
 	get_parent().call_deferred("add_child", weapon_to_drop)
 	weapon_to_drop.set_owner(get_parent())
-	yield(weapon_to_drop.tween, "tree_entered")
+	await weapon_to_drop.tween.tree_entered
 		
 	var throw_dir: Vector2 = (get_global_mouse_position() - position).normalized()
 	var force: int = 100;
@@ -212,9 +212,9 @@ func cancel_attack() -> void:
 	
 	
 func spawn_dust() -> void:
-	var dust: Sprite = DUST_SCENE.instance()
+	var dust: Sprite2D = DUST_SCENE.instantiate()
 	dust.position = dust_position.global_position
-	parent.add_child_below_node(parent.get_child(get_index() - 1), dust)
+	parent.add_sibling(dust)
 		
 		
 func switch_camera() -> void:

@@ -1,7 +1,7 @@
 extends CanvasLayer
 
-onready var ability_icon: TextureProgress = get_node("AbilityIcon")
-onready var tween: Tween = get_node("Tween")
+@onready var ability_icon: TextureProgressBar = get_node("AbilityIcon")
+@onready var tween: Tween = get_tree().create_tween()
 
 
 func recharge_ability_animation(time: float) -> void:

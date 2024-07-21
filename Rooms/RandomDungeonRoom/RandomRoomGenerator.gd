@@ -18,7 +18,7 @@ var god_rays_scene = preload ("res://Godrays/SunGodRays.tscn")
 func generate_random_room() -> DungeonRoom:
 	var room_scene = load("res://Rooms/RandomDungeonRoom/RandomDungeonRoom.tscn") # Asegúrate de tener el camino correcto a la escena de DungeonRoom.
 	var room_instance = room_scene.instance()
-	var room_size = Vector2(rand_range(MIN_ROOM_SIZE.x, MAX_ROOM_SIZE.x), rand_range(MIN_ROOM_SIZE.y, MAX_ROOM_SIZE.y) + 1)
+	var room_size = Vector2(randf_range(MIN_ROOM_SIZE.x, MAX_ROOM_SIZE.x), randf_range(MIN_ROOM_SIZE.y, MAX_ROOM_SIZE.y) + 1)
 	# Instanciar y añadir la puerta
 	var door_instance = door_scene.instance()
 	var doors_node = room_instance.get_node("Doors")
@@ -26,18 +26,18 @@ func generate_random_room() -> DungeonRoom:
 	door_instance.position = Vector2(door_x_position * TILE_SIZE, 0)
 	doors_node.add_child(door_instance) # Añade la puerta al nodo "Doors"
 	print("Door position ", door_instance.position)
-	#var room_tilemap = room_instance.get_node("TileMap") as TileMap
+	var room_tilemap = room_instance.get_node("TileMap") as TileMap
 	# añadir la entrada
 	
 	var entrance_node = room_instance.get_node("Entrance")
-	var position2d2 = Position2D.new() # Crear una instancia de Position2D
+	var position2d2 = Marker2D.new() # Crear una instancia de Marker2D
 	position2d2.name = "Position2D2"
 	position2d2.position = Vector2(door_x_position * TILE_SIZE, room_size.y * TILE_SIZE)
 	print(position2d2.position)
 	print("entrance position ", position2d2.position)
 	entrance_node.add_child(position2d2)
-	var position2d = Position2D.new() # Crear una instancia de Position2D
-	position2d.name = "Position2D"
+	var position2d = Marker2D.new() # Crear una instancia de Marker2D
+	position2d.name = "Marker2D"
 	position2d.position = Vector2(door_x_position * TILE_SIZE - 1, room_size.y * TILE_SIZE)
 	print(position2d.position)
 	print("entrance position ", position2d.position)
@@ -61,7 +61,7 @@ func generate_random_room() -> DungeonRoom:
 	window_y_position = clamp(window_y_position, 1, int(room_size.y) - 2)
 	var clean_light_instance = clean_light_scene.instance()
 	var godray_instance = god_rays_scene.instance()
-	var window_world_position = room_instance.get_node("TileMap").map_to_world(Vector2(room_size.x - 1, window_y_position))
+	var window_world_position = room_instance.get_node("TileMap").map_to_local(Vector2(room_size.x - 1, window_y_position))
 	clean_light_instance.position = window_world_position
 	godray_instance.position = window_world_position
 	room_instance.add_child(clean_light_instance)
@@ -91,44 +91,49 @@ func generate_room_tiles(room_tilemap: TileMap, size: Vector2, entrance_pos: Vec
 	var room_string = ""
 	print('enemy positions ', enemy_positions)
 	# Ajustar la fila superior de la pared
+	var tile_map_layer = 0 
+	
+
 	for x in range(size.x):
+		var tile_map_cell_position = Vector2i(x,0) 
 		if x == 0:
-			room_tilemap.set_cell(x, 0, WALL_TILE_ID) # Esquina superior izquierda
+			room_tilemap.set_cell(tile_map_layer, tile_map_cell_position, WALL_TILE_ID) # Esquina superior izquierda
 		elif x == int(size.x) - 1:
-			room_tilemap.set_cell(x, 0, WALL_TILE_ID) # Esquina superior derecha
+			room_tilemap.set_cell(tile_map_layer, tile_map_cell_position, WALL_TILE_ID) # Esquina superior derecha
 		else:
-			room_tilemap.set_cell(x, 0, WALL_TILE_ID) # Pared superior
+			room_tilemap.set_cell(tile_map_layer, tile_map_cell_position, WALL_TILE_ID) # Pared superior
 	for y in range(size.y):
 		var row_string = ""
 		for x in range(size.x):
 			var current_pos = Vector2(x, y)
+			var tile_map_cell_position = Vector2i(x,y) 
 			# Comprueba si la posición actual es una posición de enemigo
 			if current_pos in enemy_positions:
 				row_string += "E" # 'E' representa a un enemigo
-				room_tilemap.set_cell(x, y, 14)
+				room_tilemap.set_cell(tile_map_layer, tile_map_cell_position, 14)
 			elif current_pos == entrance_pos - Vector2(0, 1) or current_pos == entrance_pos - Vector2(1, 1):
 				row_string += "C"
-				room_tilemap.set_cell(x, y, 14)
+				room_tilemap.set_cell(tile_map_layer, tile_map_cell_position, 14)
 			# Tratar door_pos
 			elif current_pos == door_pos:
 				# Establecer tile de suelo para la puerta y su adyacente
-				room_tilemap.set_cell(x, y, FLOOR_TILE_ID)
-				room_tilemap.set_cell(x - 1, y, FLOOR_TILE_ID)
+				room_tilemap.set_cell(tile_map_layer,Vector2i(x,y), FLOOR_TILE_ID)
+				room_tilemap.set_cell(tile_map_layer, Vector2i(x-1,y), FLOOR_TILE_ID)
 				# Ajustar el string de la fila para los dos tiles de suelo
 				row_string = adjust_floor_tiles_in_string(row_string, x)
 			# Tratar entrance_pos
 			elif current_pos == entrance_pos:
 				# Establecer tile de suelo para la entrada y su adyacente
-				room_tilemap.set_cell(x, y, FLOOR_TILE_ID)
-				room_tilemap.set_cell(x - 1, y, FLOOR_TILE_ID)
+				room_tilemap.set_cell(tile_map_layer, Vector2i(x,y), FLOOR_TILE_ID)
+				room_tilemap.set_cell(tile_map_layer - 1, Vector2i(x-1,y), FLOOR_TILE_ID)
 				# Ajustar el string de la fila para los dos tiles de suelo
 				row_string = adjust_floor_tiles_in_string(row_string, x)
 			elif x == int(size.x) - 1 and y == window_y_position:
-				room_tilemap.set_cell(x, y, RIGHT_WINDOW_TILE_ID)
+				room_tilemap.set_cell(tile_map_layer, Vector2i(x,y), RIGHT_WINDOW_TILE_ID)
 			else:
 				# Otros tiles
 				var tile_id = get_tile_id_for_position(x, y, size, entrance_pos)
-				room_tilemap.set_cell(x, y, tile_id)
+				room_tilemap.set_cell(tile_map_layer, Vector2i(x,y), tile_id)
 				row_string += str(tile_id)
 		room_string += row_string + "\n"
 	print(room_string)
@@ -165,19 +170,19 @@ func get_tile_id_for_position(x: int, y: int, size: Vector2, entrance: Vector2) 
 
 func generate_enemy_positions(room_instance: DungeonRoom, room_size: Vector2, entrance_pos: Vector2) -> Array:
 	var enemy_positions_node = room_instance.get_node("EnemyPositions")
-	var num_enemy_positions = int(rand_range(1, 4)) # Genera 1-3 enemigos
+	var num_enemy_positions = int(randf_range(1, 4)) # Genera 1-3 enemigos
 	var margin = 4
 	var enemy_positions = []
 	var available_positions = generate_available_positions(room_size, entrance_pos, margin)
 
 	for _i in range(num_enemy_positions):
-		if available_positions.empty():
+		if available_positions.is_empty():
 			break
 		
 		var position_index = randi() % available_positions.size()
 		var chosen_position = available_positions[position_index]
 		
-		var position = Position2D.new()
+		var position = Marker2D.new()
 		position.position = chosen_position * TILE_SIZE
 		enemy_positions_node.add_child(position)
 		enemy_positions.append(chosen_position)

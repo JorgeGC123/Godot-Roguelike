@@ -1,10 +1,10 @@
 extends Area2D
 
-onready var collision_shape: CollisionShape2D = get_node("CollisionShape2D")
-onready var tween: Tween = get_node("Tween")
+@onready var collision_shape: CollisionShape2D = get_node("CollisionShape2D")
+@onready var tween: Tween = get_tree().create_tween()
 
 
-func _on_HealthPotion_body_entered(player: KinematicBody2D) -> void:
+func _on_HealthPotion_body_entered(player: CharacterBody2D) -> void:
 	collision_shape.set_deferred("disabled", true)
 	player.hp += 1
 	SavedData.hp += 1
