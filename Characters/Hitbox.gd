@@ -35,12 +35,10 @@ func _on_body_exited(_body: KinematicBody2D) -> void:
 	timer.stop()
 	
 	
-func _collide(body: KinematicBody2D) -> void:
+func _collide(body) -> void:
 	print('maldicion hijo')
-	print(body)
-	print(body.has_method("take_damage"))
 	if body == null or not body.has_method("take_damage"):
-		queue_free()
+		return
 	else:
 		print('dano takeadisimo, emitiendo señal')
 		print(body)

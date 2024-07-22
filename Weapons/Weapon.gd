@@ -135,3 +135,14 @@ func _on_AnimationPlayer_animation_started(anim_name:String):
 		stamina_tax(CHARGED_ATTACK_STAMINA)
 	elif anim_name == "active_ability":
 		stamina_tax(ABILITY_STAMINA)
+
+
+func _on_Hitbox_body_entered(body:Node):
+	# aquí llevamos la lógica del daño a tilemaps
+	# TODO: sacarla de weapon, aunque sea el emisor
+	if body is TileMap:
+		var tile_pos = body.world_to_map(self.global_position)
+		var WALL_TILE_ID = 2
+		var BROKEN_WALL_TILE_ID = 27
+		if(body.get_cellv(tile_pos+Vector2.UP) == WALL_TILE_ID):
+			body.set_cellv(tile_pos+Vector2.UP,BROKEN_WALL_TILE_ID)

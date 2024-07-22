@@ -1,4 +1,5 @@
 extends Character
+class_name Breakable
 
 var held_breakable: Node = null
 var player # referencia al jugador
