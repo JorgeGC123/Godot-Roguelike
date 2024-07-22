@@ -63,6 +63,15 @@ func interpolate_pos(initial_pos: Vector2, final_pos: Vector2) -> void:
 
 func _on_CollisionArea_body_entered(body):
 	if is_interpolating and (body is TileMap or body is StaticBody2D):
+		# TODO: Esto debe de monitorizarlo el tilemap
+		if body is TileMap:
+			print(body)
+			var local_position = body.to_local(self.global_position)
+			var map_position = body.world_to_map(local_position)
+			var WALL_TILE_ID = 2
+			var BROKEN_WALL_TILE_ID = 27
+			if (body.get_cellv(map_position + Vector2.UP) == WALL_TILE_ID):
+				body.set_cellv(map_position + Vector2.UP, BROKEN_WALL_TILE_ID)
 		tween.stop_all()
 		hitbox.monitoring = false # Desactivar la hitbox al detenerse
 		hitbox.set_collision_mask_bit(0, true) # Reactivar colisión con sí mismo
@@ -72,7 +81,7 @@ func _on_CollisionArea_body_entered(body):
 
 func _on_Hitbox_body_entered(body):
 	if is_interpolating and (body != self):
-		print('knockback',knockback_direction)
+		print('knockback', knockback_direction)
 		body.take_damage(damage, knockback_direction, knockback_force)
 		knockback_direction = Vector2.ZERO
 		self.take_damage(damage, knockback_direction, knockback_force)
