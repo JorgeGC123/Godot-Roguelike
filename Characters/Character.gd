@@ -20,8 +20,9 @@ export(float) var stamina_recovery_delay: float = 1.0 # Delay antes de la recupe
 onready var animation_player: AnimationPlayer = get_node("AnimationPlayer")
 export(int) var accerelation: int = 40
 export(int) var max_speed: int = 100
-
+onready var collision_area: Area2D = get_node("Area2D")
 export(bool) var flying: bool = false
+var is_interpolating: bool = false
 
 onready var state_machine: Node = get_node("FiniteStateMachine")
 onready var animated_sprite: AnimatedSprite = get_node("AnimatedSprite")
@@ -35,6 +36,8 @@ signal flip_h_changed(flip_h)
 signal animation_changed(anim_name)
 
 func _ready():
+	is_interpolating = false
+	collision_area.connect("body_entered", self, "_on_CollisionArea_body_entered")
 	add_child(stamina_timer)
 	stamina_timer.wait_time = stamina_recovery_interval
 	stamina_timer.one_shot = false
@@ -79,9 +82,11 @@ func take_damage(dam: int, dir: Vector2, force: int) -> void:
 		if hp > 0:
 			state_machine.set_state(state_machine.states.hurt)
 			velocity += dir * force
+			is_interpolating = true
 		else:
 			state_machine.set_state(state_machine.states.dead)
 			velocity += dir * force * 2
+			is_interpolating = true
 		
 func reduce_stamina(cost: int) -> void:
 	self.stamina -= cost
@@ -113,9 +118,8 @@ func _on_StaminaTimer_timeout():
 func _spawn_hit_effect(dir: Vector2) -> void:
 	var hit_effect: Sprite = HIT_EFFECT_SCENE.instance()
 	add_child(hit_effect)
-	
 	if has_blood:
-		var blood_effect: Particles2D = BLOOD_EFFECT_SCENE.instance()
+		var blood_effect: CPUParticles2D = BLOOD_EFFECT_SCENE.instance()
 		blood_effect.global_rotation = dir.angle()
 		blood_effect.global_position = global_position + dir
 
@@ -124,3 +128,8 @@ func _spawn_hit_effect(dir: Vector2) -> void:
 
 		# Añadir la partícula a la lista en el singleton de la escena para luego borrarlas
 		SceneTransistor.add_blood_effect(blood_effect)
+
+func _on_CollisionArea_body_entered(body):
+	if is_interpolating and (body is TileMap or body is StaticBody2D):
+		velocity = Vector2(0,0)
+		print("Colisión con pared detectada")

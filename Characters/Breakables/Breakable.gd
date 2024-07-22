@@ -5,13 +5,13 @@ var player # referencia al jugador
 onready var tween: Tween = get_node("Tween")
 onready var tooltip: Label = get_node("Node2D/Tooltip")
 #onready var animated_sprite: AnimatedSprite = get_node("AnimatedSprite")
-onready var collision_area: Area2D = get_node("Area2D")
+# onready var collision_area: Area2D = get_node("Area2D")
 onready var hitbox: Area2D = get_node("Hitbox")
 var initial_tooltip_position: Vector2
 var damage: int = 10 # Ajusta el daño según sea necesario
 var knockback_direction: Vector2 = Vector2.ZERO
 var knockback_force: int = 0
-var is_interpolating: bool = false # Bandera para indicar si está interpolando
+
 var is_orbiting: bool = false
 
 # Cargar el shader

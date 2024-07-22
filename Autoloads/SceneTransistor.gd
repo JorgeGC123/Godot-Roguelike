@@ -15,7 +15,7 @@ func change_scene() -> void:
 	var __ = get_tree().change_scene(new_scene) == OK
 	assert(__)
 
-func add_blood_effect(effect: Particles2D) -> void:
+func add_blood_effect(effect: CPUParticles2D) -> void:
     blood_effects.append(effect)
 
 func clear_blood_effects() -> void:
