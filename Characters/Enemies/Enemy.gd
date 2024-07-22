@@ -6,7 +6,7 @@ var path: PoolVector2Array
 onready var navigation: Navigation2D = get_tree().current_scene.get_node("Rooms")
 onready var player: KinematicBody2D = get_tree().current_scene.get_node("Player")
 onready var path_timer: Timer = get_node("PathTimer")
-
+export var detection_radious: int = 100
 
 func _ready() -> void:
 	var __ = connect("tree_exited", get_parent(), "_on_enemy_killed")
@@ -30,7 +30,8 @@ func chase() -> void:
 
 func _on_PathTimer_timeout() -> void:
 	if is_instance_valid(player):
-		_get_path_to_player()
+		if(self.global_position.distance_to(player.global_position) < detection_radious):
+			_get_path_to_player()
 	else:
 		path_timer.stop()
 		path = []

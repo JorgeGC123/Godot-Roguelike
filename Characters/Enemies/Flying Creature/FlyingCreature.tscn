@@ -203,8 +203,8 @@ animations = [ {
 
 [node name="FlyingCreature" instance=ExtResource( 1 )]
 script = ExtResource( 6 )
-accerelation = 20
-max_speed = 50
+accerelation = 10
+max_speed = 25
 flying = true
 
 [node name="FiniteStateMachine" parent="." index="0"]
