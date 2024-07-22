@@ -80,7 +80,7 @@ func _on_CollisionArea_body_entered(body):
 		self.take_damage(damage, knockback_direction, knockback_force)
 
 func _on_Hitbox_body_entered(body):
-	if is_interpolating and (body != self):
+	if is_interpolating and (body != self and body.has_method("take_damage")):
 		print('knockback', knockback_direction)
 		body.take_damage(damage, knockback_direction, knockback_force)
 		knockback_direction = Vector2.ZERO

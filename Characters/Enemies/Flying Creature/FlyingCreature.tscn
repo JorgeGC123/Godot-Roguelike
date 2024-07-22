@@ -204,8 +204,13 @@ animations = [ {
 [node name="FlyingCreature" instance=ExtResource( 1 )]
 script = ExtResource( 6 )
 accerelation = 10
-max_speed = 25
+max_speed = 40
 flying = true
+detection_radius = 150
+obstacle_avoid_distance = 50.0
+avoid_force = 0.5
+path_follow_weight = 1.0
+max_avoid_time = 1.0
 
 [node name="FiniteStateMachine" parent="." index="0"]
 script = ExtResource( 3 )

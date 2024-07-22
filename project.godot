@@ -110,6 +110,10 @@ window/stretch/aspect="keep"
 
 enabled=PoolStringArray( "res://addons/dialogue_manager/plugin.cfg" )
 
+[global]
+
+debug=false
+
 [importer_defaults]
 
 texture={
@@ -205,6 +209,10 @@ ui_interact={
 2d_physics/layer_2="Player"
 2d_physics/layer_3="Enemy"
 2d_physics/layer_4="Projectile"
+
+[navigation]
+
+2d/default_edge_connection_margin=16.0
 
 [physics]
 
