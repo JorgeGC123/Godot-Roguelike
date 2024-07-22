@@ -74,9 +74,9 @@ func _process(_delta: float) -> void:
 	current_weapon.move(mouse_direction)
 	
 	player_dash._process(_delta)
-	if Input.is_action_just_pressed("ui_dodge") and player_dash.is_dash_available() and stamina > DASH_STAMINA:
+	if Input.is_action_just_pressed("ui_dodge") and player_dash.is_dash_available() and stamina > DASH_STAMINA and mov_direction != Vector2.ZERO:
 		player_dash.start_dash(mov_direction)
-		stamina -= DASH_STAMINA
+		reduce_stamina(DASH_STAMINA)
 
 
 	if player_dash.is_dashing:
