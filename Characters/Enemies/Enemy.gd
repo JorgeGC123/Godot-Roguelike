@@ -108,7 +108,7 @@ func _remember_obstacle(position: Vector2) -> void:
 	if obstacle_memory.size() > memory_size:
 		obstacle_memory.pop_front()
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	_forget_old_obstacles()
 
 func _forget_old_obstacles() -> void:

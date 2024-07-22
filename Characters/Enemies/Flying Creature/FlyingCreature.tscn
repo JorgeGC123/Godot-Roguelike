@@ -211,6 +211,11 @@ obstacle_avoid_distance = 50.0
 avoid_force = 0.5
 path_follow_weight = 1.0
 max_avoid_time = 1.0
+memory_size = 5
+memory_duration = 3.0
+max_stuck_time = 0.25
+unstuck_force = 20000.0
+stuck_distance_threshold = 0.5
 
 [node name="FiniteStateMachine" parent="." index="0"]
 script = ExtResource( 3 )
@@ -237,3 +242,10 @@ anims/hurt = SubResource( 14 )
 frames = SubResource( 9 )
 animation = "default"
 frame = 3
+
+[node name="AttackTimer" type="Timer" parent="." index="8"]
+wait_time = 1.5
+one_shot = true
+
+[node name="AimRayCast" type="RayCast2D" parent="." index="9"]
+enabled = true
