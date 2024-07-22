@@ -10,7 +10,7 @@ onready var hitbox: Area2D = get_node("Hitbox")
 var initial_tooltip_position: Vector2
 var damage: int = 10 # Ajusta el daño según sea necesario
 var knockback_direction: Vector2 = Vector2.ZERO
-var knockback_force: int = 0
+var knockback_force: int = 50
 
 var is_orbiting: bool = false
 
@@ -57,6 +57,7 @@ func interpolate_pos(initial_pos: Vector2, final_pos: Vector2) -> void:
 	tween.interpolate_property(self, "global_position", initial_pos, final_pos, 0.8, Tween.TRANS_QUART, Tween.EASE_OUT)
 	tween.start()
 	hitbox.monitoring = true # Activar la hitbox durante la interpolación
+	knockback_direction = (final_pos - initial_pos).normalized()
 	tween.connect("tween_completed", self, "_on_tween_completed")
 
 func _on_CollisionArea_body_entered(body):
@@ -65,11 +66,14 @@ func _on_CollisionArea_body_entered(body):
 		hitbox.monitoring = false # Desactivar la hitbox al detenerse
 		hitbox.set_collision_mask_bit(0, true) # Reactivar colisión con sí mismo
 		print("Colisión con pared detectada")
+		knockback_direction = Vector2.ZERO
 		self.take_damage(damage, knockback_direction, knockback_force)
 
 func _on_Hitbox_body_entered(body):
-	if is_interpolating and (body != self and body is Character):
+	if is_interpolating and (body != self):
+		print('knockback',knockback_direction)
 		body.take_damage(damage, knockback_direction, knockback_force)
+		knockback_direction = Vector2.ZERO
 		self.take_damage(damage, knockback_direction, knockback_force)
 		print("Colisión con entidad detectada, causando daño")
 
