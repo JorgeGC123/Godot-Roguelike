@@ -124,9 +124,7 @@ shape = SubResource( 3 )
 anims/RESET = SubResource( 8 )
 anims/dead = SubResource( 9 )
 
-[node name="Area2D" type="Area2D" parent="." index="4"]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" index="0"]
+[node name="CollisionShape2D" parent="Area2D" index="0"]
 shape = SubResource( 10 )
 
 [node name="Tween" type="Tween" parent="." index="5"]

@@ -9,7 +9,6 @@ func get_input() -> void:
 	if is_busy_with_active_ability():
 		return
 	if Input.is_action_just_pressed("ui_attack") and player.stamina > 20:
-		print(player)
 		if in_first_attack:
 			animation_player.play("attack2")
 			emit_signal("weapon_animation_changed", "attack2")

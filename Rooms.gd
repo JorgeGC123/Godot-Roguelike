@@ -77,6 +77,9 @@ func _spawn_rooms() -> void:
 					previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(0, -y + 1), FLOOR_TILE_INDEX)
 					previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(1, -y), RIGHT_WALL_TILE_INDEX)
 					previous_room_tilemap.set_cellv(exit_tile_pos + Vector2(1, -y + 1), RIGHT_WALL_TILE_INDEX)
+					
+				previous_room_tilemap2.set_cellv(exit_tile_pos + Vector2(1,1), TOP_WALL_TILE_ID)
+				previous_room_tilemap2.set_cellv(exit_tile_pos + Vector2(-2,1), TOP_WALL_TILE_ID)
 			else:
 				for x in range(corridor_length):
 					# Conexión de habitaciones y pasillos laterales
@@ -103,6 +106,7 @@ func _spawn_rooms() -> void:
 
 				previous_room_tilemap2.set_cellv(exit_tile_pos + Vector2(corridor_length - 2, + 1), TOP_WALL_TILE_ID)
 				previous_room_tilemap2.set_cellv(exit_tile_pos + Vector2(corridor_length, + 3), BOTTOM_WALL_TILE_ID)
+				previous_room_tilemap2.set_cellv(exit_tile_pos + Vector2(corridor_length - 1, + 3), BOTTOM_WALL_TILE_ID)
 				previous_room_tilemap2.set_cellv(exit_tile_pos + Vector2(corridor_length - 1, + 3), BOTTOM_WALL_TILE_ID)
 				previous_room_tilemap2.set_cellv(exit_tile_pos + Vector2(corridor_length + 1, + 3), RIGHT_WALL_TILE_INDEX)
 				previous_room_tilemap2.set_cellv(exit_tile_pos + Vector2(corridor_length + 1, + 2), RIGHT_WALL_TILE_INDEX)
