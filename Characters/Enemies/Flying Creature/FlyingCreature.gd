@@ -32,7 +32,6 @@ func _on_PathTimer_timeout() -> void:
 			
 
 func _process(_delta: float) -> void:
-	print(state_machine.get_current_state())
 	hitbox.knockback_direction = velocity.normalized()
 
 func _headbutt() -> void:
@@ -43,7 +42,6 @@ func _headbutt() -> void:
 	
 	# Aplicar velocidad en esa dirección
 	velocity = direction_to_player * HEADBUTT_SPEED
-	print("soy 1 fkin proyectil")
 	# Actualizar la animación del enemigo si es necesario
 	yield(attack_timer, "timeout")
 	attack_timer.stop()
