@@ -84,6 +84,7 @@ func take_damage(dam: int, dir: Vector2, force: int) -> void:
 			velocity += dir * force
 			is_interpolating = true
 		else:
+			print("dead")
 			state_machine.set_state(state_machine.states.dead)
 			velocity += dir * force * 2
 			is_interpolating = true

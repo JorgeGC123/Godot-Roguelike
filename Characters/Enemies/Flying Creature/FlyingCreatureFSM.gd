@@ -6,10 +6,11 @@ func _init() -> void:
 	_add_state("attack")
 	_add_state("hurt")
 	_add_state("dead")
+	_add_state("idle")
 	
 	
 func _ready() -> void:
-	set_state(states.chase)
+	set_state(states.idle)
 	
 	
 func _state_logic(_delta: float) -> void:
@@ -34,5 +35,5 @@ func _enter_state(_previous_state: int, new_state: int) -> void:
 			animation_player.play("hurt")
 		states.dead:
 			animation_player.play("dead")
-		states.attack:
-			animation_player.play("attack")
+		# states.attack:
+		# 	animation_player.play("attack")

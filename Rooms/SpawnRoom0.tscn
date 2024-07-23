@@ -206,13 +206,4 @@ position = Vector2( 34, 76 )
 
 [node name="FlyingCreature" parent="." index="20" instance=ExtResource( 11 )]
 position = Vector2( 209, 39 )
-detection_radius = 150
-obstacle_avoid_distance = 50.0
-avoid_force = 0.5
-path_follow_weight = 1.0
-max_avoid_time = 1.0
-memory_size = 5
-memory_duration = 3.0
-max_stuck_time = 0.25
-unstuck_force = 20000.0
-stuck_distance_threshold = 0.5
+detection_radius = 75

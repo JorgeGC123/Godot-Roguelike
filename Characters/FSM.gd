@@ -45,3 +45,12 @@ func _exit_state(_state_exited: int) -> void:
 
 func flipear_verticalmente() -> void:
 	animation_player.get_parent().scale.y *= -1
+
+func get_current_state() -> String:
+	for state_name in states.keys():
+		if states[state_name] == state:
+			return state_name
+	return ""
+
+func get_state(state_name: String) -> bool:
+	return state == states.get(state_name, -1)
