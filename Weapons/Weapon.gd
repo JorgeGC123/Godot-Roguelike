@@ -80,7 +80,7 @@ func is_busy() -> bool:
 
 
 func _on_PlayerDetector_body_entered(body: KinematicBody2D) -> void:
-	if body != null:
+	if body != null and body is Player:
 		player_detector.set_collision_mask_bit(0, false)
 		player_detector.set_collision_mask_bit(1, false)
 		body.pick_up_weapon(self)
