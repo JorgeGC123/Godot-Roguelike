@@ -8,7 +8,7 @@ onready var player: KinematicBody2D = get_tree().current_scene.get_node("Player"
 onready var path_timer: Timer = get_node("PathTimer")
 onready var raycast: RayCast2D = RayCast2D.new()
 
-export var detection_radius: int = 150
+export var detection_radius: int = 50
 export var obstacle_avoid_distance: float = 50.0
 export var avoid_force: float = 0.5
 export var path_follow_weight: float = 1

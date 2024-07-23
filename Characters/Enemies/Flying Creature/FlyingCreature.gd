@@ -14,15 +14,17 @@ const HEADBUTT_SPEED: float = 300.0
 
 func _on_PathTimer_timeout() -> void:
 	if is_instance_valid(player) and state_machine.get_current_state() != "dead":
+		aim_raycast.cast_to = player.position - global_position
+		aim_raycast.force_raycast_update()
 		distance_to_player = (player.position - global_position).length()
 		if distance_to_player > MAX_DISTANCE_TO_PLAYER and distance_to_player < detection_radius and state_machine.get_current_state() != "dead":
 			state_machine.set_state(state_machine.states.chase)
 			_get_path_to_player()
 		else:
 			if distance_to_player < detection_radius and distance_to_player < MAX_DISTANCE_TO_PLAYER:
-				state_machine.set_state(state_machine.states.attack)
-				aim_raycast.cast_to = player.position - global_position
-				if can_attack:
+				print(aim_raycast.is_colliding())
+				if can_attack and not aim_raycast.is_colliding():
+					state_machine.set_state(state_machine.states.attack)
 					can_attack = false
 					charge_particles.emitting = true
 					cast_timer.start()
@@ -36,6 +38,11 @@ func _on_PathTimer_timeout() -> void:
 					else:
 						_headbutt()
 						attack_timer.start()
+				else:
+					state_machine.set_state(state_machine.states.chase)
+					can_attack = true
+					_get_path_to_player()
+
 				
 	else:
 		path_timer.stop()
@@ -44,6 +51,7 @@ func _on_PathTimer_timeout() -> void:
 			
 
 func _process(_delta: float) -> void:
+	print(state_machine.get_current_state())
 	hitbox.knockback_direction = velocity.normalized()
 
 func _headbutt() -> void:
