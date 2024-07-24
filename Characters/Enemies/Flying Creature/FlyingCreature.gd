@@ -92,13 +92,13 @@ func _stop_movement() -> void:
 func _on_attack_timer_timeout() -> void:
 	if(state_machine.get_current_state() != "dead"):
 		can_attack = true
-		state_machine.set_state(state_machine.states.idle)
+		state_machine.set_state(state_machine.states.chase)
 		headbutt_hitbox.monitoring = false
 
 func _on_cast_timer_timeout() -> void:
 	if(state_machine.get_current_state() != "dead"):
 		charge_particles.emitting = false
-		if distance_to_player > MAX_DISTANCE_TO_PLAYER:
+		if distance_to_player > detection_radius:
 			state_machine.set_state(state_machine.states.idle)
 			can_attack = true
 		else:
