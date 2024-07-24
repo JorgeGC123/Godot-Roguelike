@@ -12,11 +12,16 @@ onready var health_bar: TextureProgress = get_node("HealthBar")
 onready var health_bar_tween: Tween = get_node("HealthBar/Tween")
 onready var stamina_bar: TextureProgress = get_node("StaminaBar")
 onready var stamina_bar_tween: Tween = get_node("StaminaBar/Tween")
-
+onready var portrait: Sprite = get_node("Sprite")
 onready var inventory: HBoxContainer = get_node("PanelContainer/Inventory")
 
 
 func _ready() -> void:
+	var current_skin = SavedData.skin
+	var base_path = "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/portrait_{0}/".format([current_skin])
+	var texture_path = base_path + "{0}.png".format([current_skin])
+	portrait.scale = Vector2(0.25,0.25)
+	portrait.texture = load(texture_path)
 	max_hp = player.max_hp
 	_update_health_bar(100)
 	max_stamina = player.max_stamina
