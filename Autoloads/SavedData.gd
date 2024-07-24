@@ -71,9 +71,10 @@ func load_data() -> void:
 
 func weapons_to_dict() -> Array:
 	var weapon_dicts = []
+	
 	for weapon in weapons:
 		weapon_dicts.append({
-			"name": weapon.name,
+			"name": weapon.name.rstrip("0123456789"),
 			#"damage": weapon.damage,
 			# Añade aquí otras propiedades relevantes de las armas
 		})
