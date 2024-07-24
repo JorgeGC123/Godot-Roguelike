@@ -206,3 +206,4 @@ position = Vector2( 34, 76 )
 
 [node name="FlyingCreature" parent="." index="20" instance=ExtResource( 11 )]
 position = Vector2( 209, 39 )
+detection_radius = 100

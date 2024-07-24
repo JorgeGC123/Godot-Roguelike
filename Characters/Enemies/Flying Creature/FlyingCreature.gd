@@ -44,8 +44,6 @@ func _on_PathTimer_timeout() -> void:
 		_start_chase()
 	elif _can_attack():
 		_prepare_attack()
-	else:
-		_start_chase()
 
 func _process(_delta: float) -> void:
 	hitbox.knockback_direction = velocity.normalized()
