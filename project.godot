@@ -113,6 +113,7 @@ enabled=PoolStringArray( "res://addons/dialogue_manager/plugin.cfg" )
 [global]
 
 debug=false
+resol=false
 
 [importer_defaults]
 

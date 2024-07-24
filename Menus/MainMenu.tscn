@@ -18,28 +18,28 @@ margin_right = 46.5
 margin_bottom = 34.0
 
 [node name="CreateCharacter" type="Button" parent="VBoxContainer"]
-margin_right = 117.0
+margin_right = 144.0
 margin_bottom = 20.0
 action_mode = 0
-text = "Create Character"
+text = "Customize Character"
 
 [node name="SinglePlayer" type="Button" parent="VBoxContainer"]
 margin_top = 24.0
-margin_right = 117.0
+margin_right = 144.0
 margin_bottom = 44.0
 action_mode = 0
 text = "Single Player"
 
 [node name="Multiplayer" type="Button" parent="VBoxContainer"]
 margin_top = 48.0
-margin_right = 117.0
+margin_right = 144.0
 margin_bottom = 68.0
 action_mode = 0
 text = "Multiplayer"
 
 [node name="Quit" type="Button" parent="VBoxContainer"]
 margin_top = 72.0
-margin_right = 117.0
+margin_right = 144.0
 margin_bottom = 92.0
 action_mode = 0
 text = "Quit"
