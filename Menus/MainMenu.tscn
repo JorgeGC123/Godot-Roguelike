@@ -17,26 +17,34 @@ margin_top = -34.0
 margin_right = 46.5
 margin_bottom = 34.0
 
-[node name="SinglePlayer" type="Button" parent="VBoxContainer"]
-margin_right = 93.0
+[node name="CreateCharacter" type="Button" parent="VBoxContainer"]
+margin_right = 117.0
 margin_bottom = 20.0
+action_mode = 0
+text = "Create Character"
+
+[node name="SinglePlayer" type="Button" parent="VBoxContainer"]
+margin_top = 24.0
+margin_right = 117.0
+margin_bottom = 44.0
 action_mode = 0
 text = "Single Player"
 
 [node name="Multiplayer" type="Button" parent="VBoxContainer"]
-margin_top = 24.0
-margin_right = 93.0
-margin_bottom = 44.0
+margin_top = 48.0
+margin_right = 117.0
+margin_bottom = 68.0
 action_mode = 0
 text = "Multiplayer"
 
 [node name="Quit" type="Button" parent="VBoxContainer"]
-margin_top = 48.0
-margin_right = 93.0
-margin_bottom = 68.0
+margin_top = 72.0
+margin_right = 117.0
+margin_bottom = 92.0
 action_mode = 0
 text = "Quit"
 
+[connection signal="pressed" from="VBoxContainer/CreateCharacter" to="." method="_on_CreateCharacter_pressed"]
 [connection signal="pressed" from="VBoxContainer/SinglePlayer" to="." method="_on_SinglePlayer_pressed"]
 [connection signal="pressed" from="VBoxContainer/Multiplayer" to="." method="_on_Multiplayer_pressed"]
 [connection signal="pressed" from="VBoxContainer/Quit" to="." method="_on_Quit_pressed"]

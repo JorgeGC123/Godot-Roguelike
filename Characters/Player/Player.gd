@@ -26,7 +26,7 @@ export var DASH_STAMINA = 30
 
 func _ready() -> void:
 	emit_signal("weapon_picked_up", weapons.get_child(0).get_texture())
-	
+	update_player_skin(SavedData.skin)
 	_restore_previous_state()
 	
 func _restore_previous_state() -> void:
@@ -242,3 +242,47 @@ func _throw_breakable() -> void:
 
 		held_breakable = null
 		print("breakable lanzado")
+
+
+func change_skin(new_skin: int):
+	SavedData.skin = new_skin
+	update_player_skin(new_skin)
+
+## Requiere este formato en los assets:
+# res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/skin_1/idle.png
+# res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/skin_1/move.png
+# res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/skin_1/roll.png
+# res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/skin_1/dead.png
+
+func update_player_skin(skin_number: int):
+	var current_skin = skin_number
+	var base_path = "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/skin_{0}/".format([current_skin])
+	
+	var new_spriteframes = SpriteFrames.new()
+	
+	for animation in ["idle", "move", "roll", "dead"]:  # Añade aquí todas tus animaciones
+		var texture_path = base_path + "{0}.png".format([animation])
+		var texture = load(texture_path)
+		
+		if texture:
+			var hframes = texture.get_width() / 16  # Asumiendo que cada frame es de 16x16
+			var vframes = texture.get_height() / 16
+			
+			new_spriteframes.add_animation(animation)
+			
+			for frame in range(hframes * vframes):
+				var atlas_texture = AtlasTexture.new()
+				atlas_texture.atlas = texture
+				var x = (frame % hframes) * 16
+				var y = (frame / hframes) * 16
+				atlas_texture.region = Rect2(x, y, 16, 16)
+				
+				new_spriteframes.add_frame(animation, atlas_texture)
+			
+			# Configurar la velocidad de la animación (ajusta según sea necesario)
+			new_spriteframes.set_animation_speed(animation, 5)  # 5 FPS por defecto
+		else:
+			print("Error: No se pudo cargar la textura para la animación ", animation)
+	
+	animated_sprite.frames = new_spriteframes
+	animated_sprite.play("idle")  # Reinicia la animación al estado inicial

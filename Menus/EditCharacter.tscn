@@ -1,0 +1,59 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/CharacterCreator/2.png" type="Texture" id=1]
+[ext_resource path="res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/CharacterCreator/1.png" type="Texture" id=2]
+[ext_resource path="res://Menus/EditCharacter.gd" type="Script" id=3]
+
+[node name="EditCharacter" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 3 )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.889
+anchor_right = 0.5
+anchor_bottom = 0.889
+margin_left = -43.0
+margin_top = -18.03
+margin_right = 46.0
+margin_bottom = 27.97
+
+[node name="Back" type="Button" parent="VBoxContainer"]
+margin_right = 89.0
+margin_bottom = 20.0
+action_mode = 0
+text = "Back"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.481
+anchor_right = 0.5
+anchor_bottom = 0.481
+margin_left = -49.0
+margin_top = -17.87
+margin_right = 44.0
+margin_bottom = 22.13
+
+[node name="Button" type="Button" parent="VBoxContainer2"]
+margin_right = 93.0
+margin_bottom = 20.0
+rect_pivot_offset = Vector2( -130, -62 )
+
+[node name="Sprite" type="Sprite" parent="VBoxContainer2/Button"]
+position = Vector2( 43, 10 )
+texture = ExtResource( 2 )
+
+[node name="Button2" type="Button" parent="VBoxContainer2"]
+margin_top = 24.0
+margin_right = 93.0
+margin_bottom = 44.0
+rect_pivot_offset = Vector2( -130, -62 )
+
+[node name="Sprite" type="Sprite" parent="VBoxContainer2/Button2"]
+position = Vector2( 44, 10 )
+texture = ExtResource( 1 )
+
+[connection signal="pressed" from="VBoxContainer/Back" to="." method="_on_Back_pressed"]
+[connection signal="pressed" from="VBoxContainer2/Button" to="." method="_on_Button_pressed"]
+[connection signal="pressed" from="VBoxContainer2/Button2" to="." method="_on_Button2_pressed"]

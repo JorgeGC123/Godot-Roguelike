@@ -6,6 +6,7 @@ var hp: int = 4
 var weapons: Array = []
 var items: Array = []
 var equipped_weapon_index: int = 0
+var skin: int = 1
 
 func reset_data() -> void:
 	num_floor = 0
