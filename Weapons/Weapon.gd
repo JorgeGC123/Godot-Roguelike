@@ -27,11 +27,9 @@ signal weapon_moved(scale_y,rotation,hitbox_knockback)
 
 func _ready() -> void:
 	var shape = hitbox.get_node("CollisionShape2D")
-	if on_floor:
-		shape.disabled = true
-	if not on_floor:
-		player_detector.set_collision_mask_bit(0, false)
-		player_detector.set_collision_mask_bit(1, false)
+	shape.disabled = true
+	player_detector.set_collision_mask_bit(0, false)
+	player_detector.set_collision_mask_bit(1, false)
 
 
 func get_input() -> void:
