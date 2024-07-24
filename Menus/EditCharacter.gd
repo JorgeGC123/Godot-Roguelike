@@ -18,8 +18,10 @@ func _ready():
 
 func _on_Button_pressed():
 	SavedData.skin = 1
+	SavedData.save_data()
 	SceneTransistor.start_transition_to("res://Menus/MainMenu.tscn")
 
 func _on_Button2_pressed():
 	SavedData.skin = 2
+	SavedData.save_data()
 	SceneTransistor.start_transition_to("res://Menus/MainMenu.tscn")

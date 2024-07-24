@@ -1,11 +1,10 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Rooms/Room.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Rooms/Furniture and Traps/Door.tscn" type="PackedScene" id=2]
 [ext_resource path="res://icon.png" type="Texture" id=3]
 [ext_resource path="res://Weapons/WarHammer.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Characters/Breakables/Breakable.tscn" type="PackedScene" id=5]
-[ext_resource path="res://Items/Lantern.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Rooms/Furniture and Traps/Stairs.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Characters/Breakables/Torch/CleanLight.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Characters/Breakables/Torch/BreakableTorch.tscn" type="PackedScene" id=9]
@@ -186,24 +185,20 @@ collision_layer = 5
 position = Vector2( 82, 75 )
 collision_layer = 5
 
-[node name="Lantern" parent="." index="15" instance=ExtResource( 6 )]
-visible = false
-position = Vector2( 155, 119 )
-
-[node name="Stairs" parent="." index="16" instance=ExtResource( 7 )]
+[node name="Stairs" parent="." index="15" instance=ExtResource( 7 )]
 position = Vector2( 55, 55 )
 
-[node name="BreakableTorch" parent="." index="17" instance=ExtResource( 9 )]
+[node name="BreakableTorch" parent="." index="16" instance=ExtResource( 9 )]
 position = Vector2( 47, 24 )
 scale = Vector2( 0.703125, 1 )
 
-[node name="BreakableTorch2" parent="." index="18" instance=ExtResource( 9 )]
+[node name="BreakableTorch2" parent="." index="17" instance=ExtResource( 9 )]
 position = Vector2( 158, 25 )
 scale = Vector2( 0.703125, 1 )
 
-[node name="Boy" parent="." index="19" instance=ExtResource( 10 )]
+[node name="Boy" parent="." index="18" instance=ExtResource( 10 )]
 position = Vector2( 34, 76 )
 
-[node name="FlyingCreature" parent="." index="20" instance=ExtResource( 11 )]
+[node name="FlyingCreature" parent="." index="19" instance=ExtResource( 11 )]
 position = Vector2( 209, 39 )
 detection_radius = 100

@@ -21,9 +21,13 @@ onready var random_room_generator = preload ("res://Rooms/RandomDungeonRoom/Rand
 onready var advanced_room_generator = preload ("res://Rooms/RandomDungeonRoom/AdvancedRoomGenerator.gd").new()
 
 func _ready() -> void:
+	if SavedData.num_floor == 0:
+		print("loadeo data")
+		SavedData.load_data()
 	SavedData.num_floor += 1
 	if SavedData.num_floor == 3:
 		num_levels = 3
+	SavedData.save_data()
 	_spawn_rooms()
 	
 func _spawn_rooms() -> void:
