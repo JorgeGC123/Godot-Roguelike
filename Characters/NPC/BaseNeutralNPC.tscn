@@ -67,9 +67,6 @@ tracks/2/keys = {
 } ]
 }
 
-[sub_resource type="CircleShape2D" id=10]
-radius = 9.0
-
 [sub_resource type="AtlasTexture" id=17]
 atlas = ExtResource( 4 )
 region = Rect2( 0, 0, 16, 16 )
@@ -111,6 +108,9 @@ animations = [ {
 "speed": 5.0
 } ]
 
+[sub_resource type="CircleShape2D" id=10]
+radius = 9.0
+
 [node name="BaseNeutralNPC" instance=ExtResource( 2 )]
 collision_layer = 4
 collision_mask = 4
@@ -129,8 +129,11 @@ shape = SubResource( 3 )
 anims/RESET = SubResource( 8 )
 anims/dead = SubResource( 9 )
 
-[node name="CollisionShape2D" parent="Area2D" index="0"]
-shape = SubResource( 10 )
+[node name="AnimatedSprite" parent="." index="4"]
+frames = SubResource( 2 )
+animation = "idle"
+frame = 1
+playing = true
 
 [node name="Tween" type="Tween" parent="." index="5"]
 
@@ -141,11 +144,8 @@ z_index = 5
 margin_right = 40.0
 margin_bottom = 14.0
 
-[node name="AnimatedSprite" parent="." index="7"]
-frames = SubResource( 2 )
-animation = "idle"
-frame = 1
-playing = true
+[node name="CollisionShape2D" parent="Area2D" index="0"]
+shape = SubResource( 10 )
 
 [node name="Hitbox" type="Area2D" parent="." index="8"]
 collision_layer = 0
