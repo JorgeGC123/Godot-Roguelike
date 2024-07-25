@@ -32,7 +32,7 @@ func add_item(item):
 		if items[i] == null:
 			items[i] = item
 			grid.get_child(i).initialize(item.get_texture())
-			SavedData.add_item(item)
+			#SavedData.add_item(item)
 			return true
 	return false
 
