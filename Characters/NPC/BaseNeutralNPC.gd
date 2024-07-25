@@ -39,7 +39,6 @@ func _ready():
 	patrol_behavior.adapt_state_machine(state_machine)
 
 func _process(_delta):
-	print(state_machine.state)
 	if !is_talking() and state_machine.state == state_machine.states.talking:
 		state_machine.set_state(state_machine.states.patrolling)
 
