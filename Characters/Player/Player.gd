@@ -160,6 +160,7 @@ func pick_up_weapon(weapon: Node2D) -> void:
 	current_weapon.cancel_attack()
 	current_weapon = weapon
 	current_weapon.player = self
+	inventory_instance.add_item(weapon)
 	emit_signal("weapon_picked_up", weapon.get_texture())
 	emit_signal("weapon_switched", prev_index, new_index)
 	
@@ -205,6 +206,7 @@ func _drop_weapon() -> void:
 	hitbox_instance.damage = 2 # El daño que quieres que haga
 	hitbox_instance.knockback_direction = throw_dir
 	hitbox_instance.knockback_force = force;
+	inventory_instance.remove_item(current_weapon.get_index())
 	weapon_to_drop.add_child(hitbox_instance)
 	weapon_to_drop.show()
 	weapon_to_drop.get_node("AnimationPlayer").play("throw")
