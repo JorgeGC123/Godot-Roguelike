@@ -20,7 +20,8 @@ var near_door: Node = null
 var near_npc: Node = null
 var held_breakable: Node = null 
 var breakableScene: Node2D = null
-
+var inventory_scene = preload("res://Inventory.tscn")
+var inventory_instance
 
 export var DASH_STAMINA = 30
 
@@ -28,6 +29,9 @@ func _ready() -> void:
 	emit_signal("weapon_picked_up", weapons.get_child(0).get_texture())
 	update_player_skin(SavedData.skin)
 	_restore_previous_state()
+	inventory_instance = inventory_scene.instance()
+	get_tree().root.add_child(inventory_instance)
+	inventory_instance.connect("inventory_closed", self, "_on_inventory_closed")
 	
 func _restore_previous_state() -> void:
 	self.hp = SavedData.hp
@@ -243,6 +247,21 @@ func _throw_breakable() -> void:
 		held_breakable = null
 		print("breakable lanzado")
 
+
+func _input(event):
+	if event.is_action_pressed("ui_inventory"):
+		toggle_inventory()
+
+func toggle_inventory():
+	print("Toggle inventory called")
+	if inventory_instance.control.visible:
+		inventory_instance.hide_inventory()
+	else:
+		inventory_instance.show_inventory()
+
+func _on_inventory_closed():
+	# Esta función se llamará cuando se cierre el inventario
+	pass
 
 func change_skin(new_skin: int):
 	SavedData.skin = new_skin

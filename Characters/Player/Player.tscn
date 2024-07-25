@@ -395,7 +395,6 @@ script = ExtResource( 7 )
 [node name="AnimatedSprite" parent="." index="8"]
 frames = SubResource( 17 )
 animation = "idle"
-frame = 5
 playing = true
 
 [connection signal="animation_started" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_started"]

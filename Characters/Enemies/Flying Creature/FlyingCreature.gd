@@ -65,8 +65,11 @@ func _on_HeadbuttHitbox_body_entered(body):
 
 func _update_distance_and_aim() -> void:
 	aim_raycast.cast_to = player.position - global_position
-	aim_raycast.force_raycast_update()
+	call_deferred("_deferred_raycast_update")
 	distance_to_player = (player.position - global_position).length()
+
+func _deferred_raycast_update() -> void:
+	aim_raycast.force_raycast_update()
 
 func _should_chase() -> bool:
 	return distance_to_player > MAX_DISTANCE_TO_PLAYER and distance_to_player < detection_radius

@@ -248,6 +248,9 @@ anims/dead = SubResource( 12 )
 anims/fly = SubResource( 13 )
 anims/hurt = SubResource( 14 )
 
+[node name="PathTimer" parent="." index="6"]
+process_mode = 0
+
 [node name="AnimatedSprite" parent="." index="7"]
 frames = SubResource( 9 )
 animation = "default"

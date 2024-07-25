@@ -26,6 +26,11 @@ func add_item(item) -> void:
 		items.append(item)
 		save_data()
 
+func remove_item(item) -> void:
+	if items.has(item):
+		items.erase(item)
+		save_data()
+
 func save_data() -> void:
 	var save_dict = {
 		"num_floor": num_floor,
