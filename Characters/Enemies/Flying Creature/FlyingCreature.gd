@@ -54,7 +54,8 @@ func _headbutt() -> void:
 	var direction_to_player = (player.position - global_position).normalized()
 	velocity = direction_to_player * HEADBUTT_SPEED * 2
 	knockback_direction = direction_to_player
-	headbutt_hitbox.monitoring = true # Activar la hitbox del headbutt
+	if is_instance_valid(headbutt_hitbox):
+		headbutt_hitbox.monitoring = true # Activar la hitbox del headbutt
 	attack_timer.start()
 
 func _on_HeadbuttHitbox_body_entered(body):
@@ -96,7 +97,8 @@ func _on_attack_timer_timeout() -> void:
 	if(state_machine.get_current_state() != "dead"):
 		can_attack = true
 		state_machine.set_state(state_machine.states.chase)
-		headbutt_hitbox.monitoring = false
+		if is_instance_valid(headbutt_hitbox):
+			headbutt_hitbox.monitoring = false
 
 func _on_cast_timer_timeout() -> void:
 	if(state_machine.get_current_state() != "dead"):

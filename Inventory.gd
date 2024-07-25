@@ -23,7 +23,7 @@ func initialize_inventory():
 		items.append(null)
 
 func load_items():
-	var saved_items = SavedData.items
+	var saved_items = SavedData.weapons
 	for i in range(min(saved_items.size(), MAX_SLOTS)):
 		add_item(saved_items[i])
 
