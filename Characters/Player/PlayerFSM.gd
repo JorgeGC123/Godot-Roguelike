@@ -6,6 +6,7 @@ func _init() -> void:
 	_add_state("move")
 	_add_state("hurt")
 	_add_state("dead")
+	_add_state("inventory_open")
 	
 	
 func _ready() -> void:
@@ -43,4 +44,7 @@ func _enter_state(_previous_state: int, new_state: int) -> void:
 			parent.cancel_attack()
 		states.dead:
 			animation_player.play("dead")
+			parent.cancel_attack()
+		states.inventory_open:
+			animation_player.play("idle")
 			parent.cancel_attack()

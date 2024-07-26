@@ -258,7 +258,9 @@ func toggle_inventory():
 	print("Toggle inventory called")
 	if inventory_instance.control.visible:
 		inventory_instance.hide_inventory()
+		state_machine.set_state(state_machine.states.idle)
 	else:
+		state_machine.set_state(state_machine.states.inventory_open)
 		inventory_instance.show_inventory()
 
 func _on_inventory_closed():
@@ -300,7 +302,7 @@ func update_player_skin(skin_number: int):
 				
 				new_spriteframes.add_frame(animation, atlas_texture)
 			
-			# Configurar la velocidad de la animación (ajusta según sea necesario)
+			# Configurar la velocidad de la animación
 			new_spriteframes.set_animation_speed(animation, 5)  # 5 FPS por defecto
 		else:
 			print("Error: No se pudo cargar la textura para la animación ", animation)
