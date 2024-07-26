@@ -151,7 +151,7 @@ func _on_get_transition():
 	return - 1
 
 func _on_enter_state(previous_state, new_state):
-	if new_state == state_machine.states.dead:
+	if new_state == state_machine.states.dead or new_state == state_machine.states.talking:
 		patrol_timer.stop()
 		idle_timer.stop()
 		parent.velocity = Vector2.ZERO

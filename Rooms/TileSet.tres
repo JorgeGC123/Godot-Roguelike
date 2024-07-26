@@ -12,7 +12,7 @@ points = PoolVector2Array( 0, 9.59471, 16, 9.78853, 16, 16, 0, 16 )
 polygon = PoolVector2Array( 0, 10.284, 16, 10.4778, 16, 16, 0, 16 )
 
 [sub_resource type="ConvexPolygonShape2D" id=4]
-points = PoolVector2Array( 0, 10.6716, 16, 9.89638, 16, 16, 0, 16 )
+points = PoolVector2Array( 0, 5.63263, 15.4908, 5.63263, 16, 16, 0, 16 )
 
 [sub_resource type="OccluderPolygon2D" id=5]
 polygon = PoolVector2Array( 0, 10.0902, 15.6684, 10.0902, 16, 16, 0, 16 )
@@ -77,7 +77,7 @@ points = PoolVector2Array( 0, 0, 16, 0, 16, 16, 0, 16 )
 polygon = PoolVector2Array( 0, 0, 3.2429, 0, 3.63052, 16, 0, 16 )
 
 [sub_resource type="ConvexPolygonShape2D" id=23]
-points = PoolVector2Array( 0, 0, 4.32822, 0, 4.56078, 16, 0, 16 )
+points = PoolVector2Array( 0, 0, 10.0959, 0, 10.0959, 16, 0, 16 )
 
 [sub_resource type="OccluderPolygon2D" id=24]
 polygon = PoolVector2Array( 3.45861, 11.7063, 5.00906, 13.4506, 10.2418, 13.6444, 11.9861, 10.9311, 12.1799, 5.31073, 9.66042, 7.63641, 5.20287, 7.24879, 2.87719, 5.11692 )
@@ -96,7 +96,7 @@ polygons = [ PoolIntArray( 0, 1, 2, 3 ) ]
 polygon = PoolVector2Array( 12.244, 0, 16, 0, 16, 16, 12.0502, 16 )
 
 [sub_resource type="ConvexPolygonShape2D" id=29]
-points = PoolVector2Array( 12.5153, 0, 16, 0, 16, 16, 11.8176, 16 )
+points = PoolVector2Array( 6.09642, 0.0509949, 16, 0, 16, 16, 5.81734, 16 )
 
 [sub_resource type="NavigationPolygon" id=30]
 vertices = PoolVector2Array( 0, 0, 16, 0, 16, 7.52855, 0, 6.94713 )
@@ -106,13 +106,13 @@ polygons = [ PoolIntArray( 0, 1, 2, 3 ) ]
 polygon = PoolVector2Array( 0, 0, 3.43671, 0, 3.82433, 16, 0, 16 )
 
 [sub_resource type="ConvexPolygonShape2D" id=32]
-points = PoolVector2Array( 0, 0, 4.32822, 0, 4.56078, 16, 0, 16 )
+points = PoolVector2Array( 0, 0, 9.81683, 0, 9.81683, 16, 0, 16 )
 
 [sub_resource type="OccluderPolygon2D" id=33]
 polygon = PoolVector2Array( 12.4378, 0, 16, 0, 16, 16, 12.4378, 16 )
 
 [sub_resource type="ConvexPolygonShape2D" id=34]
-points = PoolVector2Array( 12.0501, 0, 16, 0, 16, 16, 12.0501, 16 )
+points = PoolVector2Array( 5.81734, 0.422424, 16, 0, 16, 16, 5.53825, 16 )
 
 [sub_resource type="OccluderPolygon2D" id=35]
 polygon = PoolVector2Array( 13.0192, 8.94925, 16, 8.75544, 16, 16, 12.8254, 16 )
@@ -124,7 +124,7 @@ polygon = PoolVector2Array( 0, 9.33686, 3.04909, 9.53067, 2.85529, 16, 0, 16 )
 polygon = PoolVector2Array( 0, 10.284, 16, 10.0902, 16, 16, 0, 16 )
 
 [sub_resource type="ConvexPolygonShape2D" id=38]
-points = PoolVector2Array( 0, 11.6406, 16, 11.8344, 16, 16, 0, 16 )
+points = PoolVector2Array( 0, 7.30711, 15.7719, 7.02805, 16, 16, 0, 16 )
 
 [resource]
 1/name = "full tilemap.png 1"
