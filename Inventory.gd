@@ -8,7 +8,7 @@ const MAX_SLOTS = 25
 var items = []
 
 onready var control: Control = $Control
-onready var grid: GridContainer = $Control/CenterContainer/Panel/VBoxContainer/GridContainer
+onready var grid: GridContainer = $Control/CenterContainer/Panel/VBoxContainer/InventoryGrid
 
 func _ready():
 	initialize_inventory()

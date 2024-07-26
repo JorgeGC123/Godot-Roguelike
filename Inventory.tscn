@@ -38,7 +38,7 @@ margin_bottom = 14.0
 text = "Inventario"
 align = 1
 
-[node name="GridContainer" type="GridContainer" parent="Control/CenterContainer/Panel/VBoxContainer"]
+[node name="InventoryGrid" type="GridContainer" parent="Control/CenterContainer/Panel/VBoxContainer"]
 margin_top = 18.0
 margin_right = 380.0
 margin_bottom = 246.0
