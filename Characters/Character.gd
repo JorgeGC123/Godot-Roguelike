@@ -6,10 +6,10 @@ const BLOOD_EFFECT_SCENE: PackedScene = preload ("res://Characters/BloodSplash.t
 
 const FRICTION: float = 0.15
 export(int) var has_blood: bool = true
-export(int) var max_hp: int = 2
+export(int) var max_hp: int = 2 setget set_max_hp
 export(int) var max_stamina: int = 100
 export(int) var stamina: int = 100 setget set_stamina
-export(int) var hp: int = 2 setget set_hp
+export(int) var hp: int = 2 setget set_hp, get_hp
 signal hp_changed(new_hp)
 signal stamina_changed(new_stamina)
 onready var stamina_timer: Timer = Timer.new()
@@ -35,18 +35,20 @@ signal position_changed(new_pos)
 signal flip_h_changed(flip_h)
 signal animation_changed(anim_name)
 
-func _ready():
+func _ready() -> void:
 	is_interpolating = false
 	collision_area.connect("body_entered", self, "_on_CollisionArea_body_entered")
-	add_child(stamina_timer)
-	stamina_timer.wait_time = stamina_recovery_interval
-	stamina_timer.one_shot = false
-	stamina_timer.connect("timeout", self, "_on_StaminaTimer_timeout")
+	_setup_stamina_timers()
 
-	add_child(stamina_delay_timer)
-	stamina_delay_timer.wait_time = stamina_recovery_delay
-	stamina_delay_timer.one_shot = true
-	stamina_delay_timer.connect("timeout", self, "_on_StaminaDelayTimer_timeout")
+func _setup_stamina_timers() -> void:
+	_setup_timer(stamina_timer, stamina_recovery_interval, false, "_on_StaminaTimer_timeout")
+	_setup_timer(stamina_delay_timer, stamina_recovery_delay, true, "_on_StaminaDelayTimer_timeout")
+
+func _setup_timer(timer: Timer, wait_time: float, one_shot: bool, callback: String) -> void:
+	add_child(timer)
+	timer.wait_time = wait_time
+	timer.one_shot = one_shot
+	timer.connect("timeout", self, callback)
 
 func initialize(id: int, name: String, character_index: int):
 	self.name = str(id)
@@ -97,6 +99,13 @@ func set_hp(new_hp: int) -> void:
 	hp = clamp(new_hp, 0, max_hp)
 	emit_signal("hp_changed", hp)
 
+func get_hp() -> int:
+	return hp
+
+func set_max_hp(value: int) -> void:
+	max_hp = max(1, value)
+	self.hp = min(hp, max_hp)
+	
 func set_stamina(new_stamina: int) -> void:
 	stamina = clamp(new_stamina, 0, max_stamina)
 	emit_signal("stamina_changed", stamina)
