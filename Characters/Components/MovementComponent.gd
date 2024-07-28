@@ -1,10 +1,12 @@
 class_name MovementComponent
 extends Component
 
-export var speed: float = 50.0
+export var default_speed: float = 20.0
+var speed: float = default_speed
 export var acceleration: float = 100.0
 export var friction: float = 100.0
 var velocity: Vector2 = Vector2.ZERO
+var multiplier: float = 1
 
 const PRIORITY_LOW = 0
 const PRIORITY_MEDIUM = 1
@@ -18,7 +20,7 @@ func _init(entity: Node).(entity):
 func update(delta: float) -> void:
 	apply_friction(delta)
 	apply_forces(delta)
-	velocity = velocity.clamped(speed)
+	velocity = velocity.clamped(speed) * multiplier
 	entity.move_and_slide(velocity)
 	clear_forces()
 
@@ -47,6 +49,7 @@ func clear_forces() -> void:
 func stop() -> void:
 	velocity = Vector2.ZERO
 	clear_forces()
+	speed = default_speed  # Reset speed to default when stopping
 
 func chase(target: Node2D) -> void:
 	if is_instance_valid(target):

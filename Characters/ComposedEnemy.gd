@@ -11,6 +11,7 @@ func _ready():
 	add_component("combat", CombatComponent.new(self))
 	add_component("obstacle_avoidance", ObstacleAvoidanceComponent.new(self))
 	add_component("fsm", EnemyFSMComponent.new(self))
+	add_component("headbutt", HeadbuttAttackComponent.new(self))
 
 	var hitbox_component = HitboxComponent.new(self)
 	hitbox_component.damage = 1
