@@ -11,8 +11,18 @@ func _ready():
 	add_component("detection", DetectionComponent.new(self))
 	add_component("combat", CombatComponent.new(self))
 	add_component("obstacle_avoidance", ObstacleAvoidanceComponent.new(self))
-	
+
+	var hitbox_component = HitboxComponent.new(self)
+	hitbox_component.damage = 1
+	hitbox_component.knockback_force = 100
+	hitbox_component.collision_layer = 1
+	hitbox_component.collision_mask = 1
+	hitbox_component.shape = CircleShape2D.new()
+	hitbox_component.shape.radius = 12.0
+	add_component("hitbox", hitbox_component)
+
 	var health_component = get_component("health")
+	health_component.max_health = 2
 	health_component.connect("health_changed", self, "_on_health_changed")
 	health_component.connect("damaged", self, "_on_damaged")
 	health_component.connect("died", self, "_on_died")
