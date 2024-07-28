@@ -13,3 +13,7 @@ func initialize():
 func update(delta: float):
     # Método para actualizar el componente cada frame
     pass
+
+func receive_message(message: String, data: Dictionary):
+    # Los componentes individuales pueden sobrescribir este método
+    pass

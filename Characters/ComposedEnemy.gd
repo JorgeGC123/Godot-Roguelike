@@ -1,7 +1,6 @@
 class_name ComposedEnemy
-extends KinematicBody2D
+extends Entity
 
-var components: Dictionary = {}
 var is_stunned: bool = false
 
 func _ready():
@@ -11,6 +10,7 @@ func _ready():
 	add_component("detection", DetectionComponent.new(self))
 	add_component("combat", CombatComponent.new(self))
 	add_component("obstacle_avoidance", ObstacleAvoidanceComponent.new(self))
+	add_component("fsm", EnemyFSMComponent.new(self))
 
 	var hitbox_component = HitboxComponent.new(self)
 	hitbox_component.damage = 1
@@ -30,6 +30,8 @@ func _ready():
 	health_component.connect("stun_ended", self, "_on_stun_ended")
 
 func _physics_process(delta: float):
+	var fsm = get_component("fsm")
+	print(fsm.get_current_state())
 	if not is_stunned:
 		for component_name in components:
 			components[component_name].update(delta)

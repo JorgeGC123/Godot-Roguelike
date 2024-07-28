@@ -34,7 +34,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/Components/Component.gd"
 }, {
-"base": "KinematicBody2D",
+"base": "Entity",
 "class": "ComposedEnemy",
 "language": "GDScript",
 "path": "res://Characters/ComposedEnemy.gd"
@@ -59,10 +59,20 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/Enemies/Enemy.gd"
 }, {
+"base": "FSMComponent",
+"class": "EnemyFSMComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/FSM/EnemyFSMComponent.gd"
+}, {
 "base": "KinematicBody2D",
 "class": "Entity",
 "language": "GDScript",
 "path": "res://Characters/Components/Entity.gd"
+}, {
+"base": "Component",
+"class": "FSMComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/FSM/FSMComponent.gd"
 }, {
 "base": "Node",
 "class": "FiniteStateMachine",
@@ -130,7 +140,9 @@ _global_script_class_icons={
 "DialogueResource": "",
 "DungeonRoom": "",
 "Enemy": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/enemies/goblin/goblin_idle_anim_f0.png",
+"EnemyFSMComponent": "",
 "Entity": "",
+"FSMComponent": "",
 "FiniteStateMachine": "",
 "HealthComponent": "",
 "Hitbox": "",

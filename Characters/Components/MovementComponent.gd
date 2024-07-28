@@ -4,12 +4,13 @@ extends Component
 export var speed: float = 50.0
 export var acceleration: float = 100.0
 export var friction: float = 100.0
-var velocity: Vector2 = Vector2.ZERO setget ,get_velocity
-var forces: Dictionary = {}
+var velocity: Vector2 = Vector2.ZERO
 
 const PRIORITY_LOW = 0
 const PRIORITY_MEDIUM = 1
 const PRIORITY_HIGH = 2
+
+var forces: Dictionary = {}
 
 func _init(entity: Node).(entity):
 	pass
@@ -42,6 +43,15 @@ func apply_forces(delta: float) -> void:
 
 func clear_forces() -> void:
 	forces.clear()
+
+func stop() -> void:
+	velocity = Vector2.ZERO
+	clear_forces()
+
+func chase(target: Node2D) -> void:
+	if is_instance_valid(target):
+		var direction = (target.global_position - entity.global_position).normalized()
+		set_movement_direction(direction)
 
 func get_velocity() -> Vector2:
 	return velocity
