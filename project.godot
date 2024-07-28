@@ -9,6 +9,11 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Component",
+"class": "AIComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/AIComponent.gd"
+}, {
 "base": "Character",
 "class": "Breakable",
 "language": "GDScript",
@@ -18,6 +23,26 @@ _global_script_classes=[ {
 "class": "Character",
 "language": "GDScript",
 "path": "res://Characters/Character.gd"
+}, {
+"base": "Component",
+"class": "CombatComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/CombatComponent.gd"
+}, {
+"base": "Node",
+"class": "Component",
+"language": "GDScript",
+"path": "res://Characters/Components/Component.gd"
+}, {
+"base": "KinematicBody2D",
+"class": "ComposedEnemy",
+"language": "GDScript",
+"path": "res://Characters/ComposedEnemy.gd"
+}, {
+"base": "Component",
+"class": "DetectionComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/DetectionComponent.gd"
 }, {
 "base": "Resource",
 "class": "DialogueResource",
@@ -34,10 +59,20 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/Enemies/Enemy.gd"
 }, {
+"base": "KinematicBody2D",
+"class": "Entity",
+"language": "GDScript",
+"path": "res://Characters/Components/Entity.gd"
+}, {
 "base": "Node",
 "class": "FiniteStateMachine",
 "language": "GDScript",
 "path": "res://Characters/FSM.gd"
+}, {
+"base": "Component",
+"class": "HealthComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/HealthComponent.gd"
 }, {
 "base": "Area2D",
 "class": "Hitbox",
@@ -48,6 +83,16 @@ _global_script_classes=[ {
 "class": "Lantern",
 "language": "GDScript",
 "path": "res://Items/Lantern.gd"
+}, {
+"base": "Component",
+"class": "MovementComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/MovementComponent.gd"
+}, {
+"base": "Component",
+"class": "ObstacleAvoidanceComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/ObstacleAvoidanceComponent.gd"
 }, {
 "base": "Node2D",
 "class": "PatrolBehavior",
@@ -70,14 +115,23 @@ _global_script_classes=[ {
 "path": "res://Weapons/Weapon.gd"
 } ]
 _global_script_class_icons={
+"AIComponent": "",
 "Breakable": "",
 "Character": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/knight_idle_anim_f0.png",
+"CombatComponent": "",
+"Component": "",
+"ComposedEnemy": "",
+"DetectionComponent": "",
 "DialogueResource": "",
 "DungeonRoom": "",
 "Enemy": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/enemies/goblin/goblin_idle_anim_f0.png",
+"Entity": "",
 "FiniteStateMachine": "",
+"HealthComponent": "",
 "Hitbox": "",
 "Lantern": "",
+"MovementComponent": "",
+"ObstacleAvoidanceComponent": "",
 "PatrolBehavior": "",
 "Player": "",
 "PlayerDash": "",
