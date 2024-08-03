@@ -27,6 +27,9 @@ func _ready():
 	hitbox_component.set_deferred("monitoring", true)
 	hitbox_component.initialize()
 
+	var hurtbox_component = HurtboxComponent.new(self)
+	add_component("hurtbox", hurtbox_component)
+
 	var health_component = get_component("health")
 	health_component.max_health = 2
 	health_component.connect("health_changed", self, "_on_health_changed")
