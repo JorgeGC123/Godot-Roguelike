@@ -54,3 +54,8 @@ func set_health(value: int):
 
 func get_health() -> int:
     return current_health
+
+func set_max_health(value: int):
+    max_health = value
+    current_health = min(current_health, max_health)
+    emit_signal("health_changed", current_health)

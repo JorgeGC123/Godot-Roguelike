@@ -12,15 +12,20 @@ func _ready():
 	add_component("obstacle_avoidance", ObstacleAvoidanceComponent.new(self))
 	add_component("fsm", EnemyFSMComponent.new(self))
 	add_component("headbutt", HeadbuttAttackComponent.new(self))
+	add_component("blood_splash", BloodSplashComponent.new(self))
 
 	var hitbox_component = HitboxComponent.new(self)
+	add_component("hitbox", hitbox_component)
 	hitbox_component.damage = 1
 	hitbox_component.knockback_force = 100
 	hitbox_component.collision_layer = 1
 	hitbox_component.collision_mask = 1
 	hitbox_component.shape = CircleShape2D.new()
 	hitbox_component.shape.radius = 12.0
-	add_component("hitbox", hitbox_component)
+	yield(get_tree(), "idle_frame")
+	hitbox_component.set_deferred("monitorable", true)
+	hitbox_component.set_deferred("monitoring", true)
+	hitbox_component.initialize()
 
 	var health_component = get_component("health")
 	health_component.max_health = 2
@@ -29,10 +34,9 @@ func _ready():
 	health_component.connect("died", self, "_on_died")
 	health_component.connect("stun_started", self, "_on_stun_started")
 	health_component.connect("stun_ended", self, "_on_stun_ended")
+	health_component.initialize()
 
 func _physics_process(delta: float):
-	var fsm = get_component("fsm")
-	print(fsm.get_current_state())
 	if not is_stunned:
 		for component_name in components:
 			components[component_name].update(delta)
@@ -49,10 +53,14 @@ func get_component(component_name: String) -> Component:
 	return components.get(component_name)
 
 func take_damage(amount: int, direction: Vector2 = Vector2.ZERO, force: float = 0):
-	print("ComposedEnemy take_damage called")
+	print("ComposedEnemy take_damage called with amount: ", amount, ", direction: ", direction, ", force: ", force)
+	print("Stack trace: ", get_stack())
 	var health_component = get_component("health")
 	if health_component:
 		health_component.take_damage(amount, direction, force)
+		var bloodsplash_component = get_component("blood_splash")
+		if bloodsplash_component:
+			bloodsplash_component.spawn_blood_splash(global_position,direction)
 
 func _on_health_changed(new_health: int):
 	print("Enemy health changed to: ", new_health)

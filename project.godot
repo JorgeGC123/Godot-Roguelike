@@ -14,6 +14,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/Components/AIComponent.gd"
 }, {
+"base": "Component",
+"class": "BloodSplashComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/Tools/BloodSplashComponent.gd"
+}, {
 "base": "Character",
 "class": "Breakable",
 "language": "GDScript",
@@ -136,6 +141,7 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "AIComponent": "",
+"BloodSplashComponent": "",
 "Breakable": "",
 "Character": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/knight_idle_anim_f0.png",
 "CombatComponent": "",

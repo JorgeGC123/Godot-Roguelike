@@ -29,7 +29,9 @@ func initialize():
 	entity.add_child(hitbox_area)
 
 func _on_body_entered(body):
-	if body.has_method("take_damage"):
+	print(body)
+	print(entity)
+	if body.has_method("take_damage") and body != entity:
 		print("le endiño")
 		var direction = (body.global_position - entity.global_position).normalized()
 		body.take_damage(damage, direction, knockback_force)

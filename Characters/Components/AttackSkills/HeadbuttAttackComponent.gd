@@ -40,7 +40,7 @@ func initialize():
 
 	hitbox = Area2D.new()
 	hitbox.collision_layer = 1
-	hitbox.collision_mask = 2
+	hitbox.collision_mask = 1
 	var collision_shape = CollisionShape2D.new()
 	var shape = CircleShape2D.new()
 	shape.radius = 8
@@ -48,7 +48,7 @@ func initialize():
 	hitbox.add_child(collision_shape)
 	hitbox.connect("body_entered", self, "_on_Hitbox_body_entered")
 	entity.add_child(hitbox)
-	hitbox.set_deferred("monitoring", false)
+	hitbox.set_deferred("monitoring", true)
 
 	aim_raycast = RayCast2D.new()
 	aim_raycast.enabled = true
