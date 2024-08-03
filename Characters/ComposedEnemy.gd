@@ -13,6 +13,7 @@ func _ready():
 	add_component("fsm", EnemyFSMComponent.new(self))
 	add_component("headbutt", HeadbuttAttackComponent.new(self))
 	add_component("blood_splash", BloodSplashComponent.new(self))
+	add_component("animation", AnimationComponent.new(self))
 
 	var hitbox_component = HitboxComponent.new(self)
 	add_component("hitbox", hitbox_component)
@@ -38,6 +39,9 @@ func _ready():
 	health_component.connect("stun_started", self, "_on_stun_started")
 	health_component.connect("stun_ended", self, "_on_stun_ended")
 	health_component.initialize()
+
+	var fsm_component = get_component("fsm")
+	fsm_component.connect("state_changed", self, "_on_state_changed")
 
 func _physics_process(delta: float):
 	if not is_stunned:
@@ -88,3 +92,6 @@ func _on_HitboxArea_body_entered(body):
 		var combat_component = get_component("combat")
 		if combat_component:
 			combat_component.attack(body)
+
+func _on_state_changed(previous_state, new_state):
+	send_message("state_changed", {"previous_state": previous_state, "new_state": new_state})
