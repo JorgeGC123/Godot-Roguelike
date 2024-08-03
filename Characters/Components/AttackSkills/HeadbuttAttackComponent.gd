@@ -48,7 +48,7 @@ func initialize():
 	hitbox.add_child(collision_shape)
 	hitbox.connect("body_entered", self, "_on_Hitbox_body_entered")
 	entity.add_child(hitbox)
-	hitbox.set_deferred("monitoring", true)
+	hitbox.set_deferred("monitoring", false)
 
 	aim_raycast = RayCast2D.new()
 	aim_raycast.enabled = true

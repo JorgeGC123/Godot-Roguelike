@@ -2,6 +2,9 @@ class_name ComposedEnemy
 extends Entity
 
 var is_stunned: bool = false
+export var attack_range: float = 20.0
+export var BASIC_ATTACK_STAMINA: int = 5
+var stamina: int = 100
 
 func _ready():
 	add_component("health", HealthComponent.new(self))
@@ -15,18 +18,25 @@ func _ready():
 	add_component("blood_splash", BloodSplashComponent.new(self))
 	add_component("animation", AnimationComponent.new(self))
 
-	var hitbox_component = HitboxComponent.new(self)
-	add_component("hitbox", hitbox_component)
-	hitbox_component.damage = 1
-	hitbox_component.knockback_force = 100
-	hitbox_component.collision_layer = 1
-	hitbox_component.collision_mask = 1
-	hitbox_component.shape = CircleShape2D.new()
-	hitbox_component.shape.radius = 12.0
-	yield(get_tree(), "idle_frame")
-	hitbox_component.set_deferred("monitorable", true)
-	hitbox_component.set_deferred("monitoring", true)
-	hitbox_component.initialize()
+	yield(get_tree().create_timer(0.1), "timeout")
+	var weapon_scene = preload("res://Weapons/Sword.tscn")
+	var weapon_component = WeaponComponent.new(self, weapon_scene)
+	add_component("weapon", weapon_component)
+	weapon_component.initialize()
+
+	# esto sería la hitbox tradicional de colisiono y boom me hace daño
+	# var hitbox_component = HitboxComponent.new(self)
+	# add_component("hitbox", hitbox_component)
+	# hitbox_component.damage = 1
+	# hitbox_component.knockback_force = 100
+	# hitbox_component.collision_layer = 1
+	# hitbox_component.collision_mask = 1
+	# hitbox_component.shape = CircleShape2D.new()
+	# hitbox_component.shape.radius = 12.0
+	# yield(get_tree(), "idle_frame")
+	# hitbox_component.set_deferred("monitorable", true)
+	# hitbox_component.set_deferred("monitoring", true)
+	# hitbox_component.initialize()
 
 	var hurtbox_component = HurtboxComponent.new(self)
 	add_component("hurtbox", hurtbox_component)
@@ -38,10 +48,13 @@ func _ready():
 	health_component.connect("died", self, "_on_died")
 	health_component.connect("stun_started", self, "_on_stun_started")
 	health_component.connect("stun_ended", self, "_on_stun_ended")
-	health_component.initialize()
+	#health_component.initialize()
 
 	var fsm_component = get_component("fsm")
 	fsm_component.connect("state_changed", self, "_on_state_changed")
+
+	for component in components.values():
+		component.initialize()
 
 func _physics_process(delta: float):
 	if not is_stunned:
@@ -95,3 +108,6 @@ func _on_HitboxArea_body_entered(body):
 
 func _on_state_changed(previous_state, new_state):
 	send_message("state_changed", {"previous_state": previous_state, "new_state": new_state})
+
+func reduce_stamina(amount: int):
+	stamina = max(0, stamina - amount)

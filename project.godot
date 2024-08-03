@@ -148,6 +148,11 @@ _global_script_classes=[ {
 "class": "Weapon",
 "language": "GDScript",
 "path": "res://Weapons/Weapon.gd"
+}, {
+"base": "Component",
+"class": "WeaponComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/WeaponComponent.gd"
 } ]
 _global_script_class_icons={
 "AIComponent": "",
@@ -177,7 +182,8 @@ _global_script_class_icons={
 "PatrolBehavior": "",
 "Player": "",
 "PlayerDash": "",
-"Weapon": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/weapon_sword_1.png"
+"Weapon": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/weapon_sword_1.png",
+"WeaponComponent": ""
 }
 
 [application]

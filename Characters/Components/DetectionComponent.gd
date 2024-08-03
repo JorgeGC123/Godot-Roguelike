@@ -1,7 +1,7 @@
 class_name DetectionComponent
 extends Component
 
-export var detection_radius: float = 100.0
+export var detection_radius: float = 75.0
 
 var player: KinematicBody2D
 var is_player_detected: bool = false

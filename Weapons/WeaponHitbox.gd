@@ -1,4 +1,5 @@
 extends Hitbox
+class_name WeaponHitbox
 
 
 func _on_Hitbox_area_entered(area: Area2D) -> void:
