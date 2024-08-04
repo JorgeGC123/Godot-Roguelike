@@ -12,6 +12,9 @@ var initial_position: Vector2 = Vector2.ZERO
 var parent: Character
 var state_machine: FiniteStateMachine
 var navigation: Navigation2D
+var checking_point: Vector2
+var is_checking = false
+var check_result = false
 
 var patrol_timer: Timer
 var idle_timer: Timer
@@ -20,6 +23,10 @@ var raycast: RayCast2D
 
 func _ready():
 	call_deferred("_setup")
+
+func _physics_process(delta):
+	if is_checking:
+		perform_raycast_check()
 
 func _setup():
 	parent = get_parent()
@@ -90,33 +97,45 @@ func set_new_patrol_target():
 	var valid_target_found = false
 
 	while attempts < max_attempts and not valid_target_found:
-		var random_offset = Vector2(rand_range( - patrol_radius, patrol_radius), rand_range( - patrol_radius, patrol_radius))
+		var random_offset = Vector2(rand_range(-patrol_radius, patrol_radius), rand_range(-patrol_radius, patrol_radius))
 		var potential_target = initial_position + random_offset
 		var path = navigation.get_simple_path(parent.global_position, potential_target)
 		
-		if path.size() > 0 and is_point_in_open_space(potential_target):
-			patrol_target = potential_target
-			valid_target_found = true
+		if path.size() > 0:
+			valid_target_found = yield(is_point_in_open_space(potential_target), "completed")
+			if valid_target_found:
+				patrol_target = potential_target
 		
 		attempts += 1
 
 	if valid_target_found:
 		state_machine.set_state(state_machine.states.patrolling)
 	else:
-		# Si no se encuentra un punto válido, quédate en el lugar actual
 		start_idle()
 
 func is_point_in_open_space(point: Vector2) -> bool:
-	for i in range(8): # Comprueba en 8 direcciones
+	checking_point = point
+	is_checking = true
+	check_result = false
+	yield(get_tree().create_timer(0.1), "timeout")  # Espera un breve momento
+	while is_checking:
+		yield(get_tree(), "idle_frame")
+	return check_result
+
+func perform_raycast_check():
+	for i in range(8):  # Comprueba en 8 direcciones
 		var angle = i * PI / 4
-		raycast.global_position = point
-		raycast.rotation = angle
-		raycast.force_raycast_update()
+		raycast.global_position = checking_point
+		raycast.cast_to = Vector2.RIGHT.rotated(angle) * obstacle_detection_radius
 		
+		raycast.force_raycast_update()
 		if raycast.is_colliding():
-			return false
-	
-	return true
+			is_checking = false
+			check_result = false
+			return
+
+	is_checking = false
+	check_result = true
 
 func start_idle():
 	state_machine.set_state(state_machine.states.idle)

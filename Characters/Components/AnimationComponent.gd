@@ -50,5 +50,3 @@ func receive_message(message: String, data: Dictionary):
 					play_animation("prepare_headbutt")
 				"headbutt_attack":
 					play_animation("headbutt")
-				_:
-					push_warning("Unknown state: " + str(new_state))

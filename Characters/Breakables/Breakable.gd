@@ -28,7 +28,7 @@ func _ready():
 	font.size = 12
 	tooltip.add_font_override("font", font)
 	outline_material.shader = outline_shader
-	collision_area.connect("body_entered", self, "_on_CollisionArea_body_entered")
+	#collision_area.connect("body_entered", self, "_on_CollisionArea_body_entered")
 	hitbox.connect("body_entered", self, "_on_Hitbox_body_entered")
 	hitbox.monitoring = false # Inicialmente desactivar la hitbox
 
