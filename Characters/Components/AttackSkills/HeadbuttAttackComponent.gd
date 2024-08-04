@@ -1,8 +1,8 @@
 class_name HeadbuttAttackComponent
 extends Component
 
-export var max_distance_to_player: float = 60.0
-export var min_distance_to_player: float = 20.0
+export var max_distance_to_player: float = 70.0
+export var min_distance_to_player: float = 50.0
 export var headbutt_speed: float = 500.0
 export var headbutt_damage: int = 1
 export var knockback_force: int = 100

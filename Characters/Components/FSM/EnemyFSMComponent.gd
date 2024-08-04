@@ -37,6 +37,7 @@ func _state_logic(delta: float):
 			_retreat_logic(delta)
 
 func _get_transition() -> int:
+	var obstacle_avoidance = entity.get_component("obstacle_avoidance")
 	var transition = -1
 	match state:
 		states.idle:
@@ -44,8 +45,8 @@ func _get_transition() -> int:
 				transition = states.chase
 		states.chase:
 			if weapon_component:
-				if _is_player_in_attack_range() and not weapon_component.is_charging or not weapon_component.is_attacking:
-					print("Player in attack range, transitioning to attack state")
+				if _is_player_in_attack_range() and not weapon_component.is_charging and not weapon_component.is_attacking and not obstacle_avoidance.is_obstacle_to_player():
+					print("te ataco bro")
 					transition = states.attack
 				elif not _can_see_player():
 					transition = states.idle
@@ -56,23 +57,21 @@ func _get_transition() -> int:
 					transition = states.idle
 		states.attack:
 			if weapon_component and not _is_player_in_attack_range():
-				print("Player out of attack range, transitioning to chase state")
 				transition = states.chase
 			elif weapon_component and not weapon_component.is_charging and not weapon_component.is_attacking:
-				print("Attack finished, transitioning to chase state")
 				transition = states.chase
 
 	return transition
 
-func _enter_state(previous_state, new_state):
-	print("Entering state:", new_state, "from", previous_state)
-	match new_state:
-		states.attack:
-			if weapon_component:
-				print("Starting charge in attack state")
-				#weapon_component.start_charge()
-			else:
-				push_error("Attempted to use WeaponComponent, but it's not available")
+# func _enter_state(previous_state, new_state):
+# 	print("Entering state:", new_state, "from", previous_state)
+# 	match new_state:
+# 		states.attack:
+# 			if weapon_component:
+# 				print("Starting charge in attack state")
+# 				#weapon_component.start_charge()
+# 			else:
+# 				push_error("Attempted to use WeaponComponent, but it's not available")
 
 func _exit_state(state_exited):
 	match state_exited:
@@ -83,13 +82,12 @@ func _exit_state(state_exited):
 				push_error("Attempted to use WeaponComponent, but it's not available")
 
 func _attack_logic(delta: float):
+	entity.get_component("movement").stop()
 	var player = entity.get_component("detection").get_player()
 	if player:
 		_update_weapon_direction(player)
 	if weapon_component:
 		if not weapon_component.is_charging and not weapon_component.is_attacking:
-			print("Starting new attack in attack state")
-			entity.get_component("movement").stop()
 			weapon_component.start_charge()
 	else:
 		print("ERROR: WeaponComponent not available in attack logic")
@@ -101,6 +99,7 @@ func _idle_logic(delta: float):
 func _chase_logic(delta: float):
 	var player = entity.get_component("detection").get_player()
 	if player:
+		print("te chaseo bro")
 		entity.get_component("movement").chase(player)
 
 func _strong_attack_logic(delta: float):

@@ -42,6 +42,10 @@ func _collide(body) -> void:
 	else:
 		print('dano takeadisimo, emitiendo señal')
 		print(body)
+		if knockback_direction == Vector2.ZERO:
+			position = body.to_local(self.global_position)
+			knockback_direction = position *-1
+			knockback_force = 50
 		body.take_damage(damage, knockback_direction, knockback_force)
 		#print("Escena actual: ", current_scene)
 		print("el body de ",int(body.name)," siente el dolor")

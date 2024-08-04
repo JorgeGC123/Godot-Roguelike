@@ -62,16 +62,6 @@ func initialize():
 	if animation_player:
 		animation_player.connect("animation_finished", self, "_on_AnimationPlayer_animation_finished")
 		animation_player.connect("animation_started", self, "_on_AnimationPlayer_animation_started")
-	if not animation_player:
-		print("ERROR: AnimationPlayer not found")
-	if not hitbox:
-		print("ERROR: Hitbox not found")
-	if not charge_particles:
-		print("ERROR: ChargeParticles not found")
-	if not tween:
-		print("ERROR: Tween not found")
-	if not cool_down_timer:
-		print("ERROR: CoolDownTimer not found")
 
 	weapon.visible = true
 	
@@ -136,8 +126,8 @@ func use_ability():
 func is_busy() -> bool:
 	return animation_player.is_playing() or charge_particles.emitting
 
-func _on_AnimationPlayer_animation_started(anim_name: String):
-	print("Animation started:", anim_name)
+# func _on_AnimationPlayer_animation_started(anim_name: String):
+# 	print("Animation started:", anim_name)
 
 func _on_CoolDownTimer_timeout():
 	can_active_ability = true
@@ -152,21 +142,16 @@ func handle_enemy_attack(delta: float):
 
 func start_charge():
 	if not is_charging and not is_attacking:
-		print("Starting charge")
 		is_charging = true
 		animation_player.play("charge")
 		charge_particles.emitting = true
 		charge_timer.start(charge_time)
 
 func execute_attack():
-	print("Executing attack")
 	is_charging = false
 	is_attacking = true
 	charge_particles.emitting = false
-	print("Entity stamina:", entity.stamina)
-	print("Basic attack stamina cost:", entity.BASIC_ATTACK_STAMINA)
 	if entity.stamina >= entity.BASIC_ATTACK_STAMINA:
-		print("Playing attack animation")
 		animation_player.play("attack")
 		entity.reduce_stamina(entity.BASIC_ATTACK_STAMINA)
 		emit_signal("attack_started")
@@ -174,7 +159,6 @@ func execute_attack():
 		cancel_attack()
 
 func _on_AnimationPlayer_animation_finished(anim_name: String):
-	print("Animation finished:", anim_name)
 	match anim_name:
 		"attack":
 			is_attacking = false
@@ -189,8 +173,7 @@ func cancel_attack():
 	is_charging = false
 	is_attacking = false
 	charge_particles.emitting = false
-	animation_player.stop()
-	print("Attack cancelled")
+	animation_player.play("cancel_attack")
 
 func update_weapon_position():
 	if not is_instance_valid(weapon) or not is_instance_valid(entity) or not is_instance_valid(target):
@@ -208,7 +191,6 @@ func update_weapon_position():
 
 
 func _on_charge_timer_timeout():
-	print("Charge timer timeout")
 	if is_charging:
 		execute_attack()
 

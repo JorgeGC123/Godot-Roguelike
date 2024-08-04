@@ -1,8 +1,8 @@
 class_name ObstacleAvoidanceComponent
 extends Component
 
-export var avoid_distance: float = 50.0
-export var avoid_force: float = 50.0
+export var avoid_distance: float = 60.0
+export var avoid_force: float = 60.0
 export var num_rays: int = 16
 export var ray_angle: float = PI * 1.5
 
@@ -62,3 +62,21 @@ func _on_stun_started(duration: float):
 
 func _on_influence_reduction_timeout():
 	current_influence = 1.0  # Restaura la influencia completa
+
+func is_obstacle_to_player() -> int:
+	var player = entity.get_component("detection").get_player()
+	if not player:
+		return 0
+	
+	var direction_to_player = (player.global_position - entity.global_position).normalized()
+	raycast.cast_to = direction_to_player * avoid_distance
+	raycast.force_raycast_update()
+	
+	if raycast.is_colliding():
+		var collider = raycast.get_collider()
+		if collider.is_in_group("player"):
+			return 0  # No hay obstáculo, el raycast golpea al jugador
+		else:
+			return 1  # Hay un obstáculo entre el enemigo y el jugador
+	else:
+		return 0  # No hay obstáculo, el raycast no golpea nada
