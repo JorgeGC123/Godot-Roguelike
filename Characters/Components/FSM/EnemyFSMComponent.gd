@@ -60,6 +60,8 @@ func _get_transition() -> int:
 				transition = states.chase
 			elif weapon_component and not weapon_component.is_charging and not weapon_component.is_attacking:
 				transition = states.chase
+			else:
+				transition = states.chase
 
 	return transition
 
@@ -90,7 +92,7 @@ func _attack_logic(delta: float):
 		if not weapon_component.is_charging and not weapon_component.is_attacking:
 			weapon_component.start_charge()
 	else:
-		print("ERROR: WeaponComponent not available in attack logic")
+		print("otro kind of ataque")
 
 func _idle_logic(delta: float):
 	entity.get_component("movement").stop()
