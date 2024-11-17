@@ -1,16 +1,17 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://Rooms/Room.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Rooms/Furniture and Traps/Door.tscn" type="PackedScene" id=2]
 [ext_resource path="res://icon.png" type="Texture" id=3]
 [ext_resource path="res://Weapons/WarHammer.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Characters/Breakables/Breakable.tscn" type="PackedScene" id=5]
-[ext_resource path="res://Characters/ComposedEnemy.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Characters/Enemies/NPCWarrior/ComposedEnemy.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Rooms/Furniture and Traps/Stairs.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Characters/Breakables/Torch/CleanLight.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Characters/Breakables/Torch/BreakableTorch.tscn" type="PackedScene" id=9]
 [ext_resource path="res://Characters/NPC/BaseNeutralNPC.tscn" type="PackedScene" id=10]
 [ext_resource path="res://Characters/Enemies/Flying Creature/FlyingCreature.tscn" type="PackedScene" id=11]
+[ext_resource path="res://Characters/Enemies/GenericMonster/GenericMonster.tscn" type="PackedScene" id=12]
 
 [sub_resource type="GDScript" id=2]
 
@@ -207,5 +208,8 @@ position = Vector2( 34, 76 )
 position = Vector2( 209, 39 )
 detection_radius = 100
 
-[node name="Enemy" parent="." index="20" instance=ExtResource( 6 )]
-position = Vector2( 160, 73 )
+[node name="NPCWarrior" parent="." index="20" instance=ExtResource( 6 )]
+position = Vector2( 184, 43 )
+
+[node name="GenericMonster" parent="." index="21" instance=ExtResource( 12 )]
+position = Vector2( 145, 132 )

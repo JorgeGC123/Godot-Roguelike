@@ -7,6 +7,7 @@ export var acceleration: float = 100.0
 export var friction: float = 100.0
 var velocity: Vector2 = Vector2.ZERO
 var multiplier: float = 1
+onready var animated_sprite: AnimatedSprite = entity.get_node("AnimatedSprite")
 
 const PRIORITY_LOW = 0
 const PRIORITY_MEDIUM = 1
@@ -25,7 +26,12 @@ func update(delta: float) -> void:
 	clear_forces()
 
 func set_movement_direction(direction: Vector2) -> void:
-	apply_force(direction.normalized() * acceleration, PRIORITY_MEDIUM)
+	if animated_sprite:
+		if direction.x > 0 and animated_sprite.flip_h:
+				animated_sprite.flip_h = false
+		elif direction.x < 0 and not animated_sprite.flip_h:
+				animated_sprite.flip_h = true
+		apply_force(direction.normalized() * acceleration, PRIORITY_MEDIUM)
 
 func apply_force(force: Vector2, priority: int = PRIORITY_MEDIUM) -> void:
 	if not forces.has(priority):

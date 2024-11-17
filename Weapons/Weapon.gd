@@ -27,6 +27,12 @@ signal weapon_moved(scale_y,rotation,hitbox_knockback)
 
 func _ready() -> void:
 	var shape = hitbox.get_node("CollisionShape2D")
+	
+	if animation_player:
+		animation_player.stop()
+	if charge_particles:
+		charge_particles.emitting = false
+
 	if on_floor:
 		shape.disabled = true
 	if not on_floor:

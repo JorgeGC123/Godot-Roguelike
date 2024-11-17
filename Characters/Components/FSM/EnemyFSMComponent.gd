@@ -2,6 +2,7 @@ class_name EnemyFSMComponent
 extends FSMComponent
 
 var weapon_component: WeaponComponent
+var generic_atack_component: GenericAttackComponent
 
 func _init(entity: Node).(entity):
 	_add_state("idle")
@@ -19,6 +20,7 @@ func _init(entity: Node).(entity):
 func initialize():
 	set_state(states.idle)
 	weapon_component = entity.get_component("weapon")
+	generic_atack_component = entity.get_component("attack")
 	if not weapon_component:
 		Logger.error("WeaponComponent no encontrado en la entidad", "Enemy/FSM")
 		push_error("WeaponComponent not found in entity")
@@ -50,6 +52,11 @@ func _get_transition() -> int:
 		states.chase:
 			if weapon_component:
 				if _is_player_in_attack_range() and not weapon_component.is_charging and not weapon_component.is_attacking and not obstacle_avoidance.is_obstacle_to_player():
+					transition = states.attack
+				elif not _can_see_player():
+					transition = states.idle
+			else:
+				if _is_player_in_attack_range():
 					transition = states.attack
 				elif not _can_see_player():
 					transition = states.idle
@@ -89,7 +96,10 @@ func _attack_logic(delta: float):
 			Logger.info("Iniciando carga de ataque", "Enemy/FSM")
 			weapon_component.start_charge()
 	else:
-		Logger.debug("Ejecutando ataque alternativo (sin arma)", "Enemy/FSM")
+		if generic_atack_component:
+			Logger.debug("Ejecutando ataque genérico (sin arma)", "Enemy/FSM")
+			generic_atack_component.start_attack()
+		Logger.debug("No ejecuto ataque ya que no tengo componente", "Enemy/FSM")
 
 func _idle_logic(delta: float):
 	entity.get_component("movement").stop()
@@ -171,4 +181,7 @@ func receive_message(message: String, data: Dictionary):
 			set_state(states.headbutt_attack)
 		"headbutt_finished":
 			Logger.info("Headbutt finalizado", "Enemy/FSM")
+			set_state(states.chase)
+		"attack_finished":
+			print("recidibod bro")
 			set_state(states.chase)

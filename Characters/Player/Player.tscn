@@ -365,7 +365,7 @@ DASH_STAMINA = 30
 [node name="FiniteStateMachine" parent="." index="0"]
 script = ExtResource( 5 )
 
-[node name="CollisionShape2D" parent="." index="2"]
+[node name="CollisionShape2D" parent="." index="2" groups=["player"]]
 position = Vector2( 0, 3 )
 shape = SubResource( 18 )
 
@@ -396,5 +396,7 @@ script = ExtResource( 7 )
 frames = SubResource( 17 )
 animation = "idle"
 playing = true
+
+[node name="Area2D" parent="." index="9" groups=["player"]]
 
 [connection signal="animation_started" from="AnimationPlayer" to="." method="_on_AnimationPlayer_animation_started"]

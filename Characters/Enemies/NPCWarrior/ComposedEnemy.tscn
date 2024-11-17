@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://Characters/ComposedEnemy.gd" type="Script" id=1]
+[ext_resource path="res://Characters/Enemies/NPCWarrior/ComposedEnemy.gd" type="Script" id=1]
 [ext_resource path="res://Characters/Enemies/Animations/Enemy_1/Idle/Idle.png" type="Texture" id=2]
 
 [sub_resource type="AtlasTexture" id=1]
@@ -19,7 +19,7 @@ animations = [ {
 "speed": 5.0
 } ]
 
-[node name="Enemy" type="KinematicBody2D"]
+[node name="NPCWarrior" type="KinematicBody2D"]
 collision_layer = 4
 collision_mask = 3
 script = ExtResource( 1 )
