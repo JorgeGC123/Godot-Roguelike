@@ -1,0 +1,19 @@
+# Add patterns to ignore here, one per line
+# Example:
+# *.log
+# tmp/
+
+
+*.md5
+Art/
+.vscode/
+.import/
+
+*.import
+*.tscn
+*.godot
+*.tres
+addons/
+
+/log/*
+!log/.gdignore

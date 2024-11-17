@@ -2,8 +2,8 @@ class_name ComposedEnemy
 extends Entity
 
 var is_stunned: bool = false
-export var attack_range: float = 40.0
-export var BASIC_ATTACK_STAMINA: int = 5
+export var attack_range: float = 30
+export var BASIC_ATTACK_STAMINA: int = 15
 var stamina: int = 100
 
 func _ready():

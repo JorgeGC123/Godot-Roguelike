@@ -204,6 +204,7 @@ SceneTransistor="*res://Autoloads/SceneTransistor.tscn"
 SavedData="*res://Autoloads/SavedData.gd"
 Client="*res://Autoloads/Client.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
+Logger="*res://Autoloads/Logger.gd"
 
 [debug]
 
@@ -228,6 +229,7 @@ enabled=PoolStringArray( "res://addons/dialogue_manager/plugin.cfg" )
 
 debug=false
 resol=false
+autolo=false
 
 [importer_defaults]
 

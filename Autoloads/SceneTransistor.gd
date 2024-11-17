@@ -16,10 +16,10 @@ func change_scene() -> void:
 	assert(__)
 
 func add_blood_effect(effect: CPUParticles2D) -> void:
-    blood_effects.append(effect)
+	blood_effects.append(effect)
 
 func clear_blood_effects() -> void:
-    for effect in blood_effects:
-        if is_instance_valid(effect):
-            effect.queue_free()
-    blood_effects.clear()
+	for effect in blood_effects:
+		if is_instance_valid(effect):
+			effect.queue_free()
+	blood_effects.clear()
