@@ -50,6 +50,11 @@ _global_script_classes=[ {
 "path": "res://Characters/Enemies/NPCWarrior/ComposedEnemy.gd"
 }, {
 "base": "Component",
+"class": "CornerHandlerComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/CornerHandler.gd"
+}, {
+"base": "Component",
 "class": "DetectionComponent",
 "language": "GDScript",
 "path": "res://Characters/Components/DetectionComponent.gd"
@@ -178,6 +183,7 @@ _global_script_class_icons={
 "CombatComponent": "",
 "Component": "",
 "ComposedEnemy": "",
+"CornerHandlerComponent": "",
 "DetectionComponent": "",
 "DialogueResource": "",
 "DungeonRoom": "",

@@ -55,7 +55,7 @@ func clear_forces() -> void:
 func stop() -> void:
 	velocity = Vector2.ZERO
 	clear_forces()
-	speed = default_speed  # Reset speed to default when stopping
+	speed = default_speed # Reset speed to default when stopping
 
 func chase(target: Node2D) -> void:
 	if is_instance_valid(target):
@@ -64,3 +64,8 @@ func chase(target: Node2D) -> void:
 
 func get_velocity() -> Vector2:
 	return velocity
+
+func get_movement_direction() -> Vector2:
+	if velocity.length() > 0:
+		return velocity.normalized()
+	return Vector2.ZERO
