@@ -4,7 +4,17 @@ extends Component
 var navigation: Navigation2D
 var player: KinematicBody2D
 var path: PoolVector2Array
+
+
+# Path update configuration
+export var min_update_interval: float = 0.1  # Fastest update rate when close
+export var max_update_interval: float = 1.0   # Slowest update rate when far
+export var base_update_distance: float = 100.0  # Distance at which scaling starts
+export var distance_scale_factor: float = 0.01  # How quickly interval scales with distance
+
 var path_update_timer: float = 0.0
+var current_update_interval: float = 0.2
+var last_path_update_time: float = 0.0
 var path_update_interval: float = 0.2
 var stuck_timer: float = 0.0
 var stuck_threshold: float = 1.0  # Time before considering we're stuck
@@ -30,33 +40,56 @@ func initialize():
 	last_position = entity.global_position
 
 func update(delta: float):
-	if not player or not navigation:
+	if not player or not navigation or not movement_component:
 		return
+
+	# Update interval based on distance and state
+	var update_interval = get_dynamic_update_interval()
+	
+	# Smooth transition to new interval
+	current_update_interval = lerp(current_update_interval, update_interval, 0.1)
 	
 	check_progress(delta)
 	
 	path_update_timer += delta
-	if path_update_timer >= path_update_interval:
+	if path_update_timer >= current_update_interval:
 		path_update_timer = 0.0
 		update_path()
+		last_path_update_time = OS.get_ticks_msec() / 1000.0
 	
 	if path and path.size() > 0:
 		follow_path(delta)
 
+func get_dynamic_update_interval() -> float:
+	var distance = entity.global_position.distance_to(player.global_position)
+	
+	# Base update rate when very close
+	if distance < base_update_distance:
+		return min_update_interval
+		
+	# Scale interval based on distance
+	var scaled_interval = min_update_interval + ((distance - base_update_distance) * distance_scale_factor)
+	
+	# Adjust based on entity state
+	var state_multiplier = 1.0
+	if movement_component.get_velocity().length() < 10:  # If barely moving
+		state_multiplier = 1.5  # Update slower when stationary
+	if stuck_timer > 0:
+		state_multiplier = 0.5  # Update faster when stuck
+		
+	return clamp(scaled_interval * state_multiplier, min_update_interval, max_update_interval)
+
 func check_progress(delta: float):
-	# Check if we're making progress towards our goal
 	var current_pos = entity.global_position
 	var distance_moved = current_pos.distance_to(last_position)
 	
 	if distance_moved < 1.0:  # If barely moving
 		stuck_timer += delta
-		if stuck_timer > stuck_threshold:
-			# Force path update and increase path update frequency temporarily
-			path_update_interval = 0.1
-			update_path()
+		if stuck_timer > 1.0:  # If stuck for more than a second
+			current_update_interval = min_update_interval  # Force fast updates
+			update_path()  # Force path update
 	else:
-		stuck_timer = 0.0
-		path_update_interval = 0.2
+		stuck_timer = max(0, stuck_timer - delta)  # Gradually reduce stuck timer
 	
 	last_position = current_pos
 

@@ -52,7 +52,7 @@ _global_script_classes=[ {
 "base": "Component",
 "class": "CornerHandlerComponent",
 "language": "GDScript",
-"path": "res://Characters/Components/CornerHandler.gd"
+"path": "res://Characters/Components/CornerHandlerComponent.gd"
 }, {
 "base": "Component",
 "class": "DetectionComponent",
