@@ -126,66 +126,22 @@ func _spawn_rooms() -> void:
 
 		add_child(room)
 		previous_room = room
-		 # Create navigation polygon for the room we just added
-		var navpoly = NavigationPolygon.new()
-		var outline = _generate_room_outline(room)
-		
-		if not outline.empty():
-			navpoly.add_outline(outline)
-			navpoly.make_polygons_from_outlines()
-			
-			var navpoly_instance = NavigationPolygonInstance.new()
-			navpoly_instance.navpoly = navpoly
-			room.add_child(navpoly_instance)
-			
-			# Debug visualization (optional)
-			_debug_draw_outline(outline)
-
-func _generate_room_outline(room: Node2D) -> PoolVector2Array:
-	var tilemap: TileMap = room.get_node("TileMap")
-	var tilemap2: TileMap = room.get_node("TileMap2")
-	var cells = tilemap.get_used_cells()
-	var walkable_positions = []
-	
-	# Check both tilemaps for walkable cells
-	for cell in cells:
-		if _is_walkable_tile(tilemap.get_cellv(cell)):
-			var world_pos = tilemap.map_to_world(cell)
-			walkable_positions.append(world_pos)
-			
-	# If room has corridors, they'll be included in the tilemap cells
-	
-	return _create_outline_from_cells(walkable_positions)
+		# dibuja el poligono apra debug
+		var nav_polys = _find_navigation_polygons(room)
+		for nav_poly in nav_polys:
+			if nav_poly.navpoly:
+				# Debug draw each outline in the polygon
+				for j in nav_poly.navpoly.get_outline_count():
+					var outline = nav_poly.navpoly.get_outline(j)
+					# Convert outline points to global coordinates
+					var global_outline = PoolVector2Array()
+					for point in outline:
+						global_outline.append(room.to_global(point))
+					_debug_draw_outline(global_outline)
 
 func _is_walkable_tile(tile_id: int) -> bool:
 	# Update this list with all your walkable tile IDs
 	return tile_id == FLOOR_TILE_INDEX
-
-func _create_outline_from_cells(positions: Array) -> PoolVector2Array:
-	if positions.empty():
-		return PoolVector2Array()
-	
-	# Find bounds
-	var min_x = INF
-	var min_y = INF
-	var max_x = -INF
-	var max_y = -INF
-	
-	for pos in positions:
-		min_x = min(min_x, pos.x)
-		min_y = min(min_y, pos.y)
-		max_x = max(max_x, pos.x + TILE_SIZE)
-		max_y = max(max_y, pos.y + TILE_SIZE)
-	
-	# Create outline vertices
-	var outline = PoolVector2Array([
-		Vector2(min_x, min_y),           # Top-left
-		Vector2(max_x, min_y),           # Top-right
-		Vector2(max_x, max_y),           # Bottom-right
-		Vector2(min_x, max_y)            # Bottom-left
-	])
-	
-	return outline
 
 func _debug_draw_outline(outline: PoolVector2Array) -> void:
 	if not Engine.editor_hint:
@@ -194,3 +150,14 @@ func _debug_draw_outline(outline: PoolVector2Array) -> void:
 		debug_line.default_color = Color.green
 		debug_line.width = 2.0
 		add_child(debug_line)
+
+func _find_navigation_polygons(node: Node) -> Array:
+	var nav_polys = []
+	
+	if node is NavigationPolygonInstance:
+		nav_polys.append(node)
+	
+	for child in node.get_children():
+		nav_polys += _find_navigation_polygons(child)
+	
+	return nav_polys

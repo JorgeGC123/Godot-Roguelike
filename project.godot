@@ -236,6 +236,7 @@ enabled=PoolStringArray( "res://addons/dialogue_manager/plugin.cfg" )
 debug=false
 resol=false
 autolo=false
+fps=false
 
 [importer_defaults]
 

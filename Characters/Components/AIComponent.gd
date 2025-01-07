@@ -8,7 +8,7 @@ var path: PoolVector2Array = []
 var movement_component: MovementComponent
 var debug_line: Line2D
 
-export var path_update_interval: float = 0.2
+export var path_update_interval: float = 0.5
 export var arrival_threshold: float = 5.0  # Reduced from 10.0
 var path_update_timer: float = 0.0
 
