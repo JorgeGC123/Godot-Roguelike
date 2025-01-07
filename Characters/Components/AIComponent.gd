@@ -1,31 +1,18 @@
+# AIComponent.gd
 class_name AIComponent
 extends Component
 
 var navigation: Navigation2D
 var player: KinematicBody2D
-var path: PoolVector2Array
-
-
-# Path update configuration
-export var min_update_interval: float = 0.1  # Fastest update rate when close
-export var max_update_interval: float = 1.0   # Slowest update rate when far
-export var base_update_distance: float = 100.0  # Distance at which scaling starts
-export var distance_scale_factor: float = 0.01  # How quickly interval scales with distance
-
-var path_update_timer: float = 0.0
-var current_update_interval: float = 0.2
-var last_path_update_time: float = 0.0
-var path_update_interval: float = 0.2
-var stuck_timer: float = 0.0
-var stuck_threshold: float = 1.0  # Time before considering we're stuck
-var progress_check_distance: float = 20.0  # Distance to check if we're making progress
-
+var path: PoolVector2Array = []
 var movement_component: MovementComponent
-var corner_handler: CornerHandlerComponent
-var current_path_index: int = 0
-var path_point_threshold: float = 10.0
-var last_position: Vector2
-var wall_influence: float = 0.5  # How much wall sliding affects path following
+var debug_line: Line2D
+
+export var path_update_interval: float = 0.2
+export var arrival_threshold: float = 5.0  # Reduced from 10.0
+var path_update_timer: float = 0.0
+
+export var debug_draw_path: bool = true
 
 func _init(entity: Node).(entity):
 	pass
@@ -34,125 +21,59 @@ func initialize():
 	navigation = entity.get_node("/root/Game/Rooms")
 	player = entity.get_node("/root/Game/Player")
 	
-	yield(entity.get_tree(), "idle_frame")
+	if debug_draw_path:
+		debug_line = Line2D.new()
+		debug_line.default_color = Color.red
+		debug_line.width = 2.0
+		add_child(debug_line)
+	
 	movement_component = entity.get_component("movement")
-	corner_handler = entity.get_component("corner_handler")
-	last_position = entity.global_position
 
 func update(delta: float):
 	if not player or not navigation or not movement_component:
 		return
 
-	# Update interval based on distance and state
-	var update_interval = get_dynamic_update_interval()
-	
-	# Smooth transition to new interval
-	current_update_interval = lerp(current_update_interval, update_interval, 0.1)
-	
-	check_progress(delta)
-	
 	path_update_timer += delta
-	if path_update_timer >= current_update_interval:
+	if path_update_timer >= path_update_interval:
 		path_update_timer = 0.0
-		update_path()
-		last_path_update_time = OS.get_ticks_msec() / 1000.0
-	
-	if path and path.size() > 0:
-		follow_path(delta)
+		_update_path()
 
-func get_dynamic_update_interval() -> float:
-	var distance = entity.global_position.distance_to(player.global_position)
-	
-	# Base update rate when very close
-	if distance < base_update_distance:
-		return min_update_interval
-		
-	# Scale interval based on distance
-	var scaled_interval = min_update_interval + ((distance - base_update_distance) * distance_scale_factor)
-	
-	# Adjust based on entity state
-	var state_multiplier = 1.0
-	if movement_component.get_velocity().length() < 10:  # If barely moving
-		state_multiplier = 1.5  # Update slower when stationary
-	if stuck_timer > 0:
-		state_multiplier = 0.5  # Update faster when stuck
-		
-	return clamp(scaled_interval * state_multiplier, min_update_interval, max_update_interval)
+	if not path.empty():
+		_follow_path(delta)
+		if debug_draw_path and debug_line:
+			_update_debug_line()
 
-func check_progress(delta: float):
-	var current_pos = entity.global_position
-	var distance_moved = current_pos.distance_to(last_position)
-	
-	if distance_moved < 1.0:  # If barely moving
-		stuck_timer += delta
-		if stuck_timer > 1.0:  # If stuck for more than a second
-			current_update_interval = min_update_interval  # Force fast updates
-			update_path()  # Force path update
-	else:
-		stuck_timer = max(0, stuck_timer - delta)  # Gradually reduce stuck timer
-	
-	last_position = current_pos
-
-func update_path():
-	if player:
-		# Add some randomization to pathfinding target when stuck
-		var target_pos = player.global_position
-		if stuck_timer > stuck_threshold:
-			# Add random offset to break from local minima
-			target_pos += Vector2(rand_range(-50, 50), rand_range(-50, 50))
-		
-		var new_path = navigation.get_simple_path(entity.global_position, target_pos, true)
-		if new_path.size() > 0:
-			path = smooth_path(new_path)
-			current_path_index = 0
-
-func smooth_path(original_path: PoolVector2Array) -> PoolVector2Array:
-	if original_path.size() <= 2:
-		return original_path
-	
-	var smoothed_path = PoolVector2Array()
-	smoothed_path.append(original_path[0])
-	
-	for i in range(1, original_path.size() - 1):
-		var prev = original_path[i - 1]
-		var current = original_path[i]
-		var next = original_path[i + 1]
-		
-		# Calculate midpoints for smoother corners
-		var mid1 = prev.linear_interpolate(current, 0.75)
-		var mid2 = current.linear_interpolate(next, 0.25)
-		
-		smoothed_path.append(mid1)
-		smoothed_path.append(current)
-		smoothed_path.append(mid2)
-	
-	smoothed_path.append(original_path[original_path.size() - 1])
-	return smoothed_path
-
-func follow_path(delta: float):
-	if current_path_index >= path.size():
+func _update_path():
+	if not is_instance_valid(player):
 		return
-	
-	var target = path[current_path_index]
+		
+	path = navigation.get_simple_path(
+		entity.global_position,
+		player.global_position,
+		true
+	)
+
+func _follow_path(delta: float):
+	if path.empty():
+		movement_component.stop()
+		return
+
+	var target = path[0]
 	var distance = entity.global_position.distance_to(target)
 	
-	# Handle wall influence
-	var near_wall = corner_handler and corner_handler.get_wall_status()
-	
-	# Move to next path point if close enough
-	if distance < path_point_threshold:
-		current_path_index += 1
-		if current_path_index >= path.size():
+	if distance < arrival_threshold:
+		path.remove(0)
+		if path.empty():
+			movement_component.stop()
 			return
-		target = path[current_path_index]
+		target = path[0]
 	
-	var path_direction = (target - entity.global_position).normalized()
-	
-	# If near a wall, blend path following with wall sliding
-	if near_wall:
-		# Let the wall sliding handle most of the movement
-		var slide_influence = wall_influence
-		path_direction = path_direction * (1.0 - slide_influence)
-	
-	# Apply the movement
-	movement_component.set_movement_direction(path_direction)
+	var direction = (target - entity.global_position).normalized()
+	movement_component.set_movement_direction(direction)
+
+func _update_debug_line() -> void:
+	var points = PoolVector2Array()
+	points.append(entity.global_position)
+	for point in path:
+		points.append(point)
+	debug_line.points = points

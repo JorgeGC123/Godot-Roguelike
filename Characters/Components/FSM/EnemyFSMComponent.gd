@@ -51,7 +51,7 @@ func _get_transition() -> int:
 				transition = states.chase
 		states.chase:
 			if weapon_component:
-				if _is_player_in_attack_range() and not weapon_component.is_charging and not weapon_component.is_attacking and not obstacle_avoidance.is_obstacle_to_player():
+				if _is_player_in_attack_range() and not weapon_component.is_charging and not weapon_component.is_attacking:
 					transition = states.attack
 				elif not _can_see_player():
 					transition = states.idle
@@ -106,10 +106,9 @@ func _idle_logic(delta: float):
 	Logger.debug("Estado IDLE: enemigo detenido", "Enemy/FSM")
 
 func _chase_logic(delta: float):
-	var player = entity.get_component("detection").get_player()
-	if player:
-		# Logger.debug("Persiguiendo al jugador", "Enemy/FSM")
-		entity.get_component("movement").chase(player)
+	# The AI component will handle the actual pathfinding and movement
+	# We just need to ensure it's active during the chase state
+	pass  # Let the AIComponent handle the movement
 
 func _strong_attack_logic(delta: float):
 	# Logger.debug("Lógica de ataque fuerte (no implementada)", "Enemy/FSM")

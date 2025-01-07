@@ -50,11 +50,6 @@ _global_script_classes=[ {
 "path": "res://Characters/Enemies/NPCWarrior/ComposedEnemy.gd"
 }, {
 "base": "Component",
-"class": "CornerHandlerComponent",
-"language": "GDScript",
-"path": "res://Characters/Components/CornerHandlerComponent.gd"
-}, {
-"base": "Component",
 "class": "DetectionComponent",
 "language": "GDScript",
 "path": "res://Characters/Components/DetectionComponent.gd"
@@ -139,11 +134,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/Components/MovementComponent.gd"
 }, {
-"base": "Component",
-"class": "ObstacleAvoidanceComponent",
-"language": "GDScript",
-"path": "res://Characters/Components/ObstacleAvoidanceComponent.gd"
-}, {
 "base": "Node2D",
 "class": "PatrolBehavior",
 "language": "GDScript",
@@ -183,7 +173,6 @@ _global_script_class_icons={
 "CombatComponent": "",
 "Component": "",
 "ComposedEnemy": "",
-"CornerHandlerComponent": "",
 "DetectionComponent": "",
 "DialogueResource": "",
 "DungeonRoom": "",
@@ -201,7 +190,6 @@ _global_script_class_icons={
 "HurtboxComponent": "",
 "Lantern": "",
 "MovementComponent": "",
-"ObstacleAvoidanceComponent": "",
 "PatrolBehavior": "",
 "Player": "",
 "PlayerDash": "",

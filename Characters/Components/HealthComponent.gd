@@ -29,7 +29,7 @@ func take_damage(amount: int, direction: Vector2 = Vector2.ZERO, force: float = 
 	var movement = entity.get_component("movement")
 	if movement and direction != Vector2.ZERO:
 		print("Applying knockback force: ", direction * force)
-		movement.apply_force(direction * force *50, MovementComponent.PRIORITY_HIGH)
+		#movement.apply_force(direction * force *50, MovementComponent.PRIORITY_HIGH)
 	
 	# Aplicar stun
 	apply_stun(0.5)  # 0.5 segundos de stun

@@ -9,13 +9,11 @@ var stamina: int = 100
 func _ready():
 	add_component("health", HealthComponent.new(self))
 	add_component("movement", MovementComponent.new(self))
-	add_component("corner_handler", CornerHandlerComponent.new(self))
 	add_component("ai", AIComponent.new(self))
 	add_component("detection", DetectionComponent.new(self))
 	add_component("combat", CombatComponent.new(self))
-	add_component("obstacle_avoidance", ObstacleAvoidanceComponent.new(self))
 	add_component("fsm", EnemyFSMComponent.new(self))
-	add_component("headbutt", HeadbuttAttackComponent.new(self))
+	#add_component("headbutt", HeadbuttAttackComponent.new(self))
 	add_component("blood_splash", BloodSplashComponent.new(self))
 	add_component("animation", AnimationComponent.new(self))
 	
