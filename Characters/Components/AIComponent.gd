@@ -9,8 +9,10 @@ var debug_line: Line2D
 
 export var path_update_interval: float = 0.5
 export var arrival_threshold: float = 5.0
-export var check_distance: float = 16.0  # Distancia entre puntos de comprobación
+export var check_distance: float = 16.0 # Distancia entre puntos de comprobación
 export var debug_draw_path: bool = true
+
+var nav_agent: RID
 
 var path_update_timer: float = 0.0
 var last_valid_position: Vector2 = Vector2.ZERO
@@ -23,21 +25,46 @@ func _init(entity: Node).(entity):
 	pass
 
 func initialize():
-	navigation = entity.get_node("/root/Game/Rooms")
+	# Primero obtener las referencias necesarias
 	player = entity.get_node("/root/Game/Player")
+	movement_component = entity.get_component("movement")
 	
+	# Ahora podemos configurar el agente con la velocidad correcta
+	nav_agent = Navigation2DServer.agent_create()
+	Navigation2DServer.agent_set_map(nav_agent, NavigationManager.nav_map)
+	Navigation2DServer.agent_set_radius(nav_agent, 8.0)
+	
+	# Usar la velocidad del movement_component
+	if movement_component:
+		Navigation2DServer.agent_set_max_speed(nav_agent, movement_component.default_speed)
+	else:
+		push_error("AIComponent: MovementComponent no encontrado")
+	
+	# Resto de la configuración del agente
+	Navigation2DServer.agent_set_neighbor_dist(nav_agent, 50.0)
+	Navigation2DServer.agent_set_max_neighbors(nav_agent, 10)
+	Navigation2DServer.agent_set_time_horizon(nav_agent, 1.0)
+	
+	Navigation2DServer.agent_set_callback(
+		nav_agent,
+		entity.get_instance_id(),
+		"_on_navigation_velocity_computed"
+	)
+
+	# Configurar debug si está activo
 	if debug_draw_path:
 		debug_line = Line2D.new()
 		debug_line.default_color = COLOR_VALID_PATH
 		debug_line.width = 2.0
 		add_child(debug_line)
 	
-	movement_component = entity.get_component("movement")
-	last_valid_position = entity.global_position
 
 func update(delta: float):
-	if not player or not navigation or not movement_component:
+	if not player or not movement_component:
 		return
+
+	# Actualizar la posición del agente
+	Navigation2DServer.agent_set_position(nav_agent, entity.global_position)
 
 	path_update_timer += delta
 	if path_update_timer >= path_update_interval:
@@ -54,8 +81,13 @@ func is_point_valid(point: Vector2) -> bool:
 	"""
 	Verifica si un punto está dentro del área navegable
 	"""
-	var closest = navigation.get_closest_point(point)
-	return closest.distance_to(point) < 1.0
+	var closest = Navigation2DServer.map_get_closest_point(NavigationManager.nav_map, point)
+	var owner_rid = Navigation2DServer.map_get_closest_point_owner(NavigationManager.nav_map, point)
+	
+	# Un punto es válido si:
+	# 1. Está cerca del punto más cercano en el navigation mesh
+	# 2. Pertenece a una región válida (owner_rid no es nulo)
+	return closest.distance_to(point) < 1.0 and owner_rid != RID()
 
 func find_intermediate_points(start: Vector2, end: Vector2) -> Array:
 	"""
@@ -100,7 +132,12 @@ func calculate_path_with_waypoints(start: Vector2, end: Vector2) -> PoolVector2A
 	Calcula un path usando waypoints si es necesario
 	"""
 	# Intentar primero un path directo
-	var direct_path = navigation.get_simple_path(start, end, false)
+	var direct_path = Navigation2DServer.map_get_path(
+		NavigationManager.nav_map,
+		start,
+		end,
+		true # optimize
+	)
 	
 	# Verificar si el path directo es válido
 	var is_valid = true
@@ -213,6 +250,12 @@ func _follow_path():
 		target = path[0]
 	
 	var direction = (target - entity.global_position).normalized()
+	var target_velocity = direction * movement_component.default_speed
+	
+	# Establecer la velocidad objetivo para el sistema de evasión
+	Navigation2DServer.agent_set_target_velocity(nav_agent, target_velocity)
+	
+	# También establecer la velocidad directamente mientras esperamos la respuesta del servidor
 	movement_component.set_movement_direction(direction)
 
 func _update_debug_line() -> void:

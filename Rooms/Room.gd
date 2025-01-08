@@ -12,6 +12,10 @@ const ENEMY_SCENES: Dictionary = {
 
 var num_enemies: int
 
+var nav_region: RID
+const WALKABLE_TILES = [14]
+
+
 onready var tilemap: TileMap = get_node("TileMap2")
 onready var entrance: Node2D = get_node("Entrance")
 onready var door_container: Node2D = get_node("Doors")
@@ -25,6 +29,7 @@ func _ready() -> void:
 	num_enemies = enemy_positions_container.get_child_count()
 	determine_breakable_positions()
 	spawn_breakables(randi() % 3 + 1)
+	setup_navigation()
 	
 func determine_breakable_positions() -> void:
 	breakable_positions = []
@@ -93,3 +98,29 @@ func _on_PlayerDetector_body_entered(_body: KinematicBody2D) -> void:
 	else:
 		_close_entrance()
 		_open_doors()
+
+func setup_navigation():
+	print("Configurando navegación para room")
+	
+	# Obtener el nodo NavigationPolygonInstance y su polígono
+	var navigation_instance = get_node("NavigationPolygonInstance")
+	if not navigation_instance:
+		push_error("No se encontró el nodo NavigationPolygonInstance en la room")
+		return
+	
+	var nav_poly = navigation_instance.navpoly
+	if not nav_poly:
+		push_error("No se encontró NavigationPolygon en el nodo NavigationPolygonInstance")
+		return
+		
+	# Crear región y asignar el polígono existente
+	nav_region = Navigation2DServer.region_create()
+	Navigation2DServer.region_set_map(nav_region, NavigationManager.nav_map)
+	Navigation2DServer.region_set_navpoly(nav_region, nav_poly)
+	Navigation2DServer.region_set_transform(nav_region, navigation_instance.global_transform)
+	
+	print("Navigation mesh configurado con éxito usando polígono existente")
+
+func _exit_tree():
+	if nav_region:
+		Navigation2DServer.free_rid(nav_region)
