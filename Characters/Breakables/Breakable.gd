@@ -21,6 +21,7 @@ onready var original_material = null
 onready var outline_material = ShaderMaterial.new()
 
 func _ready():
+	add_to_group("breakables")
 	is_interpolating = false
 	has_blood = false
 	tooltip.visible = false

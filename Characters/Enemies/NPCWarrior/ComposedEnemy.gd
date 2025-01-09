@@ -112,8 +112,12 @@ func _on_state_changed(previous_state, new_state):
 func reduce_stamina(amount: int):
 	stamina = max(0, stamina - amount)
 
-func _on_navigation_velocity_computed(safe_velocity: Vector2):
-	# Aplicar la velocidad segura calculada
-	var movement_component = get_component("movement")
-	if movement_component:
-		movement_component.velocity = safe_velocity
+func on_navigation_velocity_computed(safe_velocity: Vector2):
+	print("Safe velocity computed: ", safe_velocity)
+	print("For entity: ", get_instance_id())
+	
+	if not is_stunned:  # Importante: verificar si podemos movernos
+		var movement_component = get_component("movement")
+		if movement_component:
+			print("Applying safe velocity to movement component")
+			movement_component.set_velocity(safe_velocity)

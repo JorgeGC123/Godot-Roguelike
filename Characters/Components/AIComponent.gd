@@ -25,14 +25,24 @@ func _init(entity: Node).(entity):
 	pass
 
 func initialize():
+	# Primero verificar que el mapa esté activo
+	var agent_map = Navigation2DServer.agent_get_map(nav_agent)
+	print("Agent map: ", agent_map)
+	print("Navigation map: ", NavigationManager.nav_map)
+	if agent_map != NavigationManager.nav_map:
+		print("Agent is on wrong map, updating...")
+		Navigation2DServer.agent_set_map(nav_agent, NavigationManager.nav_map)
 	# Primero obtener las referencias necesarias
 	player = entity.get_node("/root/Game/Player")
 	movement_component = entity.get_component("movement")
 	
-	# Ahora podemos configurar el agente con la velocidad correcta
-	nav_agent = Navigation2DServer.agent_create()
-	Navigation2DServer.agent_set_map(nav_agent, NavigationManager.nav_map)
-	Navigation2DServer.agent_set_radius(nav_agent, 8.0)
+	
+	
+	# Forzar una actualización del mapa después de añadir el agente
+	Navigation2DServer.map_force_update(NavigationManager.nav_map)
+	
+	# Resto de la configuración
+	Navigation2DServer.agent_set_radius(nav_agent, 24.0)   
 	
 	# Usar la velocidad del movement_component
 	if movement_component:
@@ -41,15 +51,25 @@ func initialize():
 		push_error("AIComponent: MovementComponent no encontrado")
 	
 	# Resto de la configuración del agente
-	Navigation2DServer.agent_set_neighbor_dist(nav_agent, 50.0)
+	Navigation2DServer.agent_set_neighbor_dist(nav_agent, 100.0)  # Aumentado para mejor detección
 	Navigation2DServer.agent_set_max_neighbors(nav_agent, 10)
-	Navigation2DServer.agent_set_time_horizon(nav_agent, 1.0)
+	Navigation2DServer.agent_set_time_horizon(nav_agent, 0.5)    # Aumentado para evitación más suave
 	
+	Navigation2DServer.agent_set_velocity(nav_agent, Vector2.ZERO)
+	Navigation2DServer.agent_set_target_velocity(nav_agent, Vector2.ZERO)
+	
+	print("Setting up callback for entity ID: ", entity.get_instance_id())
+
 	Navigation2DServer.agent_set_callback(
 		nav_agent,
-		entity.get_instance_id(),
-		"_on_navigation_velocity_computed"
+		self.get_instance_id(),
+		"on_navigation_velocity_computed" 
 	)
+	
+	# Añadir verificación
+	var is_callback_set = Navigation2DServer.agent_is_map_changed(nav_agent)
+	print("Agent callback status: ", is_callback_set)
+	print("Agent map: ", Navigation2DServer.agent_get_map(nav_agent))
 
 	# Configurar debug si está activo
 	if debug_draw_path:
@@ -234,9 +254,12 @@ func _update_path():
 		if debug_draw_path:
 			debug_line.default_color = COLOR_INVALID_PATH
 
+
 func _follow_path():
 	if path.empty():
 		movement_component.stop()
+		Navigation2DServer.agent_set_velocity(nav_agent, Vector2.ZERO)
+		Navigation2DServer.agent_set_target_velocity(nav_agent, Vector2.ZERO)
 		return
 
 	var target = path[0]
@@ -246,16 +269,24 @@ func _follow_path():
 		path.remove(0)
 		if path.empty():
 			movement_component.stop()
+			Navigation2DServer.agent_set_velocity(nav_agent, Vector2.ZERO)
+			Navigation2DServer.agent_set_target_velocity(nav_agent, Vector2.ZERO)
 			return
 		target = path[0]
 	
 	var direction = (target - entity.global_position).normalized()
+	var current_velocity = movement_component.get_velocity()
 	var target_velocity = direction * movement_component.default_speed
 	
-	# Establecer la velocidad objetivo para el sistema de evasión
+	print("Current velocity: ", current_velocity)
+	print("Setting target velocity: ", target_velocity)
+	
+	# Establecer PRIMERO la velocidad actual
+	Navigation2DServer.agent_set_velocity(nav_agent, current_velocity)
+	# LUEGO la velocidad objetivo
 	Navigation2DServer.agent_set_target_velocity(nav_agent, target_velocity)
 	
-	# También establecer la velocidad directamente mientras esperamos la respuesta del servidor
+	# Movimiento directo como fallback
 	movement_component.set_movement_direction(direction)
 
 func _update_debug_line() -> void:
