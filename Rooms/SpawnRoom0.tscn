@@ -10,8 +10,8 @@
 [ext_resource path="res://Characters/Breakables/Torch/CleanLight.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Characters/Breakables/Torch/BreakableTorch.tscn" type="PackedScene" id=9]
 [ext_resource path="res://Characters/NPC/BaseNeutralNPC.tscn" type="PackedScene" id=10]
-[ext_resource path="res://Characters/Enemies/Flying Creature/FlyingCreature.tscn" type="PackedScene" id=11]
 [ext_resource path="res://Characters/Enemies/GenericMonster/GenericMonster.tscn" type="PackedScene" id=12]
+[ext_resource path="res://Characters/Breakables/NavigationObstacle.tscn" type="PackedScene" id=13]
 
 [sub_resource type="GDScript" id=2]
 
@@ -209,16 +209,15 @@ scale = Vector2( 0.703125, 1 )
 [node name="Boy" parent="." index="18" instance=ExtResource( 10 )]
 position = Vector2( 34, 76 )
 
-[node name="FlyingCreature" parent="." index="19" instance=ExtResource( 11 )]
-position = Vector2( 209, 39 )
-detection_radius = 100
-
-[node name="NPCWarrior" parent="." index="20" instance=ExtResource( 6 )]
+[node name="NPCWarrior" parent="." index="19" instance=ExtResource( 6 )]
 position = Vector2( 184, 43 )
 
-[node name="GenericMonster" parent="." index="21" instance=ExtResource( 12 )]
+[node name="GenericMonster" parent="." index="20" instance=ExtResource( 12 )]
 position = Vector2( 145, 132 )
 
-[node name="NavigationPolygonInstance" type="NavigationPolygonInstance" parent="." index="22"]
+[node name="NavigationPolygonInstance" type="NavigationPolygonInstance" parent="." index="21"]
 position = Vector2( 1, -2 )
 navpoly = SubResource( 6 )
+
+[node name="NavigationObstacle" parent="." index="22" instance=ExtResource( 13 )]
+position = Vector2( 78, 101 )

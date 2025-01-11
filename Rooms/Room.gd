@@ -118,6 +118,8 @@ func setup_navigation():
 	Navigation2DServer.region_set_map(nav_region, NavigationManager.nav_map)
 	Navigation2DServer.region_set_navpoly(nav_region, nav_poly)
 	Navigation2DServer.region_set_transform(nav_region, navigation_instance.global_transform)
+	Navigation2DServer.region_set_navigation_layers(nav_region, 1)
+	Navigation2DServer.region_set_travel_cost(nav_region, 1)
 	
 	print("Navigation mesh configurado con éxito usando polígono existente")
 

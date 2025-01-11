@@ -18,59 +18,19 @@ var path_update_timer: float = 0.0
 var last_valid_position: Vector2 = Vector2.ZERO
 
 # Colores debug
-const COLOR_VALID_PATH := Color(0, 1, 0, 0.5)
+const COLOR_VALID_PATH := Color(0, 0, 1, 0.5)
 const COLOR_INVALID_PATH := Color(1, 0, 0, 0.5)
 
 func _init(entity: Node).(entity):
 	pass
 
 func initialize():
-	# Primero verificar que el mapa esté activo
-	var agent_map = Navigation2DServer.agent_get_map(nav_agent)
-	print("Agent map: ", agent_map)
-	print("Navigation map: ", NavigationManager.nav_map)
-	if agent_map != NavigationManager.nav_map:
-		print("Agent is on wrong map, updating...")
-		Navigation2DServer.agent_set_map(nav_agent, NavigationManager.nav_map)
-	# Primero obtener las referencias necesarias
+
 	player = entity.get_node("/root/Game/Player")
 	movement_component = entity.get_component("movement")
 	
-	
-	
-	# Forzar una actualización del mapa después de añadir el agente
-	Navigation2DServer.map_force_update(NavigationManager.nav_map)
-	
-	# Resto de la configuración
-	Navigation2DServer.agent_set_radius(nav_agent, 24.0)   
-	
-	# Usar la velocidad del movement_component
-	if movement_component:
-		Navigation2DServer.agent_set_max_speed(nav_agent, movement_component.default_speed)
-	else:
-		push_error("AIComponent: MovementComponent no encontrado")
-	
-	# Resto de la configuración del agente
-	Navigation2DServer.agent_set_neighbor_dist(nav_agent, 100.0)  # Aumentado para mejor detección
-	Navigation2DServer.agent_set_max_neighbors(nav_agent, 10)
-	Navigation2DServer.agent_set_time_horizon(nav_agent, 0.5)    # Aumentado para evitación más suave
-	
-	Navigation2DServer.agent_set_velocity(nav_agent, Vector2.ZERO)
-	Navigation2DServer.agent_set_target_velocity(nav_agent, Vector2.ZERO)
-	
-	print("Setting up callback for entity ID: ", entity.get_instance_id())
-
-	Navigation2DServer.agent_set_callback(
-		nav_agent,
-		self.get_instance_id(),
-		"on_navigation_velocity_computed" 
-	)
-	
-	# Añadir verificación
-	var is_callback_set = Navigation2DServer.agent_is_map_changed(nav_agent)
-	print("Agent callback status: ", is_callback_set)
-	print("Agent map: ", Navigation2DServer.agent_get_map(nav_agent))
-
+	nav_agent = Navigation2DServer.agent_create();
+	Navigation2DServer.agent_set_map(nav_agent,NavigationManager.nav_map)
 	# Configurar debug si está activo
 	if debug_draw_path:
 		debug_line = Line2D.new()
@@ -82,9 +42,6 @@ func initialize():
 func update(delta: float):
 	if not player or not movement_component:
 		return
-
-	# Actualizar la posición del agente
-	Navigation2DServer.agent_set_position(nav_agent, entity.global_position)
 
 	path_update_timer += delta
 	if path_update_timer >= path_update_interval:
@@ -103,6 +60,9 @@ func is_point_valid(point: Vector2) -> bool:
 	"""
 	var closest = Navigation2DServer.map_get_closest_point(NavigationManager.nav_map, point)
 	var owner_rid = Navigation2DServer.map_get_closest_point_owner(NavigationManager.nav_map, point)
+	if owner_rid != RID():
+		print("cost")
+		print(Navigation2DServer.region_get_travel_cost(owner_rid))
 	
 	# Un punto es válido si:
 	# 1. Está cerca del punto más cercano en el navigation mesh
@@ -156,7 +116,8 @@ func calculate_path_with_waypoints(start: Vector2, end: Vector2) -> PoolVector2A
 		NavigationManager.nav_map,
 		start,
 		end,
-		true # optimize
+		true,
+		1
 	)
 	
 	# Verificar si el path directo es válido
@@ -225,7 +186,12 @@ func is_waypoint_necessary(prev: Vector2, current: Vector2, next: Vector2) -> bo
 	Determina si un waypoint es necesario para la navegación
 	"""
 	# Comprobar si podemos ir directamente de prev a next
-	var direct_path = navigation.get_simple_path(prev, next, false)
+	var direct_path = Navigation2DServer.map_get_path(
+		NavigationManager.nav_map,
+		prev,
+		next,
+		true  # optimize parameter
+	)
 	if direct_path.size() <= 2:
 		return false
 		
@@ -258,8 +224,6 @@ func _update_path():
 func _follow_path():
 	if path.empty():
 		movement_component.stop()
-		Navigation2DServer.agent_set_velocity(nav_agent, Vector2.ZERO)
-		Navigation2DServer.agent_set_target_velocity(nav_agent, Vector2.ZERO)
 		return
 
 	var target = path[0]
@@ -269,8 +233,6 @@ func _follow_path():
 		path.remove(0)
 		if path.empty():
 			movement_component.stop()
-			Navigation2DServer.agent_set_velocity(nav_agent, Vector2.ZERO)
-			Navigation2DServer.agent_set_target_velocity(nav_agent, Vector2.ZERO)
 			return
 		target = path[0]
 	
@@ -278,13 +240,8 @@ func _follow_path():
 	var current_velocity = movement_component.get_velocity()
 	var target_velocity = direction * movement_component.default_speed
 	
-	print("Current velocity: ", current_velocity)
-	print("Setting target velocity: ", target_velocity)
-	
-	# Establecer PRIMERO la velocidad actual
-	Navigation2DServer.agent_set_velocity(nav_agent, current_velocity)
-	# LUEGO la velocidad objetivo
-	Navigation2DServer.agent_set_target_velocity(nav_agent, target_velocity)
+	# print("Current velocity: ", current_velocity)
+	# print("Setting target velocity: ", target_velocity)
 	
 	# Movimiento directo como fallback
 	movement_component.set_movement_direction(direction)
