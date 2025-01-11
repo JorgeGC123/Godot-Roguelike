@@ -1,9 +1,17 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Rooms/Room.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Rooms/RoomWithWeapon.gd" type="Script" id=2]
+
+[sub_resource type="NavigationPolygon" id=1]
+vertices = PoolVector2Array( 183, 149, 24, 151, 24, 20, 185, 87, 218, 20, 218, 86 )
+polygons = [ PoolIntArray( 0, 1, 2, 3 ), PoolIntArray( 3, 2, 4, 5 ) ]
+outlines = [ PoolVector2Array( 24, 20, 24, 151, 183, 149, 185, 87, 218, 86, 218, 20 ) ]
 
 [node name="RoomWithWeapon" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 
 [node name="WeaponPos" type="Position2D" parent="." index="8"]
+
+[node name="NavigationPolygonInstance" type="NavigationPolygonInstance" parent="." index="10"]
+navpoly = SubResource( 1 )

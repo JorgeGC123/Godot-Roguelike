@@ -60,9 +60,6 @@ func is_point_valid(point: Vector2) -> bool:
 	"""
 	var closest = Navigation2DServer.map_get_closest_point(NavigationManager.nav_map, point)
 	var owner_rid = Navigation2DServer.map_get_closest_point_owner(NavigationManager.nav_map, point)
-	if owner_rid != RID():
-		print("cost")
-		print(Navigation2DServer.region_get_travel_cost(owner_rid))
 	
 	# Un punto es válido si:
 	# 1. Está cerca del punto más cercano en el navigation mesh

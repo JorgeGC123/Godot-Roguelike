@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Rooms/Room.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Rooms/Furniture and Traps/Door.tscn" type="PackedScene" id=2]
@@ -7,6 +7,11 @@
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 16, 8 )
+
+[sub_resource type="NavigationPolygon" id=2]
+vertices = PoolVector2Array( 49, 75, 18, 35, 280, 37, 277, 184, 50, 185 )
+polygons = [ PoolIntArray( 0, 1, 2, 3 ), PoolIntArray( 0, 3, 4 ) ]
+outlines = [ PoolVector2Array( 49, 75, 50, 185, 277, 184, 280, 37, 18, 35 ) ]
 
 [node name="Room3" instance=ExtResource( 1 )]
 
@@ -52,3 +57,7 @@ shape = SubResource( 1 )
 
 [node name="CleanLight" parent="." index="9" instance=ExtResource( 4 )]
 position = Vector2( 53, 108 )
+
+[node name="NavigationPolygonInstance" type="NavigationPolygonInstance" parent="." index="10"]
+position = Vector2( 1, -2 )
+navpoly = SubResource( 2 )
