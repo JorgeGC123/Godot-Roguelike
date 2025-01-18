@@ -176,6 +176,7 @@ texture = ExtResource( 3 )
 
 [node name="CleanLight" parent="." index="9" instance=ExtResource( 8 )]
 position = Vector2( 16, 102 )
+obstacle_radius = 14.0
 shape_color = Color( 255, 0, 0, 0.5 )
 debug_draw = true
 
@@ -191,6 +192,7 @@ on_floor = true
 [node name="Breakable2" parent="." index="12" instance=ExtResource( 5 )]
 position = Vector2( 82, 75 )
 collision_layer = 5
+obstacle_radius = 14.0
 shape_color = Color( 255, 0, 0, 0.5 )
 debug_draw = true
 
@@ -200,12 +202,14 @@ position = Vector2( 55, 55 )
 [node name="BreakableTorch" parent="." index="15" instance=ExtResource( 9 )]
 position = Vector2( 47, 28 )
 scale = Vector2( 0.703125, 1 )
+obstacle_radius = 14.0
 shape_color = Color( 255, 0, 0, 0.5 )
 debug_draw = true
 
 [node name="BreakableTorch2" parent="." index="16" instance=ExtResource( 9 )]
 position = Vector2( 157, 28 )
 scale = Vector2( 0.703125, 1 )
+obstacle_radius = 14.0
 shape_color = Color( 255, 0, 0, 0.5 )
 debug_draw = true
 
@@ -224,5 +228,6 @@ navpoly = SubResource( 6 )
 
 [node name="Breakable3" parent="." index="21" instance=ExtResource( 5 )]
 position = Vector2( 84, 114 )
+obstacle_radius = 14.0
 shape_color = Color( 255, 0, 0, 0.5 )
 debug_draw = true

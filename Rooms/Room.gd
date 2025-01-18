@@ -61,38 +61,97 @@ func update_navigation_with_all_breakables() -> void:
 	var working_navpoly = NavigationPolygon.new()
 	var nav_instance = get_node("NavigationPolygonInstance")
 	
-	# Añadir el outline base
+	# Obtener los límites del área navegable base
+	var bounds = get_navigation_bounds(nav_instance.navpoly)
+	print("Límites del área navegable: ", bounds)
+	
+	# Añadir TODOS los outlines originales
 	for i in range(nav_instance.navpoly.get_outline_count()):
-		working_navpoly.add_outline(
-			nav_instance.navpoly.get_outline(i)
-		)
+		working_navpoly.add_outline(nav_instance.navpoly.get_outline(i))
+	print("Añadidos ", nav_instance.navpoly.get_outline_count(), " outlines originales")
 	
 	# Añadir obstáculos para cada breakable activo
 	for breakable in active_breakables:
-		if not breakable.is_orbiting:  # No añadir obstáculo si está siendo llevado
+		if not breakable.is_orbiting:
 			var local_pos = nav_instance.to_local(breakable.global_position)
-			var obstacle_points = create_obstacle_points(local_pos, breakable.obstacle_radius)
-			working_navpoly.add_outline(obstacle_points)
-			print("Añadido obstáculo para breakable en posición: ", breakable.global_position)
+			
+			# Verificar que la posición está dentro de los límites
+			if is_position_valid(local_pos, bounds, breakable.obstacle_radius):
+				var obstacle_points = create_obstacle_points(local_pos, breakable.obstacle_radius)
+				if validate_obstacle_points(obstacle_points, bounds):
+					working_navpoly.add_outline(obstacle_points)
+					print("Obstáculo añadido para breakable en: ", local_pos)
+				else:
+					push_warning("Puntos de obstáculo inválidos para breakable en: " + str(local_pos))
+			else:
+				push_warning("Posición inválida para breakable: " + str(local_pos))
 	
+	# Intentar generar los polígonos y verificar el resultado
 	working_navpoly.make_polygons_from_outlines()
 	
 	if working_navpoly.get_polygon_count() > 0:
+		print("Polígonos generados: ", working_navpoly.get_polygon_count())
 		Navigation2DServer.region_set_navpoly(nav_region, working_navpoly)
 		Navigation2DServer.map_force_update(NavigationManager.nav_map)
 		print("Navegación actualizada exitosamente")
 	else:
-		push_warning("No se generaron polígonos en la actualización de navegación")
+		push_error("Fallo al generar polígonos de navegación")
+		restore_base_navigation()
+
+func get_navigation_bounds(navpoly: NavigationPolygon) -> Dictionary:
+	var outline = navpoly.get_outline(0)
+	var min_x = INF
+	var max_x = -INF
+	var min_y = INF
+	var max_y = -INF
+	
+	for point in outline:
+		min_x = min(min_x, point.x)
+		max_x = max(max_x, point.x)
+		min_y = min(min_y, point.y)
+		max_y = max(max_y, point.y)
+	
+	return {
+		"min_x": min_x,
+		"max_x": max_x,
+		"min_y": min_y,
+		"max_y": max_y
+	}
+
+func is_position_valid(pos: Vector2, bounds: Dictionary, radius: float) -> bool:
+	var margin = radius * 1.5  # Añadir un margen de seguridad
+	return (pos.x - margin >= bounds.min_x and 
+			pos.x + margin <= bounds.max_x and 
+			pos.y - margin >= bounds.min_y and 
+			pos.y + margin <= bounds.max_y)
+
+func validate_obstacle_points(points: PoolVector2Array, bounds: Dictionary) -> bool:
+	for point in points:
+		if not (point.x >= bounds.min_x and point.x <= bounds.max_x and
+				point.y >= bounds.min_y and point.y <= bounds.max_y):
+			return false
+	return true
+
+func restore_base_navigation() -> void:
+	var nav_instance = get_node("NavigationPolygonInstance")
+	if nav_instance and nav_instance.navpoly:
+		var base_navpoly = nav_instance.navpoly.duplicate()
+		Navigation2DServer.region_set_navpoly(nav_region, base_navpoly)
+		Navigation2DServer.map_force_update(NavigationManager.nav_map)
+		print("Navegación restaurada a estado base")
 
 func create_obstacle_points(position: Vector2, radius: float) -> PoolVector2Array:
 	var points = PoolVector2Array()
 	var num_sides = 8
 	
+	# Ajustar el radio si es muy grande
+	var adjusted_radius = min(radius, 32.0)  # Limitar el radio máximo
+	
 	for i in range(num_sides):
 		var angle = -i * 2 * PI / num_sides
 		var point = Vector2(
-			position.x + cos(angle) * radius,
-			position.y + sin(angle) * radius
+			position.x + cos(angle) * adjusted_radius,
+			position.y + sin(angle) * adjusted_radius
 		)
 		points.push_back(point)
 	

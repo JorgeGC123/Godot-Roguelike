@@ -14,7 +14,7 @@ var knockback_direction: Vector2 = Vector2.ZERO
 var knockback_force: int = 50
 
 var nav_region: RID
-var obstacle_radius: float = 8.0 # Adjust based on your breakable size
+export var obstacle_radius: float = 14.0 # Adjust based on your breakable size
 
 export var shape_color: Color = Color(255.0, 0.0, 0.0, 0.5)
 export var debug_draw: bool = true
