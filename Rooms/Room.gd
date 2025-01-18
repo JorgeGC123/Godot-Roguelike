@@ -1,7 +1,9 @@
 extends Node2D
 class_name DungeonRoom
-
+signal navigation_ready(nav_region)
 export(bool) var boss_room: bool = false
+var active_breakables: Array = []
+
 
 const SPAWN_EXPLOSION_SCENE: PackedScene = preload("res://Characters/Enemies/SpawnExplosion.tscn")
 
@@ -27,9 +29,74 @@ var breakable_positions: Array  # Almacena posiciones potenciales para spawnear 
 
 func _ready() -> void:
 	num_enemies = enemy_positions_container.get_child_count()
-	determine_breakable_positions()
-	spawn_breakables(randi() % 3 + 1)
 	setup_navigation()
+	find_existing_breakables()
+	
+	# Usar call_deferred para asegurar que la actualización ocurra después de que todo esté inicializado
+	call_deferred("initial_navigation_update")
+
+	connect("child_entered_tree", self, "_on_child_entered_tree")
+	connect("child_exiting_tree", self, "_on_child_exiting_tree")
+
+	#determine_breakable_positions()
+	#spawn_breakables(randi() % 3 + 1)
+	
+func _on_child_entered_tree(node: Node) -> void:
+	if node is Breakable:
+		active_breakables.append(node)
+		update_navigation_with_all_breakables()
+
+func _on_child_exiting_tree(node: Node) -> void:
+	if node is Breakable:
+		active_breakables.erase(node)
+		update_navigation_with_all_breakables()
+
+func update_navigation_with_all_breakables() -> void:
+	if not nav_region:
+		push_warning("No hay región de navegación disponible")
+		return
+		
+	print("Actualizando navegación con ", active_breakables.size(), " breakables activos")
+	
+	var working_navpoly = NavigationPolygon.new()
+	var nav_instance = get_node("NavigationPolygonInstance")
+	
+	# Añadir el outline base
+	for i in range(nav_instance.navpoly.get_outline_count()):
+		working_navpoly.add_outline(
+			nav_instance.navpoly.get_outline(i)
+		)
+	
+	# Añadir obstáculos para cada breakable activo
+	for breakable in active_breakables:
+		if not breakable.is_orbiting:  # No añadir obstáculo si está siendo llevado
+			var local_pos = nav_instance.to_local(breakable.global_position)
+			var obstacle_points = create_obstacle_points(local_pos, breakable.obstacle_radius)
+			working_navpoly.add_outline(obstacle_points)
+			print("Añadido obstáculo para breakable en posición: ", breakable.global_position)
+	
+	working_navpoly.make_polygons_from_outlines()
+	
+	if working_navpoly.get_polygon_count() > 0:
+		Navigation2DServer.region_set_navpoly(nav_region, working_navpoly)
+		Navigation2DServer.map_force_update(NavigationManager.nav_map)
+		print("Navegación actualizada exitosamente")
+	else:
+		push_warning("No se generaron polígonos en la actualización de navegación")
+
+func create_obstacle_points(position: Vector2, radius: float) -> PoolVector2Array:
+	var points = PoolVector2Array()
+	var num_sides = 8
+	
+	for i in range(num_sides):
+		var angle = -i * 2 * PI / num_sides
+		var point = Vector2(
+			position.x + cos(angle) * radius,
+			position.y + sin(angle) * radius
+		)
+		points.push_back(point)
+	
+	return points
 	
 func determine_breakable_positions() -> void:
 	breakable_positions = []
@@ -120,9 +187,26 @@ func setup_navigation():
 	Navigation2DServer.region_set_transform(nav_region, navigation_instance.global_transform)
 	Navigation2DServer.region_set_navigation_layers(nav_region, 1)
 	Navigation2DServer.region_set_travel_cost(nav_region, 1)
-	
-	print("Navigation mesh configurado con éxito usando polígono existente")
+	Navigation2DServer.map_force_update(NavigationManager.nav_map)
+	print("Emitiendo señal navigation_ready con región: ", nav_region)
+	emit_signal("navigation_ready", nav_region)
 
 func _exit_tree():
 	if nav_region:
 		Navigation2DServer.free_rid(nav_region)
+
+func initial_navigation_update() -> void:
+	# Asegurarse de que la navegación esté configurada
+	if nav_region:
+		print("Actualizando navegación inicial con ", active_breakables.size(), " breakables")
+		update_navigation_with_all_breakables()
+	else:
+		push_warning("Navigation no está lista durante la actualización inicial")
+
+func find_existing_breakables() -> void:
+	# Buscar todos los breakables que ya existen en la escena
+	for child in get_children():
+		if child is Breakable:
+			if not active_breakables.has(child):  # Evitar duplicados
+				active_breakables.append(child)
+				print("Breakable encontrado y registrado: ", child.name)

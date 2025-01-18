@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://Rooms/Room.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Rooms/Furniture and Traps/Door.tscn" type="PackedScene" id=2]
@@ -11,7 +11,6 @@
 [ext_resource path="res://Characters/Breakables/Torch/BreakableTorch.tscn" type="PackedScene" id=9]
 [ext_resource path="res://Characters/NPC/BaseNeutralNPC.tscn" type="PackedScene" id=10]
 [ext_resource path="res://Characters/Enemies/GenericMonster/GenericMonster.tscn" type="PackedScene" id=12]
-[ext_resource path="res://Characters/Breakables/NavigationObstacle.tscn" type="PackedScene" id=13]
 
 [sub_resource type="GDScript" id=2]
 
@@ -177,6 +176,8 @@ texture = ExtResource( 3 )
 
 [node name="CleanLight" parent="." index="9" instance=ExtResource( 8 )]
 position = Vector2( 16, 102 )
+shape_color = Color( 255, 0, 0, 0.5 )
+debug_draw = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerDetector" index="0"]
 position = Vector2( 112, 48 )
@@ -187,37 +188,41 @@ disabled = true
 position = Vector2( 208, 88 )
 on_floor = true
 
-[node name="Breakable" parent="." index="12" instance=ExtResource( 5 )]
-position = Vector2( 167, 55 )
-collision_layer = 5
-
-[node name="Breakable2" parent="." index="13" instance=ExtResource( 5 )]
+[node name="Breakable2" parent="." index="12" instance=ExtResource( 5 )]
 position = Vector2( 82, 75 )
 collision_layer = 5
+shape_color = Color( 255, 0, 0, 0.5 )
+debug_draw = true
 
-[node name="Stairs" parent="." index="15" instance=ExtResource( 7 )]
+[node name="Stairs" parent="." index="14" instance=ExtResource( 7 )]
 position = Vector2( 55, 55 )
 
-[node name="BreakableTorch" parent="." index="16" instance=ExtResource( 9 )]
-position = Vector2( 47, 24 )
+[node name="BreakableTorch" parent="." index="15" instance=ExtResource( 9 )]
+position = Vector2( 47, 28 )
 scale = Vector2( 0.703125, 1 )
+shape_color = Color( 255, 0, 0, 0.5 )
+debug_draw = true
 
-[node name="BreakableTorch2" parent="." index="17" instance=ExtResource( 9 )]
-position = Vector2( 158, 25 )
+[node name="BreakableTorch2" parent="." index="16" instance=ExtResource( 9 )]
+position = Vector2( 157, 28 )
 scale = Vector2( 0.703125, 1 )
+shape_color = Color( 255, 0, 0, 0.5 )
+debug_draw = true
 
-[node name="Boy" parent="." index="18" instance=ExtResource( 10 )]
+[node name="Boy" parent="." index="17" instance=ExtResource( 10 )]
 position = Vector2( 34, 76 )
 
-[node name="NPCWarrior" parent="." index="19" instance=ExtResource( 6 )]
+[node name="NPCWarrior" parent="." index="18" instance=ExtResource( 6 )]
 position = Vector2( 184, 43 )
 
-[node name="GenericMonster" parent="." index="20" instance=ExtResource( 12 )]
+[node name="GenericMonster" parent="." index="19" instance=ExtResource( 12 )]
 position = Vector2( 145, 132 )
 
-[node name="NavigationPolygonInstance" type="NavigationPolygonInstance" parent="." index="21"]
+[node name="NavigationPolygonInstance" type="NavigationPolygonInstance" parent="." index="20"]
 position = Vector2( 1, -2 )
 navpoly = SubResource( 6 )
 
-[node name="NavigationObstacle" parent="." index="22" instance=ExtResource( 13 )]
-position = Vector2( 78, 101 )
+[node name="Breakable3" parent="." index="21" instance=ExtResource( 5 )]
+position = Vector2( 84, 114 )
+shape_color = Color( 255, 0, 0, 0.5 )
+debug_draw = true

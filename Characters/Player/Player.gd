@@ -10,6 +10,8 @@ export (PackedScene) var Player
 signal weapon_switched(prev_index, new_index)
 signal weapon_picked_up(weapon_texture)
 signal weapon_droped(index)
+signal breakable_picked_up(breakable_node)
+signal breakable_dropped(breakable_node)
 
 onready var parent: Node2D = get_parent()
 onready var weapons: Node2D = get_node("Weapons")
@@ -166,26 +168,28 @@ func pick_up_weapon(weapon: Node2D) -> void:
 	
 
 func pick_up_breakable(breakable: Node) -> void:
-	if held_breakable and is_instance_valid(held_breakable):
-		var current_orbit_position = held_breakable.global_position  # Obtener la posición actual en la órbita
-		remove_child(held_breakable)
-		breakableScene.add_child(held_breakable)
-		held_breakable.global_position = current_orbit_position  # Usar la posición actual en la órbita
-		held_breakable.is_orbiting = false  # Detener órbita al soltar
-		held_breakable = null  # Resetear la referencia
-		print('lo soltamos')
-		return  
+    if held_breakable and is_instance_valid(held_breakable):
+        var current_orbit_position = held_breakable.global_position
+        remove_child(held_breakable)
+        breakableScene.add_child(held_breakable)
+        held_breakable.global_position = current_orbit_position
+        held_breakable.is_orbiting = false
+        emit_signal("breakable_dropped", held_breakable)  # Emitir señal al soltar
+        held_breakable = null
+        print('lo soltamos')
+        return  
 
-	held_breakable = breakable
-	if held_breakable and is_instance_valid(held_breakable):
-		breakableScene = breakable.get_parent()
-		breakableScene.remove_child(breakable)
-		add_child(breakable)
-		breakable.position = Vector2(0, -15)  # Ajusta esta posición según necesites
-		near_breakable = null
-		held_breakable.player = self  # Establecer la referencia al jugador
-		held_breakable.is_orbiting = true  # Iniciar órbita al recoger
-		print('lo pillamos?')
+    held_breakable = breakable
+    if held_breakable and is_instance_valid(held_breakable):
+        breakableScene = breakable.get_parent()
+        breakableScene.remove_child(breakable)
+        add_child(breakable)
+        breakable.position = Vector2(0, -15)
+        near_breakable = null
+        held_breakable.player = self
+        held_breakable.is_orbiting = true
+        emit_signal("breakable_picked_up", held_breakable)  # Emitir señal al recoger
+        print('lo pillamos?')
 
 	
 func _drop_weapon() -> void:
