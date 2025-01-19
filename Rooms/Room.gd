@@ -4,7 +4,6 @@ signal navigation_ready(nav_region)
 export(bool) var boss_room: bool = false
 var active_breakables: Array = []
 
-
 const SPAWN_EXPLOSION_SCENE: PackedScene = preload("res://Characters/Enemies/SpawnExplosion.tscn")
 
 const ENEMY_SCENES: Dictionary = {
@@ -17,13 +16,12 @@ var num_enemies: int
 var nav_region: RID
 const WALKABLE_TILES = [14]
 
-
 onready var tilemap: TileMap = get_node("TileMap2")
 onready var entrance: Node2D = get_node("Entrance")
 onready var door_container: Node2D = get_node("Doors")
 onready var enemy_positions_container: Node2D = get_node("EnemyPositions")
 onready var player_detector: Area2D = get_node("PlayerDetector")
-const BREAKABLE_SCENE: PackedScene = preload("res://Characters/Breakables/Breakable.tscn")  # Asegúrate de cambiar la ruta
+const BREAKABLE_SCENE: PackedScene = preload("res://Characters/Breakables/Breakable.tscn") 
 
 var breakable_positions: Array  # Almacena posiciones potenciales para spawnear Breakables
 
@@ -92,8 +90,6 @@ func update_navigation_with_all_breakables() -> void:
 	if working_navpoly.get_polygon_count() > 0:
 		print("Polígonos generados: ", working_navpoly.get_polygon_count())
 		Navigation2DServer.region_set_navpoly(nav_region, working_navpoly)
-		Navigation2DServer.map_force_update(NavigationManager.nav_map)
-		print("Navegación actualizada exitosamente")
 	else:
 		push_error("Fallo al generar polígonos de navegación")
 		restore_base_navigation()
@@ -137,7 +133,6 @@ func restore_base_navigation() -> void:
 	if nav_instance and nav_instance.navpoly:
 		var base_navpoly = nav_instance.navpoly.duplicate()
 		Navigation2DServer.region_set_navpoly(nav_region, base_navpoly)
-		Navigation2DServer.map_force_update(NavigationManager.nav_map)
 		print("Navegación restaurada a estado base")
 
 func create_obstacle_points(position: Vector2, radius: float) -> PoolVector2Array:
@@ -246,7 +241,6 @@ func setup_navigation():
 	Navigation2DServer.region_set_transform(nav_region, navigation_instance.global_transform)
 	Navigation2DServer.region_set_navigation_layers(nav_region, 1)
 	Navigation2DServer.region_set_travel_cost(nav_region, 1)
-	Navigation2DServer.map_force_update(NavigationManager.nav_map)
 	print("Emitiendo señal navigation_ready con región: ", nav_region)
 	emit_signal("navigation_ready", nav_region)
 

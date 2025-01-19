@@ -14,18 +14,8 @@ func force_update():
 	Navigation2DServer.map_set_cell_size(nav_map, 8.0)
 	Navigation2DServer.map_set_edge_connection_margin(nav_map, 10.0)
 	Navigation2DServer.map_force_update(nav_map)
-	
-	# Esperar un frame y actualizar de nuevo
-	yield(get_tree(), "idle_frame")
-	Navigation2DServer.map_force_update(nav_map)
-	print("Navigation map force updated")
 
 func _ready():
 	nav_map = get_tree().get_root().get_world_2d().get_navigation_map()
 	print("Using default navigation map: ", nav_map)
 	Navigation2DServer.map_set_active(nav_map, true)
-	force_update()
-
-func _physics_process(_delta):
-	if not Navigation2DServer.map_is_active(nav_map):
-		force_update()
