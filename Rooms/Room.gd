@@ -2,8 +2,7 @@ extends Node2D
 class_name DungeonRoom
 
 """
-TODO + Known issue: cuando placeas 1 breakable cerca de una zona no navegable (otro breakable o una parte sin navpoly del mapa) el breakable no se toma en cuenta
-Esto quiere decir que  
+TODO + Known issue: cuando placeas 1 breakable fuera de una zona navegable (una parte sin navpoly del mapa) el breakable no se toma en cuenta y el npc puede chocar
 """
 
 signal navigation_ready(nav_region)
@@ -60,70 +59,205 @@ func update_navigation_with_all_breakables() -> void:
 		push_warning("No hay región de navegación disponible")
 		return
 	
+	print("Iniciando actualización de navegación con ", active_breakables.size(), " breakables")
+	
 	var working_navpoly = NavigationPolygon.new()
 	var nav_instance = get_node("NavigationPolygonInstance")
 	
-	# Obtener los límites del área navegable base
-	var bounds = get_navigation_bounds(nav_instance.navpoly)
+	# Obtener y añadir TODOS los outlines originales
+	var original_outline_count = nav_instance.navpoly.get_outline_count()
+	for i in range(original_outline_count):
+		var outline = nav_instance.navpoly.get_outline(i)
+		working_navpoly.add_outline(outline)
+		if i == 0:
+			print("Añadido outline base con ", outline.size(), " puntos")
+		else:
+			print("Añadido hueco original #", i, " con ", outline.size(), " puntos")
 	
-	# Añadir TODOS los outlines originales
-	for i in range(nav_instance.navpoly.get_outline_count()):
-		working_navpoly.add_outline(nav_instance.navpoly.get_outline(i))
+	# Agrupar breakables cercanos
+	var breakable_groups = group_nearby_breakables(active_breakables, nav_instance)
+	print("Creados ", breakable_groups.size(), " grupos de breakables")
 	
-	# Crear una copia de los breakables activos para procesamiento
-	var breakables_to_process = active_breakables.duplicate()
+	# Obtener el outline base para validación
+	var base_outline = nav_instance.navpoly.get_outline(0)
 	
-	# Procesar breakables por proximidad
-	while not breakables_to_process.empty():
-		var current_breakable = breakables_to_process.pop_front()
-		if current_breakable.is_orbiting:
-			continue
+	# Crear un outline para cada grupo
+	var outlines_added = 0
+	for group in breakable_groups:
+		print("Procesando grupo con ", group.size(), " breakables")
+		var obstacle_outline = create_merged_obstacle(group, nav_instance)
+		if obstacle_outline.size() > 0:
+			# Verificar que el outline está en una zona válida
+			var valid_position = true
+			for point in obstacle_outline:
+				if not is_point_in_navigable_area(point, nav_instance.navpoly):
+					valid_position = false
+					break
 			
-		var local_pos = nav_instance.to_local(current_breakable.global_position)
-		var obstacle_points = create_obstacle_points(local_pos, current_breakable.obstacle_radius)
-		
-		if validate_obstacle_points(obstacle_points, bounds):
-			working_navpoly.add_outline(obstacle_points)
+			if valid_position:
+				working_navpoly.add_outline(obstacle_outline)
+				outlines_added += 1
+				print("Añadido outline para grupo con ", obstacle_outline.size(), " puntos")
+			else:
+				print("Outline descartado - puntos en zona no navegable")
 	
-	# Generar polígonos
+	print("Total de outlines añadidos: ", outlines_added)
 	working_navpoly.make_polygons_from_outlines()
 	
 	if working_navpoly.get_polygon_count() > 0:
+		print("Polígonos generados: ", working_navpoly.get_polygon_count())
 		Navigation2DServer.region_set_navpoly(nav_region, working_navpoly)
 	else:
 		push_error("Fallo al generar polígonos de navegación")
 		restore_base_navigation()
 
-func get_navigation_bounds(navpoly: NavigationPolygon) -> Dictionary:
-	var outline = navpoly.get_outline(0)
-	var min_x = INF
-	var max_x = -INF
-	var min_y = INF
-	var max_y = -INF
+func is_point_in_navigable_area(point: Vector2, navpoly: NavigationPolygon) -> bool:
+	# Primero verificar si está dentro del outline base
+	if not Geometry.is_point_in_polygon(point, navpoly.get_outline(0)):
+		return false
+		
+	# Luego verificar que no está dentro de ningún hueco original
+	for i in range(1, navpoly.get_outline_count()):
+		if Geometry.is_point_in_polygon(point, navpoly.get_outline(i)):
+			return false
 	
-	for point in outline:
-		min_x = min(min_x, point.x)
-		max_x = max(max_x, point.x)
-		min_y = min(min_y, point.y)
-		max_y = max(max_y, point.y)
-	
-	return {
-		"min_x": min_x,
-		"max_x": max_x,
-		"min_y": min_y,
-		"max_y": max_y
-	}
+	return true
 
-func validate_obstacle_points(points: PoolVector2Array, bounds: Dictionary) -> bool:
-	var valid_points = 0
-	var minimum_valid_percentage = 0.5
+func _draw() -> void:
+	if not Engine.editor_hint:  # Solo en runtime
+		var nav_instance = get_node("NavigationPolygonInstance")
+		if nav_instance and nav_instance.navpoly:
+			# Dibujar el polígono base
+			var base_outline = nav_instance.navpoly.get_outline(0)
+			draw_polyline(base_outline, Color.green, 2.0)
+			
+			# Dibujar los obstáculos
+			for i in range(1, nav_instance.navpoly.get_outline_count()):
+				var obstacle_outline = nav_instance.navpoly.get_outline(i)
+				draw_polyline(obstacle_outline, Color.red, 2.0)
+
+func group_nearby_breakables(breakables: Array, nav_instance: Node2D) -> Array:
+	var groups = []
+	var processed = []
 	
-	for point in points:
-		if point.x >= bounds.min_x and point.x <= bounds.max_x and \
-		   point.y >= bounds.min_y and point.y <= bounds.max_y:
-			valid_points += 1
+	for breakable in breakables:
+		if breakable.is_orbiting or processed.has(breakable):
+			continue
+		
+		var current_group = [breakable]
+		processed.append(breakable)
+		
+		# Buscar breakables cercanos
+		for other in breakables:
+			if other == breakable or other.is_orbiting or processed.has(other):
+				continue
+				
+			var pos1 = nav_instance.to_local(breakable.global_position)
+			var pos2 = nav_instance.to_local(other.global_position)
+			var distance = pos1.distance_to(pos2)
+			
+			# Si están cerca, añadir al grupo
+			if distance <= (breakable.obstacle_radius + other.obstacle_radius) * 1.5:
+				current_group.append(other)
+				processed.append(other)
+				print("Breakable agrupado: distancia = ", distance)
+		
+		groups.append(current_group)
+		print("Grupo creado con ", current_group.size(), " breakables")
 	
-	return float(valid_points) / points.size() >= minimum_valid_percentage
+	return groups
+
+func create_merged_obstacle(breakables: Array, nav_instance: Node2D) -> PoolVector2Array:
+	if breakables.empty():
+		return PoolVector2Array()
+	
+	print("Creando obstáculo para ", breakables.size(), " breakables")
+	
+	# Si solo hay un breakable, usar la lógica normal
+	if breakables.size() == 1:
+		var pos = nav_instance.to_local(breakables[0].global_position)
+		return create_single_obstacle(pos, breakables[0].obstacle_radius)
+	
+	# Para múltiples breakables, calcular el centro
+	var center = Vector2.ZERO
+	for breakable in breakables:
+		var pos = nav_instance.to_local(breakable.global_position)
+		center += pos
+	center = center / breakables.size()
+	
+	# Calcular el radio necesario basado en la distancia al breakable más lejano
+	var max_radius = 0
+	for breakable in breakables:
+		var pos = nav_instance.to_local(breakable.global_position)
+		var distance_to_center = center.distance_to(pos)
+		# El radio necesario es la distancia al centro más el radio del breakable
+		var required_radius = distance_to_center + breakable.obstacle_radius
+		max_radius = max(max_radius, required_radius)
+	
+	# Añadir un pequeño margen de seguridad (10%)
+	max_radius *= 0.9
+	
+	print("Radio calculado para grupo: ", max_radius)
+	return create_single_obstacle(center, max_radius)
+
+func create_single_obstacle(position: Vector2, radius: float) -> PoolVector2Array:
+	var points = PoolVector2Array()
+	var num_sides = 8
+	var adjusted_radius = min(radius, 32.0)  # Reducido a 32.0 para ser más conservador
+	
+	# IMPORTANTE: Generamos los puntos en sentido horario para los "agujeros"
+	for i in range(num_sides):
+		var angle = i * 2 * PI / num_sides  # Removido el negativo para cambiar la dirección
+		var point = Vector2(
+			position.x + cos(angle) * adjusted_radius,
+			position.y + sin(angle) * adjusted_radius
+		)
+		points.push_back(point)
+	
+	print("Creado obstáculo con ", points.size(), " puntos y radio ", adjusted_radius)
+	return points
+
+func create_convex_hull(points: PoolVector2Array) -> PoolVector2Array:
+	# Implementación simple del algoritmo Gift Wrapping (Jarvis March)
+	if points.size() < 3:
+		return points
+		
+	var hull = PoolVector2Array()
+	
+	# Encontrar el punto más a la izquierda
+	var leftmost = 0
+	for i in range(1, points.size()):
+		if points[i].x < points[leftmost].x:
+			leftmost = i
+	
+	var p = leftmost
+	var q = 0
+	
+	# Repetir hasta volver al punto inicial
+	while true:
+		hull.push_back(points[p])
+		
+		q = (p + 1) % points.size()
+		for i in range(points.size()):
+			if i == p:
+				continue
+			# Si el punto i está más a la izquierda que el punto actual q
+			if orientation(points[p], points[i], points[q]) == 2:
+				q = i
+		
+		p = q
+		
+		# Si hemos vuelto al principio, terminar
+		if p == leftmost:
+			break
+	
+	return hull
+
+func orientation(p: Vector2, q: Vector2, r: Vector2) -> int:
+	var val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
+	if val == 0:
+		return 0
+	return 1 if val > 0 else 2
 
 func restore_base_navigation() -> void:
 	var nav_instance = get_node("NavigationPolygonInstance")
