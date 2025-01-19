@@ -1,5 +1,11 @@
 extends Node2D
 class_name DungeonRoom
+
+"""
+TODO + Known issue: cuando placeas 1 breakable cerca de una zona no navegable (otro breakable o una parte sin navpoly del mapa) el breakable no se toma en cuenta
+Esto quiere decir que  
+"""
+
 signal navigation_ready(nav_region)
 export(bool) var boss_room: bool = false
 var active_breakables: Array = []
@@ -53,42 +59,36 @@ func update_navigation_with_all_breakables() -> void:
 	if not nav_region:
 		push_warning("No hay región de navegación disponible")
 		return
-		
-	print("Actualizando navegación con ", active_breakables.size(), " breakables activos")
 	
 	var working_navpoly = NavigationPolygon.new()
 	var nav_instance = get_node("NavigationPolygonInstance")
 	
 	# Obtener los límites del área navegable base
 	var bounds = get_navigation_bounds(nav_instance.navpoly)
-	print("Límites del área navegable: ", bounds)
 	
 	# Añadir TODOS los outlines originales
 	for i in range(nav_instance.navpoly.get_outline_count()):
 		working_navpoly.add_outline(nav_instance.navpoly.get_outline(i))
-	print("Añadidos ", nav_instance.navpoly.get_outline_count(), " outlines originales")
 	
-	# Añadir obstáculos para cada breakable activo
-	for breakable in active_breakables:
-		if not breakable.is_orbiting:
-			var local_pos = nav_instance.to_local(breakable.global_position)
+	# Crear una copia de los breakables activos para procesamiento
+	var breakables_to_process = active_breakables.duplicate()
+	
+	# Procesar breakables por proximidad
+	while not breakables_to_process.empty():
+		var current_breakable = breakables_to_process.pop_front()
+		if current_breakable.is_orbiting:
+			continue
 			
-			# Verificar que la posición está dentro de los límites
-			if is_position_valid(local_pos, bounds, breakable.obstacle_radius):
-				var obstacle_points = create_obstacle_points(local_pos, breakable.obstacle_radius)
-				if validate_obstacle_points(obstacle_points, bounds):
-					working_navpoly.add_outline(obstacle_points)
-					print("Obstáculo añadido para breakable en: ", local_pos)
-				else:
-					push_warning("Puntos de obstáculo inválidos para breakable en: " + str(local_pos))
-			else:
-				push_warning("Posición inválida para breakable: " + str(local_pos))
+		var local_pos = nav_instance.to_local(current_breakable.global_position)
+		var obstacle_points = create_obstacle_points(local_pos, current_breakable.obstacle_radius)
+		
+		if validate_obstacle_points(obstacle_points, bounds):
+			working_navpoly.add_outline(obstacle_points)
 	
-	# Intentar generar los polígonos y verificar el resultado
+	# Generar polígonos
 	working_navpoly.make_polygons_from_outlines()
 	
 	if working_navpoly.get_polygon_count() > 0:
-		print("Polígonos generados: ", working_navpoly.get_polygon_count())
 		Navigation2DServer.region_set_navpoly(nav_region, working_navpoly)
 	else:
 		push_error("Fallo al generar polígonos de navegación")
@@ -114,19 +114,16 @@ func get_navigation_bounds(navpoly: NavigationPolygon) -> Dictionary:
 		"max_y": max_y
 	}
 
-func is_position_valid(pos: Vector2, bounds: Dictionary, radius: float) -> bool:
-	var margin = radius * 1.5  # Añadir un margen de seguridad
-	return (pos.x - margin >= bounds.min_x and 
-			pos.x + margin <= bounds.max_x and 
-			pos.y - margin >= bounds.min_y and 
-			pos.y + margin <= bounds.max_y)
-
 func validate_obstacle_points(points: PoolVector2Array, bounds: Dictionary) -> bool:
+	var valid_points = 0
+	var minimum_valid_percentage = 0.5
+	
 	for point in points:
-		if not (point.x >= bounds.min_x and point.x <= bounds.max_x and
-				point.y >= bounds.min_y and point.y <= bounds.max_y):
-			return false
-	return true
+		if point.x >= bounds.min_x and point.x <= bounds.max_x and \
+		   point.y >= bounds.min_y and point.y <= bounds.max_y:
+			valid_points += 1
+	
+	return float(valid_points) / points.size() >= minimum_valid_percentage
 
 func restore_base_navigation() -> void:
 	var nav_instance = get_node("NavigationPolygonInstance")
