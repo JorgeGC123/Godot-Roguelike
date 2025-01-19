@@ -78,9 +78,6 @@ func update_navigation_with_all_breakables() -> void:
 	var breakable_groups = group_nearby_breakables(active_breakables, nav_instance)
 	print("Creados ", breakable_groups.size(), " grupos de breakables")
 	
-	# Obtener el outline base para validación
-	var base_outline = nav_instance.navpoly.get_outline(0)
-	
 	# Crear un outline para cada grupo
 	var outlines_added = 0
 	for group in breakable_groups:
@@ -122,19 +119,6 @@ func is_point_in_navigable_area(point: Vector2, navpoly: NavigationPolygon) -> b
 			return false
 	
 	return true
-
-func _draw() -> void:
-	if not Engine.editor_hint:  # Solo en runtime
-		var nav_instance = get_node("NavigationPolygonInstance")
-		if nav_instance and nav_instance.navpoly:
-			# Dibujar el polígono base
-			var base_outline = nav_instance.navpoly.get_outline(0)
-			draw_polyline(base_outline, Color.green, 2.0)
-			
-			# Dibujar los obstáculos
-			for i in range(1, nav_instance.navpoly.get_outline_count()):
-				var obstacle_outline = nav_instance.navpoly.get_outline(i)
-				draw_polyline(obstacle_outline, Color.red, 2.0)
 
 func group_nearby_breakables(breakables: Array, nav_instance: Node2D) -> Array:
 	var groups = []
@@ -217,42 +201,6 @@ func create_single_obstacle(position: Vector2, radius: float) -> PoolVector2Arra
 	print("Creado obstáculo con ", points.size(), " puntos y radio ", adjusted_radius)
 	return points
 
-func create_convex_hull(points: PoolVector2Array) -> PoolVector2Array:
-	# Implementación simple del algoritmo Gift Wrapping (Jarvis March)
-	if points.size() < 3:
-		return points
-		
-	var hull = PoolVector2Array()
-	
-	# Encontrar el punto más a la izquierda
-	var leftmost = 0
-	for i in range(1, points.size()):
-		if points[i].x < points[leftmost].x:
-			leftmost = i
-	
-	var p = leftmost
-	var q = 0
-	
-	# Repetir hasta volver al punto inicial
-	while true:
-		hull.push_back(points[p])
-		
-		q = (p + 1) % points.size()
-		for i in range(points.size()):
-			if i == p:
-				continue
-			# Si el punto i está más a la izquierda que el punto actual q
-			if orientation(points[p], points[i], points[q]) == 2:
-				q = i
-		
-		p = q
-		
-		# Si hemos vuelto al principio, terminar
-		if p == leftmost:
-			break
-	
-	return hull
-
 func orientation(p: Vector2, q: Vector2, r: Vector2) -> int:
 	var val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
 	if val == 0:
@@ -265,23 +213,6 @@ func restore_base_navigation() -> void:
 		var base_navpoly = nav_instance.navpoly.duplicate()
 		Navigation2DServer.region_set_navpoly(nav_region, base_navpoly)
 		print("Navegación restaurada a estado base")
-
-func create_obstacle_points(position: Vector2, radius: float) -> PoolVector2Array:
-	var points = PoolVector2Array()
-	var num_sides = 8
-	
-	# Ajustar el radio si es muy grande
-	var adjusted_radius = min(radius, 32.0)  # Limitar el radio máximo
-	
-	for i in range(num_sides):
-		var angle = -i * 2 * PI / num_sides
-		var point = Vector2(
-			position.x + cos(angle) * adjusted_radius,
-			position.y + sin(angle) * adjusted_radius
-		)
-		points.push_back(point)
-	
-	return points
 	
 func determine_breakable_positions() -> void:
 	breakable_positions = []
