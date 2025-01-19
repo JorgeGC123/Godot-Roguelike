@@ -127,8 +127,6 @@ func _on_tween_completed(object, key):
 func _physics_process(_delta):
 	if not is_orbiting and global_position.distance_to(last_position) > 1.0:
 		last_position = global_position
-		if dungeon_room:
-			dungeon_room.update_navigation_with_all_breakables()
 
 func move_breakable(mouse_position: Vector2) -> void:
 	if player and is_orbiting:
