@@ -8,6 +8,7 @@ var weapons: Array = []
 var items: Array = []
 var equipped_weapon_index: int = 0
 var skin: int = 1
+var inventory_positions = {}
 
 func _ready():
 	load_data()
@@ -76,24 +77,28 @@ func load_data() -> void:
 
 func weapons_to_dict() -> Array:
 	var weapon_dicts = []
-	
 	for weapon in weapons:
 		weapon_dicts.append({
 			"name": weapon.name.rstrip("0123456789"),
-			#"damage": weapon.damage,
-			# Añade aquí otras propiedades relevantes de las armas
+			"inventory_position": inventory_positions.get(weapon.name, -1)
 		})
 	return weapon_dicts
 
 func dict_to_weapons(weapon_dicts: Array) -> Array:
 	var loaded_weapons = []
+	inventory_positions.clear()
+	
 	for weapon_dict in weapon_dicts:
 		var weapon = load("res://Weapons/" + weapon_dict["name"] + ".tscn").instance()
 		weapon.name = weapon_dict["name"]
-		#weapon.damage = weapon_dict["damage"]
-		# Configura aquí otras propiedades relevantes de las armas
+		if weapon_dict.has("inventory_position"):
+			inventory_positions[weapon.name] = weapon_dict["inventory_position"]
 		loaded_weapons.append(weapon)
 	return loaded_weapons
+
+func update_weapon_position(weapon_name: String, position: int) -> void:
+	inventory_positions[weapon_name] = position
+	save_data()
 
 func items_to_dict() -> Array:
 	var item_dicts = []

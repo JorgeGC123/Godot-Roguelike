@@ -168,28 +168,28 @@ func pick_up_weapon(weapon: Node2D) -> void:
 	
 
 func pick_up_breakable(breakable: Node) -> void:
-    if held_breakable and is_instance_valid(held_breakable):
-        var current_orbit_position = held_breakable.global_position
-        remove_child(held_breakable)
-        breakableScene.add_child(held_breakable)
-        held_breakable.global_position = current_orbit_position
-        held_breakable.is_orbiting = false
-        emit_signal("breakable_dropped", held_breakable)  # Emitir señal al soltar
-        held_breakable = null
-        print('lo soltamos')
-        return  
+	if held_breakable and is_instance_valid(held_breakable):
+		var current_orbit_position = held_breakable.global_position
+		remove_child(held_breakable)
+		breakableScene.add_child(held_breakable)
+		held_breakable.global_position = current_orbit_position
+		held_breakable.is_orbiting = false
+		emit_signal("breakable_dropped", held_breakable)  # Emitir señal al soltar
+		held_breakable = null
+		print('lo soltamos')
+		return  
 
-    held_breakable = breakable
-    if held_breakable and is_instance_valid(held_breakable):
-        breakableScene = breakable.get_parent()
-        breakableScene.remove_child(breakable)
-        add_child(breakable)
-        breakable.position = Vector2(0, -15)
-        near_breakable = null
-        held_breakable.player = self
-        held_breakable.is_orbiting = true
-        emit_signal("breakable_picked_up", held_breakable)  # Emitir señal al recoger
-        print('lo pillamos?')
+	held_breakable = breakable
+	if held_breakable and is_instance_valid(held_breakable):
+		breakableScene = breakable.get_parent()
+		breakableScene.remove_child(breakable)
+		add_child(breakable)
+		breakable.position = Vector2(0, -15)
+		near_breakable = null
+		held_breakable.player = self
+		held_breakable.is_orbiting = true
+		emit_signal("breakable_picked_up", held_breakable)  # Emitir señal al recoger
+		print('lo pillamos?')
 
 	
 func _drop_weapon() -> void:
