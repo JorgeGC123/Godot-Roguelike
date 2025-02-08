@@ -59,7 +59,7 @@ func load_items():
 	
 	# Luego, carga los items en sus posiciones guardadas
 	for item in saved_items:
-		var position = SavedData.inventory_positions.get(item.name, -1)
+		var position = SavedData.inventory_positions.get(item.name, 0)
 		if position >= 0 and position < MAX_SLOTS:
 			items[position] = item
 			grid.get_child(position).initialize(item.get_texture())
@@ -74,11 +74,12 @@ func add_item(item):
 			return true
 	return false
 
-func remove_item(index):
+func remove_item(index: int):
 	if index >= 0 and index < MAX_SLOTS and items[index] != null:
 		var item = items[index]
 		items[index] = null
 		grid.get_child(index).texture = null
+		print("por que cojones")
 		SavedData.remove_item(item)
 		return item
 	return null

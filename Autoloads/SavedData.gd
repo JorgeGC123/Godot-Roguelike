@@ -28,7 +28,12 @@ func add_item(item) -> void:
 		save_data()
 
 func remove_item(item) -> void:
-	if items.has(item):
+	if weapons.has(item):
+		weapons.erase(item)
+		if inventory_positions.has(item.name):
+			inventory_positions.erase(item.name)
+		save_data()
+	elif items.has(item):
 		items.erase(item)
 		save_data()
 
@@ -80,7 +85,7 @@ func weapons_to_dict() -> Array:
 	for weapon in weapons:
 		weapon_dicts.append({
 			"name": weapon.name.rstrip("0123456789"),
-			"inventory_position": inventory_positions.get(weapon.name, -1)
+			"inventory_position": inventory_positions.get(weapon.name,0)
 		})
 	return weapon_dicts
 

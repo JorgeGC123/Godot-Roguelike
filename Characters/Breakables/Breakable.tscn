@@ -112,6 +112,7 @@ collision_mask = 4
 script = ExtResource( 5 )
 max_hp = 1
 hp = 1
+obstacle_radius = 14.0
 
 [node name="FiniteStateMachine" parent="." index="0"]
 script = ExtResource( 4 )

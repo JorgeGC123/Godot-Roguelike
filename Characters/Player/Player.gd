@@ -18,6 +18,7 @@ onready var weapons: Node2D = get_node("Weapons")
 onready var dust_position: Position2D = get_node("DustPosition")
 onready var player_dash: PlayerDash = $PlayerDash
 var near_breakable: Node = null
+var near_pickable: Node = null
 var near_door: Node = null
 var near_npc: Node = null
 var held_breakable: Node = null 
@@ -193,24 +194,32 @@ func pick_up_breakable(breakable: Node) -> void:
 
 	
 func _drop_weapon() -> void:
-	SavedData.weapons.remove(current_weapon.get_index() - 1)
 	var weapon_to_drop: Node2D = current_weapon
+	var inventory_position = SavedData.inventory_positions.get(weapon_to_drop.name, 0)
+	print(inventory_position)
+	# Primero eliminamos del inventario
+	inventory_instance.remove_item(inventory_position)
+		
+	
+	# Luego manejamos el arma y SavedData
+	var weapon_index = current_weapon.get_index()
+	SavedData.weapons.remove(weapon_index - 1)
 	_switch_weapon(UP)
 	
-	emit_signal("weapon_droped", weapon_to_drop.get_index())
+	emit_signal("weapon_droped", weapon_index)
 	
 	weapons.call_deferred("remove_child", weapon_to_drop)
 	get_parent().call_deferred("add_child", weapon_to_drop)
 	weapon_to_drop.set_owner(get_parent())
 	yield(weapon_to_drop.tween, "tree_entered")
-		
+	
 	var throw_dir: Vector2 = (get_global_mouse_position() - position).normalized()
-	var force: int = 100;
+	var force: int = 100
 	var hitbox_instance = Hitbox.new()
-	hitbox_instance.damage = 2 # El daño que quieres que haga
+	hitbox_instance.damage = 2
 	hitbox_instance.knockback_direction = throw_dir
-	hitbox_instance.knockback_force = force;
-	inventory_instance.remove_item(current_weapon.get_index())
+	hitbox_instance.knockback_force = force
+	
 	weapon_to_drop.add_child(hitbox_instance)
 	weapon_to_drop.show()
 	weapon_to_drop.get_node("AnimationPlayer").play("throw")
