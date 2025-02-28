@@ -119,11 +119,13 @@ func import_from_saved_data():
 	
 	for i in range(saved_data.weapons.size()):
 		var weapon_node = saved_data.weapons[i]
-		var base_name = weapon_node.name.rstrip("0123456789")
-		var position = saved_data.inventory_positions.get(base_name, i)
+		# Usamos el nombre completo del arma (con sufijos numéricos) como clave
+		var weapon_name = weapon_node.name
+		# Obtenemos la posición usando el nombre completo
+		var position = saved_data.inventory_positions.get(weapon_name, i)
 		position_weapon_map[position] = weapon_node
 		
-		print("InventoryManager: Mapped weapon ", base_name, " to position ", position)
+		print("InventoryManager: Mapped weapon ", weapon_name, " to position ", position)
 	
 	# Segunda pasada: añadir armas en el orden correcto según posiciones
 	var sorted_positions = position_weapon_map.keys()

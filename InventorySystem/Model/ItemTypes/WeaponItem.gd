@@ -61,16 +61,17 @@ func configure_from_weapon_node(weapon_node: Node) -> void:
 	if not weapon_node:
 		return
 	
-	# Obtener valores del nodo de arma
-	self.id = weapon_node.name.rstrip("0123456789")
-	self.name = weapon_node.name
+	# Preservar el nombre único completo del arma
+	self.id = weapon_node.name.rstrip("0123456789") # Solo para el ID base usamos sin sufijo
+	self.name = weapon_node.name # Preservamos el nombre único completo
 	
 	# Asignar textura del arma
 	if weapon_node.has_method("get_texture"):
 		self.icon = weapon_node.get_texture()
 	
-	# Buscar la escena original
-	var weapon_path = "res://Weapons/" + self.id + ".tscn"
+	# Buscar la escena original (sin el sufijo numérico)
+	var base_name = self.id # Ya quitamos los números arriba
+	var weapon_path = "res://Weapons/" + base_name + ".tscn"
 	if ResourceLoader.exists(weapon_path):
 		self.weapon_scene = load(weapon_path)
 	

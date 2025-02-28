@@ -86,13 +86,15 @@ func weapons_to_dict() -> Array:
 	print("SavedData: weapons_to_dict(): inventory_positions = ", inventory_positions)
 	
 	for weapon in weapons:
-		var base_name = weapon.name.rstrip("0123456789")
-		var position = inventory_positions.get(base_name, 0)
+		# Ya no eliminamos sufijos numéricos para permitir múltiples armas del mismo tipo
+		# var base_name = weapon.name.rstrip("0123456789")
+		var weapon_name = weapon.name
+		var position = inventory_positions.get(weapon_name, 0)
 		
-		print("SavedData: Saving weapon ", weapon.name, " (base_name: ", base_name, ") at position ", position)
+		print("SavedData: Saving weapon ", weapon.name, " at position ", position)
 		
 		weapon_dicts.append({
-			"name": base_name,
+			"name": weapon_name,
 			"inventory_position": position
 		})
 	return weapon_dicts
@@ -105,7 +107,12 @@ func dict_to_weapons(weapon_dicts: Array) -> Array:
 	
 	for weapon_dict in weapon_dicts:
 		var weapon_name = weapon_dict["name"]
-		var weapon = load("res://Weapons/" + weapon_name + ".tscn").instance()
+		
+		# Cargar la escena base sin sufijos numéricos
+		var weapon_scene_name = weapon_name.rstrip("0123456789")
+		var weapon = load("res://Weapons/" + weapon_scene_name + ".tscn").instance()
+		
+		# Preservar el nombre único original con sus sufijos
 		weapon.name = weapon_name
 		
 		if weapon_dict.has("inventory_position"):
@@ -121,8 +128,8 @@ func dict_to_weapons(weapon_dicts: Array) -> Array:
 func update_weapon_position(weapon_name: String, position: int) -> void:
 	print("SavedData: Updating position for weapon ", weapon_name, " to ", position)
 	
-	# Asegurar consistencia en nombres (eliminar sufijos numéricos)
-	weapon_name = weapon_name.rstrip("0123456789")
+	# Ya no eliminamos sufijos numéricos para permitir múltiples armas del mismo tipo
+	# weapon_name = weapon_name.rstrip("0123456789")
 	
 	inventory_positions[weapon_name] = position
 	print("SavedData: Current inventory positions: ", inventory_positions)

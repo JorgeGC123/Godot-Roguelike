@@ -147,10 +147,28 @@ func _switch_weapon(direction: int) -> void:
 	
 	
 func pick_up_weapon(weapon: Node2D) -> void:
-	# 1. Convertir el nodo de arma a un WeaponItem usando ItemFactory
+	# 1. Obtener el nombre base del arma sin sufijos numéricos
+	var base_name = weapon.name.rstrip("0123456789")
+	
+	# 2. Generar un nombre único para esta instancia de arma
+	# Contar cuántas armas del mismo tipo ya tenemos
+	var count = 0
+	for w in weapons.get_children():
+		if w.name.begins_with(base_name):
+			count += 1
+	
+	# Asignar un sufijo numérico si ya tenemos alguna del mismo tipo
+	var unique_name = base_name
+	if count > 0:
+		unique_name = base_name + str(count)
+	
+	# Asignar el nombre único al arma
+	weapon.name = unique_name
+	
+	# 3. Convertir el nodo de arma a un WeaponItem usando ItemFactory
 	var weapon_item = ItemFactory.create_item_from_node(weapon)
 	
-	# 2. Añadir el WeaponItem al inventario
+	# 4. Añadir el WeaponItem al inventario
 	var added_to_inventory = false
 	if has_node("/root/InventoryManager"):
 		var inventory_manager = get_node("/root/InventoryManager")
@@ -163,7 +181,7 @@ func pick_up_weapon(weapon: Node2D) -> void:
 		# Sincronizar con SavedData para retrocompatibilidad
 		SavedData.weapons.append(weapon.duplicate())
 	
-	# 3. Manejar la parte visual/mecánica
+	# 5. Manejar la parte visual/mecánica
 	var prev_index: int = SavedData.equipped_weapon_index
 	var new_index: int = weapons.get_child_count()
 	SavedData.equipped_weapon_index = new_index
