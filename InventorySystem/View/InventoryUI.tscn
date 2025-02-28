@@ -1,29 +1,49 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://InventorySystem/View/InventoryUI.gd" type="Script" id=1]
 [ext_resource path="res://InventorySystem/View/SlotUI.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Art/v1.1 dungeon crawler 16x16 pixel pack/ui (new)/crosshair_1.png" type="Texture" id=3]
 
 [sub_resource type="StyleBoxFlat" id=1]
-bg_color = Color( 0.145098, 0.145098, 0.164706, 0.882353 )
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color( 0.313726, 0.313726, 0.345098, 1 )
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
-shadow_color = Color( 0, 0, 0, 0.243137 )
-shadow_size = 5
+bg_color = Color( 0.1, 0.1, 0.12, 0.95 )
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color( 0.4, 0.35, 0.25, 1 )
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color( 0, 0, 0, 0.4 )
+shadow_size = 8
+anti_aliasing = false
+
+[sub_resource type="StyleBoxLine" id=4]
+color = Color( 0.4, 0.35, 0.25, 0.7 )
+thickness = 2
 
 [sub_resource type="DynamicFontData" id=2]
 font_path = "res://Art/Fonts/ThaleahFat.ttf"
 
 [sub_resource type="DynamicFont" id=3]
-size = 24
+size = 28
+outline_size = 1
+outline_color = Color( 0.2, 0.2, 0.2, 1 )
 font_data = SubResource( 2 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0.4, 0.35, 0.25, 1 )
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 4
+border_color = Color( 0.2, 0.2, 0.2, 1 )
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
 
 [node name="InventoryUI" type="Control"]
 pause_mode = 2
@@ -34,40 +54,37 @@ margin_bottom = 45.82
 mouse_filter = 2
 script = ExtResource( 1 )
 slot_scene = ExtResource( 2 )
-grid_container_path = NodePath("CenterContainer/Panel/VBoxContainer/InventoryGrid")
+grid_container_path = NodePath("CenterContainer/Panel/VBoxContainer/ScrollContainer/InventoryGrid")
 close_button_path = NodePath("CenterContainer/Panel/VBoxContainer/HBoxContainer/CloseButton")
 
 [node name="BackgroundDimmer" type="ColorRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color( 0, 0, 0, 0.345098 )
+color = Color( 0, 0, 0, 0.5 )
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -1.0
-margin_top = 2.0
-margin_right = -88.0
-margin_bottom = -58.0
 
 [node name="Panel" type="Panel" parent="CenterContainer"]
 margin_left = 72.0
-margin_top = 30.0
-margin_right = 87.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 15, 15 )
+margin_top = 60.0
+margin_right = 372.0
+margin_bottom = 360.0
+rect_min_size = Vector2( 300, 300 )
 custom_styles/panel = SubResource( 1 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/Panel"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -55.0
-margin_top = -15.0
-margin_right = 142.0
-margin_bottom = 70.0
+margin_left = 12.0
+margin_top = 12.0
+margin_right = -12.0
+margin_bottom = -12.0
+custom_constants/separation = 10
 
 [node name="TitleContainer" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
-margin_right = 212.0
+margin_right = 276.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 0, 40 )
 
@@ -81,50 +98,62 @@ stretch_mode = 6
 
 [node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/TitleContainer"]
 margin_left = 44.0
-margin_top = 19.0
-margin_right = 53.0
-margin_bottom = 21.0
+margin_top = 5.0
+margin_right = 183.0
+margin_bottom = 35.0
 custom_fonts/font = SubResource( 3 )
-text = "Inventory"
+text = "INVENTORY"
 
 [node name="Control" type="Control" parent="CenterContainer/Panel/VBoxContainer/TitleContainer"]
-margin_left = 57.0
-margin_right = 212.0
+margin_left = 187.0
+margin_right = 276.0
 margin_bottom = 40.0
 size_flags_horizontal = 3
 
 [node name="HSeparator" type="HSeparator" parent="CenterContainer/Panel/VBoxContainer"]
-margin_top = 44.0
-margin_right = 212.0
-margin_bottom = 48.0
+margin_top = 50.0
+margin_right = 276.0
+margin_bottom = 54.0
+custom_styles/separator = SubResource( 4 )
 
-[node name="InventoryGrid" type="GridContainer" parent="CenterContainer/Panel/VBoxContainer"]
-margin_top = 52.0
-margin_right = 212.0
-margin_bottom = 60.0
+[node name="ScrollContainer" type="ScrollContainer" parent="CenterContainer/Panel/VBoxContainer"]
+margin_top = 64.0
+margin_right = 276.0
+margin_bottom = 204.0
+rect_min_size = Vector2( 0, 140 )
 size_flags_vertical = 3
-custom_constants/vseparation = 6
-custom_constants/hseparation = 6
-columns = 4
+scroll_horizontal_enabled = false
+
+[node name="InventoryGrid" type="GridContainer" parent="CenterContainer/Panel/VBoxContainer/ScrollContainer"]
+margin_right = 276.0
+margin_bottom = 83.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/vseparation = 8
+custom_constants/hseparation = 8
+columns = 5
 
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/Panel/VBoxContainer"]
-margin_top = 64.0
-margin_right = 212.0
-margin_bottom = 68.0
+margin_top = 214.0
+margin_right = 276.0
+margin_bottom = 218.0
+custom_styles/separator = SubResource( 4 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
-margin_top = 72.0
-margin_right = 212.0
-margin_bottom = 100.0
+margin_top = 228.0
+margin_right = 276.0
+margin_bottom = 276.0
 rect_min_size = Vector2( 0, 28 )
 alignment = 1
 
 [node name="CloseButton" type="Button" parent="CenterContainer/Panel/VBoxContainer/HBoxContainer"]
-margin_left = 36.0
-margin_right = 176.0
-margin_bottom = 28.0
-rect_min_size = Vector2( 140, 0 )
-text = "Close"
+margin_left = 68.0
+margin_right = 208.0
+margin_bottom = 48.0
+rect_min_size = Vector2( 140, 48 )
+custom_fonts/font = SubResource( 3 )
+custom_styles/normal = SubResource( 5 )
+text = "CLOSE"
 
 [node name="DragPreview" type="TextureRect" parent="."]
 visible = false

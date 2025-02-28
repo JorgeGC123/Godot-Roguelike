@@ -22,6 +22,8 @@ var drag_data = null
 # Referencias para posicionamiento dinámico
 var player_ref = null
 var update_timer = null
+var last_player_pos = Vector2.ZERO  # Última posición del jugador
+var repositioning_threshold = 100  # Distancia mínima en píxeles para reposicionar
 
 func _ready():
 	# Conectar señales del botón de cierre si existe
@@ -73,19 +75,23 @@ func _initialize_slots():
 		slot_ui.connect("gui_input", self, "_on_Slot_gui_input", [i])
 		
 		# Conexiones específicas para drag & drop
-		# Importante: estas señales ya son parte del Control node, no necesitamos conectarlas manualmente
-		# El nodo procesará get_drag_data, can_drop_data, y drop_data automáticamente
-		
-		# Sin embargo, sí necesitamos conectar nuestra señal personalizada item_dropped
 		slot_ui.connect("item_dropped", self, "_on_item_dropped")
 		
 		# Asignar item si existe
 		var item = inventory_model.get_item(i)
 		if item:
 			slot_ui.set_item(item)
-			
-	# Debug
-	print("Initialized ", slots.size(), " slots")
+	
+	# Ajustar el número de columnas para una cuadrícula más estética
+	# Si tenemos menos de 10 slots, usamos menos columnas
+	if grid_container.get_child_count() <= 5:
+		grid_container.columns = 3
+	elif grid_container.get_child_count() <= 12:
+		grid_container.columns = 4
+	else:
+		grid_container.columns = 5
+	
+	print("Initialized ", slots.size(), " slots with ", grid_container.columns, " columns")
 
 # Función para manejar drops entre slots
 func _on_item_dropped(source_index, target_index):
@@ -130,10 +136,10 @@ func show_inventory():
 	# Hacer visible
 	visible = true
 	
-	# Centrar en el jugador
-	_center_on_player()
+	# Centrar en el jugador (forzar posicionamiento inicial)
+	_center_on_player(true)
 	
-	# Iniciar seguimiento al jugador
+	# Iniciar seguimiento al jugador (solo para movimientos significativos)
 	if update_timer:
 		update_timer.start()
 
@@ -242,7 +248,7 @@ func _find_node_by_name(node, name):
 	return null
 
 # Centra el inventario en el jugador
-func _center_on_player():
+func _center_on_player(force_update=false):
 	if not player_ref or not player_ref.get_ref():
 		_find_player()
 		return
@@ -272,6 +278,30 @@ func _center_on_player():
 	else:
 		return
 	
+	# Comprobar si el jugador se ha movido lo suficiente como para reposicionar
+	if not force_update:
+		var viewport = get_viewport()
+		if not viewport:
+			return
+		
+		# Convertir posición global actual a posición de pantalla
+		var current_screen_pos = viewport.canvas_transform.xform(player_global_pos)
+		
+		# Si no tenemos una posición anterior guardada o si es la primera vez
+		if last_player_pos == Vector2.ZERO:
+			last_player_pos = current_screen_pos
+			force_update = true  # Forzar actualización la primera vez
+		else:
+			# Calcular la distancia que se ha movido el jugador en coordenadas de pantalla
+			var distance = last_player_pos.distance_to(current_screen_pos)
+			
+			# Solo reposicionar si se ha movido más de la distancia umbral
+			if distance < repositioning_threshold:
+				return  # No reposicionar si no se ha movido lo suficiente
+			
+			# Actualizar la última posición conocida
+			last_player_pos = current_screen_pos
+	
 	# Convertir a posición de pantalla
 	var viewport = get_viewport()
 	if not viewport:
@@ -279,24 +309,32 @@ func _center_on_player():
 	
 	var player_screen_pos = viewport.canvas_transform.xform(player_global_pos)
 	
-	# Centrar el inventario en la posición del jugador
-	rect_global_position = player_screen_pos - rect_size / 2
+	# Centrar el panel en la posición del jugador
+	# El CenterContainer debe centrarse automáticamente si su posición global se establece correctamente
+	var panel_size = panel.rect_size
+	var offset = Vector2(panel_size.x/2, panel_size.y/2)
 	
-	# Asegurar que no se salga de la pantalla
+	# Ajustar la posición global del control principal para centrar el panel
+	rect_global_position = player_screen_pos - offset
+	
+	# Asegurar que el panel no se salga de la pantalla
 	var viewport_size = viewport.size
-	if rect_global_position.x < 0:
-		rect_global_position.x = 0
-	elif rect_global_position.x + rect_size.x > viewport_size.x:
-		rect_global_position.x = viewport_size.x - rect_size.x
+	var panel_rect = Rect2(rect_global_position, panel_size)
 	
-	if rect_global_position.y < 0:
+	# Ajustar horizontalmente
+	if panel_rect.position.x < 0:
+		rect_global_position.x = 0
+	elif panel_rect.end.x > viewport_size.x:
+		rect_global_position.x = viewport_size.x - panel_size.x
+	
+	# Ajustar verticalmente
+	if panel_rect.position.y < 0:
 		rect_global_position.y = 0
-	elif rect_global_position.y + rect_size.y > viewport_size.y:
-		rect_global_position.y = viewport_size.y - rect_size.y
+	elif panel_rect.end.y > viewport_size.y:
+		rect_global_position.y = viewport_size.y - panel_size.y
 
 
 # Actualiza la posición del inventario (llamado por timer)
 func _update_position():
 	if visible:
-		_center_on_player()
-
+		_center_on_player(false)  # Solo actualizar si el jugador se mueve significativamente

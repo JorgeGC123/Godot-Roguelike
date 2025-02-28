@@ -39,6 +39,7 @@ func show_inventory():
 		# Crear un nuevo CanvasLayer para asegurar que esté por encima de todo
 		var ui_layer = CanvasLayer.new()
 		ui_layer.layer = 100  # Layer alto para estar al frente
+		ui_layer.name = "InventoryCanvasLayer"  # Nombrar para facilitar depuración
 		get_tree().root.add_child(ui_layer)
 		
 		# Instanciar la UI en el CanvasLayer
@@ -57,18 +58,20 @@ func show_inventory():
 				print("InventoryDisplayManager: UI configured with player inventory")
 		else:
 			print("InventoryDisplayManager: Could not get player inventory")
+		
+		# Hacer visible el inventario (esto también inicia el posicionamiento)
+		inventory_ui_instance.show_inventory()
 	else:
 		# Si ya existe, asegurar que esté al frente
 		var parent = inventory_ui_instance.get_parent()
 		if parent is CanvasLayer:
 			parent.layer = 100
+		
+		# Solo mostrar si no está visible
+		if not inventory_ui_instance.visible:
+			inventory_ui_instance.show_inventory()
 	
-	# Mostrar UI
-	inventory_ui_instance.show_inventory()
 	emit_signal("inventory_opened")
-	
-	# Pausar el juego si es necesario
-	# get_tree().paused = true
 
 func hide_inventory():
 	if inventory_ui_instance != null:
