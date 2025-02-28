@@ -152,18 +152,39 @@ func _switch_weapon(direction: int) -> void:
 	
 	
 func pick_up_weapon(weapon: Node2D) -> void:
-	SavedData.weapons.append(weapon.duplicate())
+	# 1. Convertir el nodo de arma a un WeaponItem usando ItemFactory
+	var weapon_item = ItemFactory.create_item_from_node(weapon)
+	
+	# 2. Añadir el WeaponItem al inventario
+	var added_to_inventory = false
+	if has_node("/root/InventoryManager"):
+		var inventory_manager = get_node("/root/InventoryManager")
+		added_to_inventory = inventory_manager.add_item_to_active(weapon_item)
+	
+	if not added_to_inventory:
+		# Falló, usar el método antiguo como fallback
+		SavedData.weapons.append(weapon.duplicate())
+	else:
+		# Sincronizar con SavedData para retrocompatibilidad
+		SavedData.weapons.append(weapon.duplicate())
+	
+	# 3. Manejar la parte visual/mecánica
 	var prev_index: int = SavedData.equipped_weapon_index
 	var new_index: int = weapons.get_child_count()
 	SavedData.equipped_weapon_index = new_index
+	
+	# Agregar el arma como hijo de weapons
 	weapon.get_parent().call_deferred("remove_child", weapon)
 	weapons.call_deferred("add_child", weapon)
 	weapon.set_deferred("owner", weapons)
+	
+	# Mostrar la nueva arma
 	current_weapon.hide()
 	current_weapon.cancel_attack()
 	current_weapon = weapon
 	current_weapon.player = self
-	inventory_instance.add_item(weapon)
+	
+	# Emitir señales para la UI
 	emit_signal("weapon_picked_up", weapon.get_texture())
 	emit_signal("weapon_switched", prev_index, new_index)
 	
@@ -196,10 +217,17 @@ func pick_up_breakable(breakable: Node) -> void:
 func _drop_weapon() -> void:
 	var weapon_to_drop: Node2D = current_weapon
 	var inventory_position = SavedData.inventory_positions.get(weapon_to_drop.name, 0)
-	print(inventory_position)
+	print("Dropping weapon from inventory position:", inventory_position)
+	
 	# Primero eliminamos del inventario
 	inventory_instance.remove_item(inventory_position)
-		
+	
+	# NUEVO: Eliminar del nuevo sistema de inventario
+	if has_node("/root/InventoryManager"):
+		var inventory_manager = get_node("/root/InventoryManager")
+		var removed_item = inventory_manager.remove_item_by_name_from_active(weapon_to_drop.name)
+		if removed_item:
+			print("Removed weapon from new inventory system:", weapon_to_drop.name)
 	
 	# Luego manejamos el arma y SavedData
 	var weapon_index = current_weapon.get_index()
@@ -265,19 +293,18 @@ func _throw_breakable() -> void:
 
 func _input(event):
 	if event.is_action_pressed("ui_inventory"):
-		toggle_inventory()
+		InventoryDisplayManager.toggle_inventory()
 
 func toggle_inventory():
-	print("Toggle inventory called")
-	if inventory_instance.control.visible:
-		inventory_instance.hide_inventory()
-		state_machine.set_state(state_machine.states.idle)
-	else:
+	InventoryDisplayManager.toggle_inventory()
+	if InventoryDisplayManager.is_inventory_visible():
 		state_machine.set_state(state_machine.states.inventory_open)
-		inventory_instance.show_inventory()
+	else:
+		state_machine.set_state(state_machine.states.idle)
 
 func _on_inventory_closed():
-	# Esta función se llamará cuando se cierre el inventario
+	# Esta función ya no necesita hacer nada específico porque
+	# ahora InventoryDisplayManager maneja el estado del inventario
 	pass
 
 func change_skin(new_skin: int):

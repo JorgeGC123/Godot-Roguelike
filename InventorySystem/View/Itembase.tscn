@@ -1,0 +1,79 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/weapon_sword_1.png" type="Texture" id=1]
+
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 8.0
+content_margin_right = 8.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+bg_color = Color( 0.145098, 0.145098, 0.164706, 0.921569 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.25098, 0.25098, 0.27451, 1 )
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="DynamicFontData" id=2]
+font_path = "res://Art/Fonts/ThaleahFat.ttf"
+
+[sub_resource type="DynamicFont" id=3]
+size = 18
+font_data = SubResource( 2 )
+
+[node name="ItemBase" type="Control"]
+margin_right = 250.0
+margin_bottom = 80.0
+rect_min_size = Vector2( 250, 80 )
+
+[node name="Panel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_styles/panel = SubResource( 1 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = -8.0
+custom_constants/separation = 12
+
+[node name="ItemIcon" type="TextureRect" parent="Panel/HBoxContainer"]
+margin_right = 64.0
+margin_bottom = 64.0
+rect_min_size = Vector2( 64, 64 )
+texture = ExtResource( 1 )
+expand = true
+stretch_mode = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/HBoxContainer"]
+margin_left = 76.0
+margin_right = 234.0
+margin_bottom = 64.0
+size_flags_horizontal = 3
+
+[node name="ItemName" type="Label" parent="Panel/HBoxContainer/VBoxContainer"]
+margin_right = 158.0
+margin_bottom = 18.0
+custom_fonts/font = SubResource( 3 )
+text = "Item Name"
+
+[node name="ItemDescription" type="Label" parent="Panel/HBoxContainer/VBoxContainer"]
+margin_top = 22.0
+margin_right = 158.0
+margin_bottom = 36.0
+size_flags_vertical = 3
+text = "Item description goes here..."
+autowrap = true
+
+[node name="ItemProperties" type="Label" parent="Panel/HBoxContainer/VBoxContainer"]
+margin_top = 40.0
+margin_right = 158.0
+margin_bottom = 54.0
+text = "Damage: 10"

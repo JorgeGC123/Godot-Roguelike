@@ -17,3 +17,8 @@ addons/
 
 /log/*
 !log/.gdignore
+Rooms/
+Shaders/
+Forest/
+*.cfg
+*.json

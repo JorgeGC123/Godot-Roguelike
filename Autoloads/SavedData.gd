@@ -82,10 +82,18 @@ func load_data() -> void:
 
 func weapons_to_dict() -> Array:
 	var weapon_dicts = []
+	
+	print("SavedData: weapons_to_dict(): inventory_positions = ", inventory_positions)
+	
 	for weapon in weapons:
+		var base_name = weapon.name.rstrip("0123456789")
+		var position = inventory_positions.get(base_name, 0)
+		
+		print("SavedData: Saving weapon ", weapon.name, " (base_name: ", base_name, ") at position ", position)
+		
 		weapon_dicts.append({
-			"name": weapon.name.rstrip("0123456789"),
-			"inventory_position": inventory_positions.get(weapon.name,0)
+			"name": base_name,
+			"inventory_position": position
 		})
 	return weapon_dicts
 
@@ -93,16 +101,31 @@ func dict_to_weapons(weapon_dicts: Array) -> Array:
 	var loaded_weapons = []
 	inventory_positions.clear()
 	
+	print("SavedData: Loading weapons from dict, count: ", weapon_dicts.size())
+	
 	for weapon_dict in weapon_dicts:
-		var weapon = load("res://Weapons/" + weapon_dict["name"] + ".tscn").instance()
-		weapon.name = weapon_dict["name"]
+		var weapon_name = weapon_dict["name"]
+		var weapon = load("res://Weapons/" + weapon_name + ".tscn").instance()
+		weapon.name = weapon_name
+		
 		if weapon_dict.has("inventory_position"):
-			inventory_positions[weapon.name] = weapon_dict["inventory_position"]
+			var position = weapon_dict["inventory_position"]
+			inventory_positions[weapon_name] = position
+			print("SavedData: Loaded weapon ", weapon_name, " with position ", position)
+		
 		loaded_weapons.append(weapon)
+	
+	print("SavedData: Final inventory_positions: ", inventory_positions)
 	return loaded_weapons
 
 func update_weapon_position(weapon_name: String, position: int) -> void:
+	print("SavedData: Updating position for weapon ", weapon_name, " to ", position)
+	
+	# Asegurar consistencia en nombres (eliminar sufijos numéricos)
+	weapon_name = weapon_name.rstrip("0123456789")
+	
 	inventory_positions[weapon_name] = position
+	print("SavedData: Current inventory positions: ", inventory_positions)
 	save_data()
 
 func items_to_dict() -> Array:

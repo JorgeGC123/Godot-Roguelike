@@ -124,6 +124,26 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/Components/HurtboxComponent.gd"
 }, {
+"base": "Resource",
+"class": "InventoryModel",
+"language": "GDScript",
+"path": "res://InventorySystem/Model/Inventory.gd"
+}, {
+"base": "Resource",
+"class": "InventorySlot",
+"language": "GDScript",
+"path": "res://InventorySystem/Model/InventorySlot.gd"
+}, {
+"base": "Control",
+"class": "InventoryUI",
+"language": "GDScript",
+"path": "res://InventorySystem/View/InventoryUI.gd"
+}, {
+"base": "Resource",
+"class": "Item",
+"language": "GDScript",
+"path": "res://InventorySystem/Model/Item.gd"
+}, {
 "base": "Area2D",
 "class": "Lantern",
 "language": "GDScript",
@@ -149,6 +169,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/Player/PlayerDash.gd"
 }, {
+"base": "TextureRect",
+"class": "SlotUI",
+"language": "GDScript",
+"path": "res://InventorySystem/View/SlotUI.gd"
+}, {
 "base": "Node2D",
 "class": "Weapon",
 "language": "GDScript",
@@ -163,6 +188,11 @@ _global_script_classes=[ {
 "class": "WeaponHitbox",
 "language": "GDScript",
 "path": "res://Weapons/WeaponHitbox.gd"
+}, {
+"base": "Item",
+"class": "WeaponItem",
+"language": "GDScript",
+"path": "res://InventorySystem/Model/ItemTypes/WeaponItem.gd"
 } ]
 _global_script_class_icons={
 "AIComponent": "",
@@ -188,14 +218,20 @@ _global_script_class_icons={
 "Hitbox": "",
 "HitboxComponent": "",
 "HurtboxComponent": "",
+"InventoryModel": "",
+"InventorySlot": "",
+"InventoryUI": "",
+"Item": "",
 "Lantern": "",
 "MovementComponent": "",
 "PatrolBehavior": "",
 "Player": "",
 "PlayerDash": "",
+"SlotUI": "",
 "Weapon": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/weapon_sword_1.png",
 "WeaponComponent": "",
-"WeaponHitbox": ""
+"WeaponHitbox": "",
+"WeaponItem": ""
 }
 
 [application]
@@ -212,6 +248,9 @@ Client="*res://Autoloads/Client.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
 Logger="*res://Autoloads/Logger.gd"
 NavigationManager="*res://Autoloads/NavigationManager.gd"
+InventoryManager="*res://InventorySystem/Core/InventoryManager.gd"
+ItemFactory="*res://InventorySystem/Core/ItemFactory.gd"
+InventoryDisplayManager="*res://InventorySystem/Core/InventoryDisplayManager.gd"
 
 [debug]
 
