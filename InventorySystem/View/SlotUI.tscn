@@ -42,9 +42,9 @@ corner_radius_bottom_left = 3
 anti_aliasing = false
 
 [node name="SlotUI" type="TextureRect"]
-margin_right = 48.0
-margin_bottom = 48.0
-rect_min_size = Vector2( 48, 48 )
+margin_right = 40.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 40, 40 )
 mouse_filter = 0
 script = ExtResource( 1 )
 normal_style = SubResource( 1 )
