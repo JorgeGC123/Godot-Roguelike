@@ -1,23 +1,9 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://InventoryItem.gd" type="Script" id=2]
+[ext_resource path="res://InventoryItem.gd" type="Script" id=1]
 
 [node name="InventoryItem" type="TextureRect"]
-margin_right = 40.0
-margin_bottom = 40.0
-rect_min_size = Vector2( 16, 16 )
-mouse_filter = 0
-mouse_default_cursor_shape = 2
-stretch_mode = 6
-script = ExtResource( 2 )
-
-[node name="ReferenceRect" type="ReferenceRect" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-border_color = Color( 0.45098, 0.396078, 0.396078, 1 )
-border_width = 2.0
-editor_only = false
-
-[connection signal="mouse_entered" from="ReferenceRect" to="." method="_on_ReferenceRect_mouse_entered"]
-[connection signal="mouse_exited" from="ReferenceRect" to="." method="_on_ReferenceRect_mouse_exited"]
+margin_right = 10.0
+margin_bottom = 10.0
+rect_min_size = Vector2( 10, 10 )
+script = ExtResource( 1 )

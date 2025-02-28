@@ -23,8 +23,6 @@ var near_door: Node = null
 var near_npc: Node = null
 var held_breakable: Node = null 
 var breakableScene: Node2D = null
-var inventory_scene = preload("res://Inventory.tscn")
-var inventory_instance
 
 export var DASH_STAMINA = 30
 
@@ -32,9 +30,6 @@ func _ready() -> void:
 	emit_signal("weapon_picked_up", weapons.get_child(0).get_texture())
 	update_player_skin(SavedData.skin)
 	_restore_previous_state()
-	inventory_instance = inventory_scene.instance()
-	get_tree().root.add_child(inventory_instance)
-	inventory_instance.connect("inventory_closed", self, "_on_inventory_closed")
 	
 func _restore_previous_state() -> void:
 	self.hp = SavedData.hp
@@ -216,20 +211,15 @@ func pick_up_breakable(breakable: Node) -> void:
 	
 func _drop_weapon() -> void:
 	var weapon_to_drop: Node2D = current_weapon
-	var inventory_position = SavedData.inventory_positions.get(weapon_to_drop.name, 0)
-	print("Dropping weapon from inventory position:", inventory_position)
 	
-	# Primero eliminamos del inventario
-	inventory_instance.remove_item(inventory_position)
-	
-	# NUEVO: Eliminar del nuevo sistema de inventario
+	# Eliminar del sistema de inventario
 	if has_node("/root/InventoryManager"):
 		var inventory_manager = get_node("/root/InventoryManager")
 		var removed_item = inventory_manager.remove_item_by_name_from_active(weapon_to_drop.name)
 		if removed_item:
-			print("Removed weapon from new inventory system:", weapon_to_drop.name)
+			print("Removed weapon from inventory system:", weapon_to_drop.name)
 	
-	# Luego manejamos el arma y SavedData
+	# Eliminar de SavedData
 	var weapon_index = current_weapon.get_index()
 	SavedData.weapons.remove(weapon_index - 1)
 	_switch_weapon(UP)
@@ -303,9 +293,11 @@ func toggle_inventory():
 		state_machine.set_state(state_machine.states.idle)
 
 func _on_inventory_closed():
-	# Esta función ya no necesita hacer nada específico porque
-	# ahora InventoryDisplayManager maneja el estado del inventario
-	pass
+	# Redirigir a la implementación del nuevo sistema
+	if InventoryDisplayManager.is_inventory_visible():
+		state_machine.set_state(state_machine.states.inventory_open)
+	else:
+		state_machine.set_state(state_machine.states.idle)
 
 func change_skin(new_skin: int):
 	SavedData.skin = new_skin
