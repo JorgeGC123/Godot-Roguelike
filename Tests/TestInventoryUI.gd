@@ -4,14 +4,19 @@ extends Reference
 # Nota: Estos tests son más difíciles de automatizar ya que implican nodos UI,
 # pero se pueden hacer verificaciones básicas de lógica
 
+# Función auxiliar para crear un mock de InventoryUI
+func _create_ui_mock(inventory_model):
+	# Creamos un objeto diccionario que simula la UI en lugar de usar el nodo real
+	return {
+		"inventory_model": inventory_model,
+		"slots": [],
+		"selected_slot": -1
+	}
+
 func test_ui_slot_creation():
 	# Verificar que se crean los slots de UI correctamente
 	var inventory_model = InventoryModel.new(10)
-	var ui = InventoryUI.new()
-	
-	# Simulamos que la UI ha sido completamente construida
-	ui.inventory_model = inventory_model
-	ui.slot_container = Node2D.new() # Simulación simple
+	var ui = _create_ui_mock(inventory_model)
 	
 	# Método que simula el proceso de creación de slots UI
 	var slots_created = _simulate_create_ui_slots(ui, 10)
@@ -21,11 +26,7 @@ func test_ui_slot_creation():
 func test_ui_slot_update():
 	# Verificar que los slots de UI se actualizan cuando cambia el inventario
 	var inventory_model = InventoryModel.new(3)
-	var ui = InventoryUI.new()
-	
-	# Simulamos que la UI ha sido completamente construida
-	ui.inventory_model = inventory_model
-	ui.slot_container = Node2D.new() # Simulación simple
+	var ui = _create_ui_mock(inventory_model)
 	
 	# Crear slots simulados
 	var ui_slots = []
@@ -48,11 +49,7 @@ func test_ui_slot_update():
 func test_slot_click_handling():
 	# Verificar que los clicks en slots funcionan correctamente
 	var inventory_model = InventoryModel.new(3)
-	var ui = InventoryUI.new()
-	
-	# Simulamos que la UI ha sido completamente construida
-	ui.inventory_model = inventory_model
-	ui.slot_container = Node2D.new()
+	var ui = _create_ui_mock(inventory_model)
 	
 	# Crear slots simulados
 	var ui_slots = []
@@ -76,7 +73,7 @@ func test_slot_click_handling():
 	# debería marcar el slot como seleccionado
 	return handled and ui_slots[1].selected
 
-# Métodos auxiliares para simulación (estos dependerán de la implementación específica)
+# Métodos auxiliares para simulación
 func _simulate_create_ui_slots(ui, count):
 	# Simulación de creación de slots UI
 	ui.slots = []
