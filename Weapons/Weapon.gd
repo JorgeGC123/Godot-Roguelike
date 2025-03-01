@@ -176,7 +176,24 @@ func _on_Hitbox_area_entered(area:Area2D):
 			if other_weapon.animation_player.is_playing():
 				print("¡Colisión de armas detectada! " + self.name + " vs " + other_weapon.name)
 				
-				# Crear efecto de sangre en el punto de colisión
+				# Cancelar ataques de ambas armas
+				self.cancel_attack()
+				
+				# Intentar cancelar el ataque de la otra arma
+				if other_weapon.has_method("cancel_attack"):
+					other_weapon.cancel_attack()
+				else:
+					# Puede que sea un WeaponComponent de NPC
+					var parent = other_weapon.get_parent()
+					if parent and parent.has_method("cancel_attack"):
+						parent.cancel_attack()
+					# Si no, buscar en el árbol hacia arriba
+					else:
+						var ancestor = other_weapon.get_parent().get_parent()
+						if ancestor and ancestor.has_method("cancel_attack"):
+							ancestor.cancel_attack()
+				
+				# Crear efecto de colisión de espadas en el punto de colisión
 				var collision_effect: CPUParticles2D = SWORD_COLLISION_SCENE.instance()
 				var collision_dir = (global_position - other_weapon.global_position).normalized()
 				collision_effect.global_rotation = collision_dir.angle()
