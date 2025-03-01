@@ -35,7 +35,6 @@ func heal(amount: int) -> void:
 	SavedData.hp = self.hp
 
 func _ready() -> void:
-	emit_signal("weapon_picked_up", weapons.get_child(0).get_texture())
 	update_player_skin(SavedData.skin)
 	_restore_previous_state()
 	
@@ -45,21 +44,32 @@ func _ready() -> void:
 	
 func _restore_previous_state() -> void:
 	self.hp = SavedData.hp
-	print(SavedData.weapons)
-	for weapon in SavedData.weapons:
-		weapon = weapon.duplicate()
-		weapon.position = Vector2.ZERO
-		weapons.add_child(weapon)
-		weapon.hide()
-		
-		emit_signal("weapon_picked_up", weapon.get_texture())
-		emit_signal("weapon_switched", weapons.get_child_count() - 2, weapons.get_child_count() - 1)
-		
-	current_weapon = weapons.get_child(SavedData.equipped_weapon_index)
-	current_weapon.show()
-	current_weapon.player=self
+	print("SavedData weapons: ", SavedData.weapons)
 	
-	emit_signal("weapon_switched", weapons.get_child_count() - 1, SavedData.equipped_weapon_index)
+	# Si hay armas guardadas, cargarlas
+	if SavedData.weapons and SavedData.weapons.size() > 0:
+		for weapon in SavedData.weapons:
+			weapon = weapon.duplicate()
+			weapon.position = Vector2.ZERO
+			weapons.add_child(weapon)
+			weapon.hide()
+			
+			emit_signal("weapon_picked_up", weapon.get_texture())
+			emit_signal("weapon_switched", weapons.get_child_count() - 2, weapons.get_child_count() - 1)
+		
+		# Establecer el arma activa según el índice guardado
+		if weapons.get_child_count() > 0:
+			# Asegurarse que el índice sea válido
+			var weapon_index = min(SavedData.equipped_weapon_index, weapons.get_child_count() - 1)
+			current_weapon = weapons.get_child(weapon_index)
+			current_weapon.show()
+			current_weapon.player = self
+			
+			emit_signal("weapon_switched", weapons.get_child_count() - 1, weapon_index)
+	else:
+		# No hay armas guardadas
+		current_weapon = null
+		print("Player: No hay armas guardadas")
 	print(SavedData.items)
 	for item in SavedData.items:
 		if is_instance_valid(item) and item is Lantern:
@@ -96,7 +106,8 @@ func _process(_delta: float) -> void:
 		return
 	
 	# Procesamiento normal cuando el inventario está cerrado
-	current_weapon.move(mouse_direction)
+	if current_weapon:
+		current_weapon.move(mouse_direction)
 	
 	player_dash._process(_delta)
 	if Input.is_action_just_pressed("ui_dodge") and player_dash.is_dash_available() and stamina > DASH_STAMINA and mov_direction != Vector2.ZERO:
@@ -140,21 +151,33 @@ func get_input() -> void:
 	if Input.is_action_pressed("ui_up"):
 		mov_direction += Vector2.UP
 		
-	if not current_weapon.is_busy():
-		if Input.is_action_just_released("ui_previous_weapon"):
-			_switch_weapon(UP)
-		elif Input.is_action_just_released("ui_next_weapon"):
-			_switch_weapon(DOWN)
-		elif Input.is_action_just_pressed("ui_throw") and held_breakable and is_instance_valid(held_breakable):
-			print("throweo el breakable bro")
-			_throw_breakable()
-		elif Input.is_action_just_pressed("ui_throw") and current_weapon.get_index() != 0:
-			_drop_weapon()
+	if current_weapon:
+		if not current_weapon.is_busy():
+			if Input.is_action_just_released("ui_previous_weapon"):
+				_switch_weapon(UP)
+			elif Input.is_action_just_released("ui_next_weapon"):
+				_switch_weapon(DOWN)
+			elif Input.is_action_just_pressed("ui_throw") and held_breakable and is_instance_valid(held_breakable):
+				print("throweo el breakable bro")
+				_throw_breakable()
+			elif Input.is_action_just_pressed("ui_throw") and current_weapon:
+				_drop_weapon()
+				return  # Salir inmediatamente para evitar acceder a current_weapon después de soltarlo
 		
-	current_weapon.get_input()
+		# Verificación adicional de seguridad después de las acciones de botones
+		if current_weapon:  # Verificamos de nuevo porque _drop_weapon() puede hacerlo null
+			current_weapon.get_input()
+	elif Input.is_action_just_pressed("ui_throw") and held_breakable and is_instance_valid(held_breakable):
+		print("throweo el breakable bro (sin arma)")
+		_throw_breakable()
 	
 	
 func _switch_weapon(direction: int) -> void:
+	# Si no hay armas equipadas o no hay armas disponibles, no hacer nada
+	if not current_weapon or weapons.get_child_count() <= 0:
+		print("No hay armas para cambiar")
+		return
+	
 	var prev_index: int = current_weapon.get_index()
 	var index: int = prev_index
 	if direction == UP:
@@ -220,11 +243,16 @@ func pick_up_weapon(weapon: Node2D) -> void:
 	weapons.call_deferred("add_child", weapon)
 	weapon.set_deferred("owner", weapons)
 	
-	# Mostrar la nueva arma
-	current_weapon.hide()
-	current_weapon.cancel_attack()
+	# Ocultar el arma actual si existe y cancelar su ataque
+	if current_weapon != null:
+		current_weapon.hide()
+		current_weapon.cancel_attack()
+	
+	# Establecer la nueva arma como la actual
 	current_weapon = weapon
 	current_weapon.player = self
+	# Asegurar que el arma nueva sea visible
+	current_weapon.show()
 	
 	# Emitir señales para la UI
 	emit_signal("weapon_picked_up", weapon.get_texture())
@@ -301,6 +329,11 @@ func pick_up_breakable(breakable: Node) -> void:
 
 	
 func _drop_weapon() -> void:
+	# Verificar que haya un arma equipada
+	if not current_weapon:
+		print("No hay arma equipada para soltar")
+		return
+	
 	var weapon_to_drop: Node2D = current_weapon
 	
 	# Eliminar del sistema de inventario
@@ -313,11 +346,22 @@ func _drop_weapon() -> void:
 	# Eliminar de SavedData
 	var weapon_index = current_weapon.get_index()
 	SavedData.weapons.remove(weapon_index - 1)
-	_switch_weapon(UP)
+	
+	# Cambiar a otra arma si quedan armas disponibles
+	if weapons.get_child_count() > 1:
+		_switch_weapon(UP)
+	else:
+		# Si era la última arma, establecer current_weapon a null
+		weapons.call_deferred("remove_child", weapon_to_drop)
+		current_weapon = null
 	
 	emit_signal("weapon_droped", weapon_index)
 	
-	weapons.call_deferred("remove_child", weapon_to_drop)
+	# Si no era la última arma, eliminarla de weapons
+	if current_weapon != null:
+		weapons.call_deferred("remove_child", weapon_to_drop)
+	
+	# Añadirla al mundo
 	get_parent().call_deferred("add_child", weapon_to_drop)
 	weapon_to_drop.set_owner(get_parent())
 	yield(weapon_to_drop.tween, "tree_entered")
@@ -336,7 +380,8 @@ func _drop_weapon() -> void:
 	weapon_to_drop.remove_child(hitbox_instance)
 		
 func cancel_attack() -> void:
-	current_weapon.cancel_attack()
+	if current_weapon:
+		current_weapon.cancel_attack()
 	
 	
 func spawn_dust() -> void:
