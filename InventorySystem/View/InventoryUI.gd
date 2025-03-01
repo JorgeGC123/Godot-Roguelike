@@ -31,7 +31,7 @@ func _gui_input(event):
 		print("InventoryUI: _gui_input recibido evento de ratón")
 		# No consumimos el evento para que pueda llegar a los slots
 func _unhandled_input(event):
-	print("InventoryUI: _unhandled_input", event)
+	# print("InventoryUI: _unhandled_input", event)
 	# Solo procesar eventos cuando el inventario está visible
 	if not visible:
 		return

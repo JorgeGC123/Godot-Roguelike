@@ -39,6 +39,15 @@ func _ready() -> void:
 		shape.disabled = true
 		player_detector.set_collision_mask_bit(0, false)
 		player_detector.set_collision_mask_bit(1, false)
+	
+	# Configurar hitbox para detectar colisiones con otras armas
+	# Layer 3 será para hitboxes de armas
+	hitbox.set_collision_layer_bit(3, true)
+	hitbox.set_collision_mask_bit(3, true)
+	
+	# Conectar señal de colisión área-área
+	if not hitbox.is_connected("area_entered", self, "_on_Hitbox_area_entered"):
+		hitbox.connect("area_entered", self, "_on_Hitbox_area_entered")
 
 
 func get_input() -> void:
@@ -154,3 +163,22 @@ func _on_Hitbox_body_entered(body:Node):
 		var BROKEN_WALL_TILE_ID = 27
 		if(body.get_cellv(map_position+Vector2.UP) == WALL_TILE_ID):
 			body.set_cellv(map_position+Vector2.UP,BROKEN_WALL_TILE_ID)
+
+
+func _on_Hitbox_area_entered(area:Area2D):
+	# Verificar si el área es un hitbox de otra arma
+	if area.get_collision_layer_bit(3) and animation_player.is_playing():
+		var other_weapon = _find_parent_weapon(area)
+		if other_weapon and other_weapon != self:
+			# Si el arma está atacando (animación en curso)
+			if other_weapon.animation_player.is_playing():
+				print("¡Colisión de armas detectada! " + self.name + " vs " + other_weapon.name)
+
+
+func _find_parent_weapon(node:Node) -> Node:
+	# Buscar recursivamente hasta encontrar un nodo que probablemente sea un arma
+	var parent = node.get_parent()
+	# En lugar de comparar con el tipo, verificamos si tiene los componentes típicos de un arma
+	while parent and not (parent.has_node("AnimationPlayer") and parent.has_node("Node2D/Sprite/Hitbox")):
+		parent = parent.get_parent()
+	return parent

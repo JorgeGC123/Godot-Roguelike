@@ -104,7 +104,6 @@ func toggle_inventory():
 
 func is_inventory_visible() -> bool:
 	var result = inventory_ui_instance != null and inventory_ui_instance.visible
-	print("InventoryDisplayManager: is_inventory_visible(): ", result)
 	return result
 
 # Callback para señales

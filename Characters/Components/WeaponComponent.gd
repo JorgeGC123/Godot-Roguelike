@@ -53,6 +53,16 @@ func initialize():
 	hitbox.set_collision_mask_bit(0, true) # 1 es la máscara del world -> true
 	hitbox.set_collision_mask_bit(1, true) # 1 es la máscara del player -> true
 	hitbox.set_collision_mask_bit(2, false) # 2 es la máscara de los enemies -> false
+	
+	# Configurar hitbox para detectar colisiones con otras armas
+	# Layer 3 será para hitboxes de armas
+	hitbox.set_collision_layer_bit(3, true)
+	hitbox.set_collision_mask_bit(3, true)
+	
+	# Conectar señal de colisión área-área
+	if not hitbox.is_connected("area_entered", self, "_on_Hitbox_area_entered"):
+		hitbox.connect("area_entered", self, "_on_Hitbox_area_entered")
+	
 	charge_particles = weapon.get_node("Node2D/Sprite/ChargeParticles")
 	tween = weapon.get_node("Tween")
 	cool_down_timer = weapon.get_node("CoolDownTimer")
@@ -196,3 +206,49 @@ func _on_charge_timer_timeout():
 
 func _on_attack_cooldown_timeout():
 	can_attack = true
+
+
+func _on_Hitbox_area_entered(area:Area2D):
+	# Verificar si el área es un hitbox de otra arma
+	if area.get_collision_layer_bit(3) and animation_player.is_playing():
+		# Encontrar a qué arma pertenece este hitbox
+		var other_weapon = _find_parent_weapon(area)
+		
+		if other_weapon and other_weapon != weapon:
+			# Verificar si la otra arma está atacando
+			var other_animation_player = other_weapon.get_node("AnimationPlayer")
+			if other_animation_player and other_animation_player.is_playing():
+				# Determinar si el duelo es player vs enemy
+				var owner_type = "unknown"
+				var other_owner_type = "unknown"
+				
+				if entity is Player:
+					owner_type = "player"
+				else:
+					owner_type = "enemy"
+				
+				var other_entity = _find_owner_entity(other_weapon)
+				if other_entity is Player:
+					other_owner_type = "player"
+				else:
+					other_owner_type = "enemy"
+				
+				print("¡Colisión de armas detectada! " + owner_type + " (" + weapon.name + ") vs " + 
+					other_owner_type + " (" + other_weapon.name + ")")
+
+
+# Busca recursivamente el nodo Weapon padre de un nodo
+func _find_parent_weapon(node:Node) -> Node:
+	# Buscar recursivamente hasta encontrar un nodo que probablemente sea un arma
+	var parent = node.get_parent()
+	while parent and not (parent.has_method("get_texture") or parent.has_node("AnimationPlayer") and parent.has_node("Node2D/Sprite/Hitbox")):
+		parent = parent.get_parent()
+	return parent
+
+
+# Busca el dueño de un arma (Player o Enemy)
+func _find_owner_entity(weapon_node:Node) -> Node:
+	var parent = weapon_node.get_parent()
+	while parent and not (parent is Player or parent.get_class().find("Enemy") >= 0):
+		parent = parent.get_parent()
+	return parent

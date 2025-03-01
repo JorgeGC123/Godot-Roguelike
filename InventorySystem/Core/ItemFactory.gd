@@ -166,6 +166,9 @@ func create_item_from_node(node: Node) -> Item:
         consumable_item.item_type = "consumable"
         consumable_item.heal_amount = 1  # Valor por defecto para pociones de vida
         
+        # Definir descripción por defecto
+        consumable_item.description = "Restaura 1 punto de vida"
+        
         # Cargar escena - usando nombre base sin sufijos
         var scene_path = "res://Items/" + base_name + ".tscn"
         if ResourceLoader.exists(scene_path):
@@ -193,6 +196,16 @@ func create_item_from_node(node: Node) -> Item:
         
         # Forzar item_type = "weapon" para asegurar consistencia
         weapon_item.item_type = "weapon"
+        
+        # Asegurarse de que weapon_scene esté definido correctamente
+        if not weapon_item.has_weapon_scene():
+            print("ItemFactory: ADVERTENCIA - weapon_scene no está definido para " + weapon_item.name)
+            # Intentar cargar la escena basada en el nombre
+            var base_name = weapon_item.id
+            var weapon_path = "res://Weapons/" + base_name + ".tscn"
+            if ResourceLoader.exists(weapon_path):
+                weapon_item.weapon_scene = load(weapon_path)
+                print("ItemFactory: Cargada escena desde " + weapon_path)
         
         print("ItemFactory: Creado WeaponItem con item_type = ", weapon_item.item_type)
         return weapon_item

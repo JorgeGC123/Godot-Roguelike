@@ -255,11 +255,11 @@ func export_to_saved_data() -> bool:
 	print("CONSUMIBLES DETECTADOS: ", inventory_consumables.size())
 	print("POSICIONES DETECTADAS: ", inventory_positions)
 	
-	# Si no tenemos armas, mantener el estado actual
+	# Si no tenemos armas, NO preservar el estado actual ya que el jugador las ha soltado
 	if inventory_weapons.size() == 0 and current_weapons_count > 0:
-		print("InventoryManager: ADVERTENCIA - No se detectaron armas en el inventario pero hay ", current_weapons_count, " armas en SavedData")
-		print("InventoryManager: Preservando armas existentes")
-		inventory_weapons = saved_data.weapons
+		print("InventoryManager: AVISO - No se detectaron armas en el inventario pero hay ", current_weapons_count, " armas en SavedData")
+		print("InventoryManager: El jugador ha soltado sus armas, limpiando SavedData.weapons")
+		# No preservamos las armas - si el inventario está vacío, es correcto que saved_data también lo esté
 	
 	# 2. SEGUNDO: crear nuevas instancias de armas basadas en las armas del inventario
 	var new_weapons = []
@@ -268,8 +268,13 @@ func export_to_saved_data() -> bool:
 	for weapon_item in inventory_weapons:
 		print("- Procesando ", weapon_item.name)
 		
-		# Verificar si tenemos weapon_scene
-		if not weapon_item.weapon_scene:
+		# Verificar si estamos tratando con un WeaponItem válido
+		if not (weapon_item is WeaponItem):
+			print("  ERROR: El objeto no es un WeaponItem válido. Tipo: ", weapon_item.get_class())
+			continue
+		
+		# Verificar si tenemos weapon_scene usando get() para seguridad
+		if not weapon_item.get("weapon_scene"):
 			print("  ERROR: weapon_scene es null para ", weapon_item.name)
 			
 			# Intento de recuperación: Buscar escena basada en el tipo de arma
@@ -285,7 +290,15 @@ func export_to_saved_data() -> bool:
 				continue
 		
 		# Instanciar arma desde la escena
-		var weapon_instance = weapon_item.weapon_scene.instance()
+		var weapon_scene = weapon_item.get("weapon_scene")
+		if not weapon_scene:
+			print("  ERROR: No se pudo obtener weapon_scene para instanciar")
+			continue
+			
+		var weapon_instance = weapon_scene.instance()
+		if not weapon_instance:
+			print("  ERROR: Fallo al instanciar el arma desde la escena")
+			continue
 		
 		# Mantener el nombre exacto
 		weapon_instance.name = weapon_item.name

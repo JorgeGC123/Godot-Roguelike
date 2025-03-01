@@ -5,6 +5,33 @@ onready var second_attack_timer: Timer = get_node("SecondAttackTimer")  # Asumie
 var in_first_attack: bool = false
 var in_second_attack: bool = false
 
+func _ready() -> void:
+	# Forzar on_floor a true para que la espada sea recogible, sin importar cómo esté en la escena
+	on_floor = true
+	
+	# Llamar al _ready de la clase padre (que ahora configurará correctamente el PlayerDetector)
+	._ready()
+	
+	# Asegurarnos de que el PlayerDetector tenga una forma de colisión adecuada
+	var detector_shape = player_detector.get_node("CollisionShape2D")
+	if not detector_shape.shape:
+		var capsule_shape = CapsuleShape2D.new()
+		capsule_shape.radius = 5.0
+		capsule_shape.height = 8.0
+		detector_shape.shape = capsule_shape
+		detector_shape.position = Vector2(-5, -8)
+		detector_shape.rotation = 1.5708  # ~90 grados en radianes
+	
+	# Asegurarnos de que el detector esté correctamente configurado para colisiones
+	detector_shape.disabled = false
+	player_detector.set_collision_mask_bit(1, true)  # Detectar al jugador
+	player_detector.set_collision_mask_bit(0, true)  # También detectar al mundo si es necesario
+	
+	# Imprimir estado para depuración
+	print("Sword ready - on_floor: ", on_floor)
+	print("PlayerDetector shape: ", detector_shape.shape)
+	print("PlayerDetector disabled: ", detector_shape.disabled)
+
 func get_input() -> void:
 	if is_busy_with_active_ability():
 		return

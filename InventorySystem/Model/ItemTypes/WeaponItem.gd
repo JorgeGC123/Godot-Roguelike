@@ -6,6 +6,13 @@ export(int) var damage: int = 1
 export(float) var attack_speed: float = 1.0
 export(PackedScene) var weapon_scene: PackedScene
 
+# Métodos seguros para acceder a weapon_scene
+func has_weapon_scene() -> bool:
+	return weapon_scene != null
+
+func get_weapon_scene():
+	return weapon_scene
+
 func _init(p_id: String = "", p_name: String = "", p_description: String = "", p_icon = null).(p_id, p_name, p_description, p_icon):
 	item_type = "weapon"
 	
