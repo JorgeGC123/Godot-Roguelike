@@ -101,10 +101,19 @@ func create_item_from_node(node: Node) -> Item:
     if not node:
         return null
     
+    # Debugear el nodo para ayudar a diagnosticar
+    print("ItemFactory: Creando item desde nodo: ", node.name, ", Clase: ", node.get_class())
+    
     # Si es una arma
-    if node.get_class() == "Weapon" or node.get("item_type") == "weapon":
+    if node.get_class() == "Weapon" or node.name.begins_with("War") or node.name.begins_with("Sword"):
+        print("ItemFactory: Detectado como arma: ", node.name)
         var weapon_item = WeaponItem.new()
         weapon_item.configure_from_weapon_node(node)
+        
+        # Forzar item_type = "weapon" para asegurar consistencia
+        weapon_item.item_type = "weapon"
+        
+        print("ItemFactory: Creado WeaponItem con item_type = ", weapon_item.item_type)
         return weapon_item
     
     # Para otros tipos, implementar lógica similar

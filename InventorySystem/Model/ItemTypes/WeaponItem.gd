@@ -8,6 +8,16 @@ export(PackedScene) var weapon_scene: PackedScene
 
 func _init(p_id: String = "", p_name: String = "", p_description: String = "", p_icon = null).(p_id, p_name, p_description, p_icon):
 	item_type = "weapon"
+	
+	# Si tenemos ID pero no tenemos weapon_scene, intentar cargar la escena
+	if p_id != "" and not weapon_scene:
+		# Limpiar posibles sufijos numéricos para obtener el tipo base de arma
+		var base_id = p_id.rstrip("0123456789")
+		var weapon_path = "res://Weapons/" + base_id + ".tscn"
+		
+		if ResourceLoader.exists(weapon_path):
+			weapon_scene = load(weapon_path)
+			print("WeaponItem: Cargada escena automáticamente desde ", weapon_path)
 
 # Sobreescribir el método serialize para incluir propiedades específicas
 func serialize() -> Dictionary:
@@ -74,6 +84,9 @@ func configure_from_weapon_node(weapon_node: Node) -> void:
 	var weapon_path = "res://Weapons/" + base_name + ".tscn"
 	if ResourceLoader.exists(weapon_path):
 		self.weapon_scene = load(weapon_path)
+		print("WeaponItem: Cargada escena desde ", weapon_path, " para ", self.name)
+	else:
+		print("WeaponItem ERROR: No se pudo encontrar la escena para ", self.name, " en ", weapon_path)
 	
 	# Obtener estadísticas
 	if weapon_node.has_node("Node2D/Sprite/Hitbox"):

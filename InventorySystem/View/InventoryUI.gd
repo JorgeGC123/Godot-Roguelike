@@ -102,6 +102,11 @@ func _on_item_dropped(source_index, target_index):
 		print("InventoryUI: Invalid slot indices")
 		return
 		
+	# Debug: mostrar qué items están involucrados
+	var source_item = inventory_model.get_item(source_index)
+	var target_item = inventory_model.get_item(target_index)
+	print("InventoryUI: Moving from slot ", source_index, " (", source_item.name if source_item else "None", ") to slot ", target_index, " (", target_item.name if target_item else "None", ")")
+	
 	# Intentar intercambiar en el modelo
 	var success = inventory_model.swap_items(source_index, target_index)
 	
@@ -109,6 +114,9 @@ func _on_item_dropped(source_index, target_index):
 	if success:
 		print("InventoryUI: Swap successful")
 		# La actualización visual la maneja el modelo a través de señales
+		
+		# NO intentar guardar aquí, ya que InventoryManager lo hará a través
+		# de la señal items_swapped del inventario
 	else:
 		print("InventoryUI: Swap failed")
 		# Podríamos agregar una animación o feedback visual aquí

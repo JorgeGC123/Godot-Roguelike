@@ -19,7 +19,6 @@ func _initialize_slots() -> void:
 		slots.append(InventorySlot.new())
 
 # Añadir item a un slot específico
-# Añadir item a un slot específico
 func add_item(item: Item, slot_index: int = -1) -> bool:
 	# Si no se especifica slot, buscar el primer slot disponible
 	if slot_index == -1:
@@ -36,6 +35,7 @@ func add_item(item: Item, slot_index: int = -1) -> bool:
 	# Verificar si el slot está vacío
 	if not slots[slot_index].is_empty():
 		print("InventoryModel: Cannot add item to slot ", slot_index, " - slot not empty")
+		print("InventoryModel: Current item in slot ", slot_index, ": ", slots[slot_index].get_item().name if slots[slot_index].get_item() else "None")
 		
 		# Alternativa: intentar encontrar otro slot vacío
 		var alt_slot = get_first_empty_slot()
@@ -67,7 +67,13 @@ func remove_item(slot_index: int) -> Item:
 # Intercambiar items entre slots
 func swap_items(from_index: int, to_index: int) -> bool:
 	if from_index < 0 or from_index >= capacity or to_index < 0 or to_index >= capacity:
+		print("InventoryModel: Cannot swap - invalid indices")
 		return false
+	
+	# Si los índices son iguales, no hay que hacer nada
+	if from_index == to_index:
+		print("InventoryModel: Cannot swap with same slot")
+		return true  # Retornamos true porque el estado final es correcto
 	
 	var from_item = slots[from_index].get_item()
 	var to_item = slots[to_index].get_item()
@@ -84,8 +90,11 @@ func swap_items(from_index: int, to_index: int) -> bool:
 	# Nota: la sincronización con SavedData se hará desde InventoryManager
 	# ya que los Resources no pueden acceder directamente a los autoloads
 	
+	# Emitir señales en orden correcto para que los listeners puedan procesar el cambio
 	emit_signal("items_swapped", from_index, to_index)
 	emit_signal("inventory_updated")
+	
+	print("InventoryModel: Swap completed successfully")
 	return true
 
 # Obtener item en un slot específico
