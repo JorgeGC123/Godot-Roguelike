@@ -208,9 +208,11 @@ position = Vector2( 34, 76 )
 
 [node name="NPCWarrior" parent="." index="18" instance=ExtResource( 6 )]
 position = Vector2( 184, 43 )
+z_index = 2
 
 [node name="GenericMonster" parent="." index="19" instance=ExtResource( 12 )]
 position = Vector2( 145, 132 )
+z_index = 2
 
 [node name="NavigationPolygonInstance" type="NavigationPolygonInstance" parent="." index="20"]
 position = Vector2( 1, -2 )

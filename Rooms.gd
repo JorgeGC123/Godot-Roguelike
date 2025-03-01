@@ -137,7 +137,7 @@ func _spawn_rooms() -> void:
 					var global_outline = PoolVector2Array()
 					for point in outline:
 						global_outline.append(room.to_global(point))
-					_debug_draw_outline(global_outline)
+					#_debug_draw_outline(global_outline)
 
 func _is_walkable_tile(tile_id: int) -> bool:
 	# Update this list with all your walkable tile IDs

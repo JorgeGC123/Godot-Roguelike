@@ -1,6 +1,8 @@
 extends Node2D
 class_name Weapon, "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/weapon_sword_1.png"
 
+const SWORD_COLLISION_SCENE: PackedScene = preload("res://Characters/SwordCollision.tscn")
+
 export(bool) var on_floor: bool = false
 
 export var ranged_weapon: bool = false
@@ -173,6 +175,20 @@ func _on_Hitbox_area_entered(area:Area2D):
 			# Si el arma está atacando (animación en curso)
 			if other_weapon.animation_player.is_playing():
 				print("¡Colisión de armas detectada! " + self.name + " vs " + other_weapon.name)
+				
+				# Crear efecto de sangre en el punto de colisión
+				var collision_effect: CPUParticles2D = SWORD_COLLISION_SCENE.instance()
+				var collision_dir = (global_position - other_weapon.global_position).normalized()
+				collision_effect.global_rotation = collision_dir.angle()
+				collision_effect.global_position = area.global_position
+				
+				var main_scene = get_tree().root
+				main_scene.add_child(collision_effect)
+				
+				collision_effect.z_index = 1
+
+				# Añadir la partícula a la lista en el singleton para luego borrarlas
+				SceneTransistor.add_blood_effect(collision_effect)
 
 
 func _find_parent_weapon(node:Node) -> Node:

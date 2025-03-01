@@ -2,7 +2,7 @@ extends StaticBody2D
 
 export var obstacle_radius: float = 10.0
 export var shape_color: Color = Color(255.0, 0.0, 0.0, 0.5)
-export var debug_draw: bool = true
+export var debug_draw: bool = false
 export var navigation_cost: float = 1000.0  # Coste muy alto para el pathfinding
 
 var nav_region: RID
