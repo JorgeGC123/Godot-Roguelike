@@ -3,6 +3,7 @@ extends FSMComponent
 
 var weapon_component: WeaponComponent
 var generic_atack_component: GenericAttackComponent
+var combat_tactics_component: Component
 
 func _init(entity: Node).(entity):
 	_add_state("idle")
@@ -21,6 +22,8 @@ func initialize():
 	set_state(states.idle)
 	weapon_component = entity.get_component("weapon")
 	generic_atack_component = entity.get_component("attack")
+	combat_tactics_component = entity.get_component("combat_tactics")
+
 	if not weapon_component:
 		Logger.error("WeaponComponent no encontrado en la entidad", "Enemy/FSM")
 		push_error("WeaponComponent not found in entity")
@@ -85,7 +88,10 @@ func _exit_state(state_exited):
 
 func _attack_logic(delta: float):
 	Logger.debug("Ejecutando lógica de ataque", "Enemy/FSM")
-	entity.get_component("movement").stop()
+	
+	# No detenemos el movimiento, las tácticas de combate manejan el movimiento
+	# entity.get_component("movement").stop()
+	
 	var player = entity.get_component("detection").get_player()
 	if player:
 		_update_weapon_direction(player)

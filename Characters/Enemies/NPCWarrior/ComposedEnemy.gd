@@ -3,8 +3,13 @@ extends Entity
 
 var is_stunned: bool = false
 export var attack_range: float = 40.0
-export var BASIC_ATTACK_STAMINA: int = 5
-var stamina: int = 100
+export var ideal_attack_distance: float = 30.0  # Distancia ideal para atacar
+export var post_attack_recovery_time: float = 1.2  # Tiempo de recuperación después de un ataque
+
+# Constantes de stamina
+const BASIC_ATTACK_STAMINA: int = 5
+const CHARGED_ATTACK_STAMINA: int = 20
+const ABILITY_STAMINA: int = 30
 
 func _ready():
 	add_component("health", HealthComponent.new(self))
@@ -12,15 +17,22 @@ func _ready():
 	add_component("ai", AIComponent.new(self))
 	add_component("detection", DetectionComponent.new(self))
 	add_component("combat", CombatComponent.new(self))
+	add_component("combat_tactics", CombatTacticsComponent.new(self))
 	add_component("fsm", EnemyFSMComponent.new(self))
+	add_component("stamina", StaminaComponent.new(self))
 	#add_component("headbutt", HeadbuttAttackComponent.new(self))
 	add_component("blood_splash", BloodSplashComponent.new(self))
 	add_component("animation", AnimationComponent.new(self))
 	
+	# Configurar componente de stamina
+	var stamina_component = get_component("stamina")
+	stamina_component.max_stamina = 100
+	stamina_component.stamina_regen_rate = 15.0  # Regeneración más rápida que el jugador
+	stamina_component.stamina_regen_delay = 0.8  # Menos retraso en regeneración
 
 	yield(get_tree().create_timer(0.1), "timeout")
 	var weapon_scene = preload("res://Weapons/Sword.tscn")
-	var weapon_component = WeaponComponent.new(self, weapon_scene)
+	var weapon_component = EnemyWeaponComponent.new(self, weapon_scene)
 	add_component("weapon", weapon_component)
 	weapon_component.initialize()
 
@@ -109,8 +121,17 @@ func _on_HitboxArea_body_entered(body):
 func _on_state_changed(previous_state, new_state):
 	send_message("state_changed", {"previous_state": previous_state, "new_state": new_state})
 
-func reduce_stamina(amount: int):
-	stamina = max(0, stamina - amount)
+func reduce_stamina(amount: int) -> bool:
+	var stamina_component = get_component("stamina")
+	if stamina_component:
+		return stamina_component.use_stamina(amount)
+	return false
+
+func get_stamina() -> int:
+	var stamina_component = get_component("stamina")
+	if stamina_component:
+		return stamina_component.stamina
+	return 0
 
 func on_navigation_velocity_computed(safe_velocity: Vector2):
 	print("Safe velocity computed: ", safe_velocity)

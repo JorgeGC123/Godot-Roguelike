@@ -39,6 +39,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/Components/CombatComponent.gd"
 }, {
+"base": "Component",
+"class": "CombatTacticsComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/CombatTacticsComponent.gd"
+}, {
 "base": "Node",
 "class": "Component",
 "language": "GDScript",
@@ -78,6 +83,11 @@ _global_script_classes=[ {
 "class": "EnemyFSMComponent",
 "language": "GDScript",
 "path": "res://Characters/Components/FSM/EnemyFSMComponent.gd"
+}, {
+"base": "WeaponComponent",
+"class": "EnemyWeaponComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/EnemyWeaponComponent.gd"
 }, {
 "base": "KinematicBody2D",
 "class": "Entity",
@@ -179,6 +189,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://InventorySystem/View/SlotUI.gd"
 }, {
+"base": "Component",
+"class": "StaminaComponent",
+"language": "GDScript",
+"path": "res://Characters/Components/StaminaComponent.gd"
+}, {
 "base": "Node2D",
 "class": "Weapon",
 "language": "GDScript",
@@ -206,6 +221,7 @@ _global_script_class_icons={
 "Breakable": "",
 "Character": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/knight_idle_anim_f0.png",
 "CombatComponent": "",
+"CombatTacticsComponent": "",
 "Component": "",
 "ComposedEnemy": "",
 "ConsumableItem": "",
@@ -214,6 +230,7 @@ _global_script_class_icons={
 "DungeonRoom": "",
 "Enemy": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/enemies/goblin/goblin_idle_anim_f0.png",
 "EnemyFSMComponent": "",
+"EnemyWeaponComponent": "",
 "Entity": "",
 "FSMComponent": "",
 "FiniteStateMachine": "",
@@ -234,6 +251,7 @@ _global_script_class_icons={
 "Player": "",
 "PlayerDash": "",
 "SlotUI": "",
+"StaminaComponent": "",
 "Weapon": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/weapon_sword_1.png",
 "WeaponComponent": "",
 "WeaponHitbox": "",
