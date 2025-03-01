@@ -11,6 +11,7 @@ var player_ref = null
 signal inventory_opened
 signal inventory_closed
 signal item_selected(item, index)
+signal weapon_equipped(item, index)
 
 func _ready():
 	# Buscar el jugador - esto podría hacerse después en _process si el jugador no está disponible al inicio
@@ -51,6 +52,7 @@ func show_inventory():
 		# Configurar señales
 		inventory_ui_instance.connect("inventory_closed", self, "_on_inventory_closed")
 		inventory_ui_instance.connect("item_selected", self, "_on_item_selected")
+		inventory_ui_instance.connect("weapon_equipped", self, "_on_weapon_equipped")
 		
 		# Configurar UI con el inventario del jugador
 		if InventoryManager.has_method("get_inventory"):
@@ -113,6 +115,26 @@ func _on_inventory_closed():
 
 func _on_item_selected(item, index):
 	emit_signal("item_selected", item, index)
+
+func _on_weapon_equipped(item, index):
+	emit_signal("weapon_equipped", item, index)
+	
+	# Notificar al jugador del cambio
+	var player = _get_player()
+	if player and player.has_method("switch_weapon"):
+		# Guardar el índice anterior antes de actualizar SavedData
+		var prev_index = SavedData.equipped_weapon_index
+		
+		# El índice actual ya está actualizado en SavedData por el método _on_equip_slot_item_dropped
+		# Solo necesitamos notificar al jugador
+		player.switch_weapon(prev_index, index)
+		print("InventoryDisplayManager: Notificado al jugador del cambio de arma")
+
+# Obtener referencia al jugador
+func _get_player():
+	if player_ref and player_ref.get_ref():
+		return player_ref.get_ref()
+	return null
 
 # Función para limpiar/eliminar la UI
 func cleanup():

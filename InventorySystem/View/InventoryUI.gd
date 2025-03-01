@@ -4,10 +4,14 @@ extends Control
 signal inventory_closed
 signal item_selected(item, index)
 signal item_used(item, index)
+signal weapon_equipped(item, index)
 
 export(PackedScene) var slot_scene: PackedScene
 export(NodePath) var grid_container_path
 export(NodePath) var close_button_path
+
+# Referencias para los slots de equipo
+var equipped_weapon_slot: SlotUI
 
 var inventory_model: InventoryModel
 var slots: Array = []
@@ -62,6 +66,9 @@ func _ready():
 	if close_button:
 		close_button.connect("pressed", self, "_on_CloseButton_pressed")
 	
+	# Inicializar los slots de equipamiento
+	_setup_equipment_slots()
+	
 	# Inicializar el drag preview
 	_setup_drag_preview()
 	
@@ -75,6 +82,18 @@ func _ready():
 	
 	# Buscar al jugador
 	call_deferred("_find_player")
+
+# Inicializar los slots de equipamiento
+func _setup_equipment_slots():
+	# Obtener referencia al slot de arma equipada
+	equipped_weapon_slot = get_node("CenterContainer/Panel/VBoxContainer/HBoxContainer2/EquipmentContainer/WeaponSlot")
+	if equipped_weapon_slot:
+		# Establecer índice especial para identificar que es el slot de equipo
+		equipped_weapon_slot.index = -100 # Valor especial para slot de equipo
+		
+		# Conectar señales para drag & drop
+		equipped_weapon_slot.connect("item_dropped", self, "_on_equip_slot_item_dropped")
+		print("Slot de equipamiento de arma inicializado")
 
 # Configurar la vista con un modelo de inventario
 func setup(model: InventoryModel):
@@ -125,9 +144,14 @@ func _initialize_slots():
 	
 	print("Initialized ", slots.size(), " slots with ", grid_container.columns, " columns")
 
-# Función para manejar drops entre slots
+# Función para manejar drops entre slots normales del inventario
 func _on_item_dropped(source_index, target_index):
 	print("InventoryUI: Dropping item from slot ", source_index, " to slot ", target_index)
+	
+	# Si el destino es el slot de equipamiento (-100), manejarlo diferente
+	if target_index == -100:
+		_on_equip_slot_item_dropped(source_index, target_index)
+		return
 	
 	# Verificar índices válidos
 	if source_index < 0 or source_index >= inventory_model.capacity or target_index < 0 or target_index >= inventory_model.capacity:
@@ -147,17 +171,79 @@ func _on_item_dropped(source_index, target_index):
 		print("InventoryUI: Swap successful")
 		# La actualización visual la maneja el modelo a través de señales
 		
-		# NO intentar guardar aquí, ya que InventoryManager lo hará a través
-		# de la señal items_swapped del inventario
+		# Si el ítem es un arma y estábamos intercambiando con un ítem equipado,
+		# actualizar el índice de equipo en SavedData
+		if SavedData and source_item and source_item.item_type == "weapon":
+			if SavedData.equipped_weapon_index == source_index:
+				SavedData.equipped_weapon_index = target_index
+				print("InventoryUI: Actualizando índice de arma equipada a ", target_index)
+		if SavedData and target_item and target_item.item_type == "weapon":
+			if SavedData.equipped_weapon_index == target_index:
+				SavedData.equipped_weapon_index = source_index
+				print("InventoryUI: Actualizando índice de arma equipada a ", source_index)
+		
+		# Actualizar la visualización del slot de equipamiento
+		refresh()
 	else:
 		print("InventoryUI: Swap failed")
 		# Podríamos agregar una animación o feedback visual aquí
 
+# Manejar drop en el slot de equipamiento
+func _on_equip_slot_item_dropped(source_index, target_index):
+	print("InventoryUI: Dropping item onto equip slot from slot ", source_index)
+	
+	# Verificar índice válido del origen
+	if source_index < 0 or source_index >= inventory_model.capacity:
+		print("InventoryUI: Invalid source slot index")
+		return
+		
+	# Obtener el item que se está arrastrando
+	var item = inventory_model.get_item(source_index)
+	if not item:
+		print("InventoryUI: No item in source slot")
+		return
+		
+	# Verificar que sea un arma
+	if item.item_type != "weapon":
+		print("InventoryUI: Item is not a weapon, cannot equip")
+		return
+		
+	# Obtener el índice actual del arma equipada
+	var current_equipped_index = SavedData.equipped_weapon_index if SavedData else -1
+	
+	# Si ya está equipada, no hacer nada
+	if current_equipped_index == source_index:
+		print("InventoryUI: Weapon already equipped")
+		return
+		
+	# Equipar el arma (actualizar SavedData)
+	SavedData.equipped_weapon_index = source_index
+	print("InventoryUI: Weapon equipped from slot ", source_index)
+	
+	# Emitir señal de arma equipada
+	emit_signal("weapon_equipped", item, source_index)
+	
+	# Actualizar la visualización
+	refresh()
+
 # Actualizar visualmente todos los slots
 func refresh():
+	# Actualizar slots de inventario
 	for i in range(slots.size()):
 		var item = inventory_model.get_item(i) if i < inventory_model.capacity else null
 		slots[i].set_item(item)
+	
+	# Actualizar slot de arma equipada
+	if equipped_weapon_slot and inventory_model:
+		# Obtener el arma equipada actual a través de SavedData
+		var equipped_index = SavedData.equipped_weapon_index if SavedData else -1
+		var equipped_weapon = null
+		
+		if equipped_index >= 0 and equipped_index < inventory_model.capacity:
+			equipped_weapon = inventory_model.get_item(equipped_index)
+		
+		# Actualizar el slot de equipo
+		equipped_weapon_slot.set_item(equipped_weapon)
 
 # Mostrar el inventario
 func show_inventory():

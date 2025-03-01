@@ -87,6 +87,58 @@ func get_player():
 		return player_ref.get_ref()
 	return null
 
+# Obtener items por tipo de un inventario específico
+func get_items_by_type(type: String, inventory_id: String = PLAYER_INVENTORY) -> Array:
+	var items_array = []
+	var inventory = get_inventory(inventory_id)
+	
+	if not inventory:
+		return items_array
+		
+	for i in range(inventory.capacity):
+		var item = inventory.get_item(i)
+		if item and item.item_type == type:
+			items_array.append({"item": item, "index": i})
+			
+	return items_array
+
+# Obtener el arma equipada actual
+func get_equipped_weapon() -> WeaponItem:
+	if not saved_data:
+		return null
+		
+	var player_inventory = get_inventory(PLAYER_INVENTORY)
+	if not player_inventory:
+		return null
+		
+	# Obtener el índice del arma equipada desde SavedData
+	var equipped_index = saved_data.equipped_weapon_index
+	if equipped_index < 0:
+		return null
+		
+	# Buscar el arma en la posición guardada
+	var item = player_inventory.get_item(equipped_index)
+	if item and item.item_type == "weapon":
+		return item
+		
+	# Si no encontramos el arma en la posición esperada, buscar la primera arma
+	var weapons = get_items_by_type("weapon")
+	if weapons.size() > 0:
+		return weapons[0].item
+		
+	return null
+
+# Verificar si un item está equipado
+func is_item_equipped(item: Item) -> bool:
+	if not saved_data or not item or item.item_type != "weapon":
+		return false
+		
+	var equipped_weapon = get_equipped_weapon()
+	if not equipped_weapon:
+		return false
+		
+	return equipped_weapon.name == item.name
+
 # Métodos para agregar/quitar items al inventario activo
 func add_item_to_active(item: Item, slot_index: int = -1) -> bool:
 	var inventory = get_active_inventory()

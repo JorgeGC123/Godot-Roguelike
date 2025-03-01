@@ -54,7 +54,7 @@ margin_bottom = 45.82
 mouse_filter = 2
 script = ExtResource( 1 )
 slot_scene = ExtResource( 2 )
-grid_container_path = NodePath("CenterContainer/Panel/VBoxContainer/ScrollContainer/InventoryGrid")
+grid_container_path = NodePath("CenterContainer/Panel/VBoxContainer/HBoxContainer2/ScrollContainer/InventoryGrid")
 close_button_path = NodePath("CenterContainer/Panel/VBoxContainer/HBoxContainer/CloseButton")
 
 [node name="BackgroundDimmer" type="ColorRect" parent="."]
@@ -71,9 +71,9 @@ mouse_filter = 1
 [node name="Panel" type="Panel" parent="CenterContainer"]
 margin_left = 72.0
 margin_top = 60.0
-margin_right = 322.0
+margin_right = 390.0
 margin_bottom = 310.0
-rect_min_size = Vector2( 250, 250 )
+rect_min_size = Vector2( 318, 250 )
 mouse_filter = 1
 custom_styles/panel = SubResource( 1 )
 
@@ -119,24 +119,57 @@ margin_right = 226.0
 margin_bottom = 44.0
 custom_styles/separator = SubResource( 4 )
 
-[node name="ScrollContainer" type="ScrollContainer" parent="CenterContainer/Panel/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
 margin_top = 54.0
-margin_right = 226.0
+margin_right = 294.0
 margin_bottom = 174.0
 rect_min_size = Vector2( 0, 120 )
+size_flags_vertical = 3
+custom_constants/separation = 10
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CenterContainer/Panel/VBoxContainer/HBoxContainer2"]
+margin_right = 226.0
+margin_bottom = 120.0
+rect_min_size = Vector2( 226, 0 )
 mouse_filter = 1
 size_flags_vertical = 3
 scroll_horizontal_enabled = false
 
-[node name="InventoryGrid" type="GridContainer" parent="CenterContainer/Panel/VBoxContainer/ScrollContainer"]
+[node name="InventoryGrid" type="GridContainer" parent="CenterContainer/Panel/VBoxContainer/HBoxContainer2/ScrollContainer"]
 margin_right = 226.0
-margin_bottom = 83.0
+margin_bottom = 120.0
 mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/vseparation = 6
 custom_constants/hseparation = 6
 columns = 5
+
+[node name="VSeparator" type="VSeparator" parent="CenterContainer/Panel/VBoxContainer/HBoxContainer2"]
+margin_left = 236.0
+margin_right = 240.0
+margin_bottom = 120.0
+custom_styles/separator = SubResource( 4 )
+
+[node name="EquipmentContainer" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer/HBoxContainer2"]
+margin_left = 250.0
+margin_right = 294.0
+margin_bottom = 120.0
+rect_min_size = Vector2( 44, 0 )
+custom_constants/separation = 6
+
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxContainer2/EquipmentContainer"]
+margin_right = 44.0
+margin_bottom = 26.0
+custom_fonts/font = SubResource( 3 )
+text = "EQUIP"
+align = 1
+
+[node name="WeaponSlot" parent="CenterContainer/Panel/VBoxContainer/HBoxContainer2/EquipmentContainer" instance=ExtResource( 2 )]
+margin_top = 32.0
+margin_right = 44.0
+margin_bottom = 76.0
+rect_min_size = Vector2( 44, 44 )
 
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/Panel/VBoxContainer"]
 margin_top = 184.0
