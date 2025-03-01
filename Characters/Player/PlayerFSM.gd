@@ -14,9 +14,11 @@ func _ready() -> void:
 	
 	
 func _state_logic(_delta: float) -> void:
+	# Solo procesar entradas y movimiento si no estamos en el estado de inventario
 	if state == states.idle or state == states.move:
 		parent.get_input()
 		parent.move()
+	# En el estado de inventario, no procesamos ninguna entrada ni movimiento
 	
 	
 func _get_transition() -> int:
@@ -29,6 +31,10 @@ func _get_transition() -> int:
 				return states.idle
 		states.hurt:
 			if not animation_player.is_playing():
+				return states.idle
+		states.inventory_open:
+			# Verificar si el inventario ya no está abierto para regresar al estado idle
+			if not InventoryDisplayManager.is_inventory_visible():
 				return states.idle
 	return -1
 	

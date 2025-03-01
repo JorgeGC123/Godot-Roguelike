@@ -33,8 +33,10 @@ func _process(_delta):
 		return
 
 func show_inventory():
+	print("InventoryDisplayManager: show_inventory llamado")
 	# Crear UI si no existe
 	if inventory_ui_instance == null:
+		print("InventoryDisplayManager: Creando nueva instancia de UI")
 		# Crear un nuevo CanvasLayer para asegurar que esté por encima de todo
 		var ui_layer = CanvasLayer.new()
 		ui_layer.layer = 100  # Layer alto para estar al frente
@@ -44,6 +46,7 @@ func show_inventory():
 		# Instanciar la UI en el CanvasLayer
 		inventory_ui_instance = inventory_ui_scene.instance()
 		ui_layer.add_child(inventory_ui_instance)
+		print("InventoryDisplayManager: UI instanciada y añadida al CanvasLayer")
 		
 		# Configurar señales
 		inventory_ui_instance.connect("inventory_closed", self, "_on_inventory_closed")
@@ -61,6 +64,7 @@ func show_inventory():
 		# Hacer visible el inventario (esto también inicia el posicionamiento)
 		inventory_ui_instance.show_inventory()
 	else:
+		print("InventoryDisplayManager: usando instancia existente de UI")
 		# Si ya existe, asegurar que esté al frente
 		var parent = inventory_ui_instance.get_parent()
 		if parent is CanvasLayer:
@@ -68,25 +72,40 @@ func show_inventory():
 		
 		# Solo mostrar si no está visible
 		if not inventory_ui_instance.visible:
+			print("InventoryDisplayManager: mostrando UI existente")
 			inventory_ui_instance.show_inventory()
+		else:
+			print("InventoryDisplayManager: UI ya está visible")
 	
 	emit_signal("inventory_opened")
 
 func hide_inventory():
+	print("InventoryDisplayManager: hide_inventory llamado")
 	if inventory_ui_instance != null:
-		inventory_ui_instance.hide_inventory()
+		if inventory_ui_instance.visible:
+			print("InventoryDisplayManager: ocultando UI")
+			inventory_ui_instance.hide_inventory()
+		else:
+			print("InventoryDisplayManager: UI ya está oculta")
+	else:
+		print("InventoryDisplayManager: No hay inventario para ocultar")
 	
-	# Reanudar el juego si está pausado
-	# get_tree().paused = false
+	# Emitir señal para asegurar que todos los sistemas se actualizan
+	emit_signal("inventory_closed")
 
 func toggle_inventory():
+	print("InventoryDisplayManager: toggle_inventory llamado")
 	if is_inventory_visible():
+		print("InventoryDisplayManager: ocultando inventario")
 		hide_inventory()
 	else:
+		print("InventoryDisplayManager: mostrando inventario")
 		show_inventory()
 
-func is_inventory_visible():
-	return inventory_ui_instance != null and inventory_ui_instance.visible
+func is_inventory_visible() -> bool:
+	var result = inventory_ui_instance != null and inventory_ui_instance.visible
+	print("InventoryDisplayManager: is_inventory_visible(): ", result)
+	return result
 
 # Callback para señales
 func _on_inventory_closed():

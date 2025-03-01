@@ -39,6 +39,10 @@ func _ready() -> void:
 	update_player_skin(SavedData.skin)
 	_restore_previous_state()
 	
+	# Conectar señales del sistema de inventario
+	if not InventoryDisplayManager.is_connected("inventory_closed", self, "_on_inventory_closed"):
+		InventoryDisplayManager.connect("inventory_closed", self, "_on_inventory_closed")
+	
 func _restore_previous_state() -> void:
 	self.hp = SavedData.hp
 	print(SavedData.weapons)
@@ -69,18 +73,29 @@ func _restore_previous_state() -> void:
 
 
 func _process(_delta: float) -> void:
+	# Verificar antes de procesar cualquier cosa si el inventario está abierto
+	var inventory_open = state_machine.state == state_machine.states.inventory_open or \
+						InventoryDisplayManager.is_inventory_visible()
 	
 	var mouse_direction: Vector2 = (get_global_mouse_position() - global_position).normalized()
 	var window_size: Vector2 = OS.get_window_size()
 	var mouse_pos = get_global_mouse_position()
 	$Camera2D.offset_h = (mouse_pos.x - global_position.x) / (window_size.x/2)
 	$Camera2D.offset_v = (mouse_pos.y - global_position.y) / (window_size.y/2)
+	
+	# Siempre actualizamos la orientación del sprite
 	if mouse_direction.x > 0 and animated_sprite.flip_h:
 		animated_sprite.flip_h = false
 	elif mouse_direction.x < 0 and not animated_sprite.flip_h:
 		animated_sprite.flip_h = true
-		
+	
 	emit_signal("flip_h_changed", animated_sprite.flip_h)
+	
+	# Si el inventario está abierto, no procesamos nada más
+	if inventory_open:
+		return
+	
+	# Procesamiento normal cuando el inventario está cerrado
 	current_weapon.move(mouse_direction)
 	
 	player_dash._process(_delta)
@@ -102,6 +117,12 @@ func _process(_delta: float) -> void:
 			pick_up_breakable(near_breakable) 
 		
 func get_input() -> void:
+	# Verificar si el inventario está abierto
+	if state_machine.state == state_machine.states.inventory_open or InventoryDisplayManager.is_inventory_visible():
+		# No procesar entradas cuando el inventario está abierto
+		mov_direction = Vector2.ZERO
+		return
+	
 	# Verificar si el jugador está realizando un dash
 	if player_dash.is_dashing:
 		return  # No procesar entradas de movimiento durante el dash
@@ -352,21 +373,66 @@ func _throw_breakable() -> void:
 
 
 func _input(event):
+	# Solo procesar eventos del inventario
 	if event.is_action_pressed("ui_inventory"):
-		InventoryDisplayManager.toggle_inventory()
+		print("Player: Inventario tecla presionada - Tab")
+		# Alternar el inventario directamente
+		toggle_inventory()
+		# Importante: consumir el evento para evitar doble procesamiento
+		get_tree().set_input_as_handled()
+		return
+
+	# Bloquear acciones de combate si el inventario está abierto
+	if InventoryDisplayManager.is_inventory_visible():
+		# Intercepción temprana para evitar que las acciones del jugador se activen
+		# cuando se está interactuando con el inventario
+		if event is InputEventMouseButton or \
+		   event.is_action_pressed("ui_attack") or \
+		   event.is_action_pressed("ui_throw") or \
+		   event.is_action_pressed("ui_dodge") or \
+		   event.is_action_pressed("ui_interact") or \
+		   event.is_action_pressed("ui_previous_weapon") or \
+		   event.is_action_pressed("ui_next_weapon"):
+			# NO evitamos que el evento se propague para que llegue al inventario
+			# Solo queremos evitar que se procese aquí
+			return
 
 func toggle_inventory():
+	print("toggle_inventory llamado")
+	# Guardar el estado anterior antes de abrir el inventario (si no estamos en un estado especial)
+	var prev_state = state_machine.state
+	var was_in_special_state = (prev_state == state_machine.states.hurt or 
+							  prev_state == state_machine.states.dead or
+							  prev_state == state_machine.states.inventory_open)
+	
+	# Alternar el inventario
+	print("Intentando alternar inventario")
 	InventoryDisplayManager.toggle_inventory()
+	print("Inventario visible: ", InventoryDisplayManager.is_inventory_visible())
+	
+	# Actualizar el estado de la FSM según el estado del inventario
 	if InventoryDisplayManager.is_inventory_visible():
+		# Cancelar cualquier ataque en progreso
+		cancel_attack()
+		# Cambiar al estado de inventario
 		state_machine.set_state(state_machine.states.inventory_open)
+		# Detener el movimiento inmediatamente
+		mov_direction = Vector2.ZERO
+		velocity = Vector2.ZERO
 	else:
+		# Al cerrar el inventario, volver al estado idle
 		state_machine.set_state(state_machine.states.idle)
 
 func _on_inventory_closed():
-	# Redirigir a la implementación del nuevo sistema
-	if InventoryDisplayManager.is_inventory_visible():
-		state_machine.set_state(state_machine.states.inventory_open)
-	else:
+	print("Player: _on_inventory_closed")
+	# Esta función se llama cuando el inventario se cierra desde la UI
+	# Asegurarnos de que el estado del jugador sea coherente
+	if state_machine.state == state_machine.states.inventory_open:
+		print("Player: Cambiando estado a idle")
+		# Detener el movimiento inmediatamente
+		mov_direction = Vector2.ZERO
+		velocity = Vector2.ZERO
+		# Cambiar al estado idle
 		state_machine.set_state(state_machine.states.idle)
 
 func change_skin(new_skin: int):

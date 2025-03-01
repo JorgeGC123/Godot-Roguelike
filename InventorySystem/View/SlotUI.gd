@@ -1,6 +1,11 @@
 class_name SlotUI
 extends TextureRect
 
+# Implementamos un handler para eventos directos
+func _gui_input(event):
+	if event is InputEventMouseButton and event.pressed:
+		print("SlotUI[" + str(index) + "]: Recibido click directo")
+
 signal item_dropped(from_index, to_index)
 
 export(StyleBox) var normal_style: StyleBox
@@ -17,7 +22,9 @@ onready var selection_panel = $SelectionPanel
 onready var border = $Border
 
 func _ready():
-	mouse_filter = MOUSE_FILTER_PASS
+	# STOP significa que este nodo captura eventos y no los pasa a nodos por debajo
+	# pero los sigue enviando a sus padres si no los procesa
+	mouse_filter = MOUSE_FILTER_STOP
 	
 	# Configurar estilos visuales
 	if normal_style:
@@ -25,6 +32,9 @@ func _ready():
 	
 	# Configurar elementos visuales
 	selection_panel.visible = false
+	
+	# Depuración
+	print("SlotUI inicializado: ", get_path(), " - mouse_filter: ", mouse_filter)
 	
 	# Por defecto el slot está vacío
 	item_texture.texture = null
@@ -75,7 +85,9 @@ func unhighlight():
 
 # Funciones para drag & drop
 func get_drag_data(position):
+	print("SlotUI: get_drag_data llamado en slot ", index)
 	if not item:
+		print("SlotUI: No hay item para arrastrar")
 		return null
 	
 	# Crear datos para el drag

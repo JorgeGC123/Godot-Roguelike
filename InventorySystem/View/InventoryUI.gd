@@ -25,7 +25,39 @@ var update_timer = null
 var last_player_pos = Vector2.ZERO  # Última posición del jugador
 var repositioning_threshold = 100  # Distancia mínima en píxeles para reposicionar
 
+# Implementamos _gui_input para capturar eventos de interfaz en el inventario
+func _gui_input(event):
+	if event is InputEventMouseButton and event.pressed:
+		print("InventoryUI: _gui_input recibido evento de ratón")
+		# No consumimos el evento para que pueda llegar a los slots
+func _unhandled_input(event):
+	print("InventoryUI: _unhandled_input", event)
+	# Solo procesar eventos cuando el inventario está visible
+	if not visible:
+		return
+	
+	# Cerrar el inventario con la tecla de inventario o Escape
+	if event.is_action_pressed("ui_inventory") or event.is_action_pressed("ui_cancel"):
+		print("InventoryUI: cerrando desde _unhandled_input")
+		hide_inventory()
+		get_tree().set_input_as_handled() # Marcar el evento como procesado
+	
+	# Consumir todos los eventos de ratón que ocurran sobre el inventario
+	# para que no lleguen a la escena de juego subyacente
+	if event is InputEventMouseButton:
+		# Verificar si el mouse está dentro del área del panel
+		var center_container = $CenterContainer
+		if center_container:
+			var panel = center_container.get_node("Panel")
+			if panel:
+				var panel_rect = Rect2(panel.rect_global_position, panel.rect_size)
+				if panel_rect.has_point(event.global_position):
+					get_tree().set_input_as_handled()
+
 func _ready():
+	# NO usamos STOP aquí porque queremos que los eventos pasen a los hijos
+	mouse_filter = MOUSE_FILTER_PASS # PASS permite que el evento se propague a los hijos
+	
 	# Conectar señales del botón de cierre si existe
 	if close_button:
 		close_button.connect("pressed", self, "_on_CloseButton_pressed")
