@@ -111,20 +111,22 @@ func import_from_saved_data():
 		push_warning("Player inventory not found")
 		return
 	
-	print("InventoryManager: Importing weapons from SavedData, count: ", saved_data.weapons.size())
-	print("InventoryManager: Current inventory positions in SavedData: ", saved_data.inventory_positions)
+	print("InventoryManager: Importando desde SavedData")
+	print("InventoryManager: Armas en SavedData: ", saved_data.weapons.size())
+	print("InventoryManager: Consumibles en SavedData: ", saved_data.items.size())
+	print("InventoryManager: Posiciones en SavedData: ", saved_data.inventory_positions)
 	
 	# Primero, limpiar el inventario para evitar conflictos
 	for i in range(player_inventory.capacity):
 		player_inventory.remove_item(i)
 	
-	# Crear un mapa directo de arma -> posición usando el diccionario de posiciones guardado
+	# ===== IMPORTACIÓN DE ARMAS =====
 	var weapon_position_map = {}
 	
 	# Llenar el mapa usando los datos guardados en inventory_positions
 	for weapon_name in saved_data.inventory_positions.keys():
 		var position = saved_data.inventory_positions[weapon_name]
-		print("InventoryManager: Found saved position for ", weapon_name, ": ", position)
+		print("InventoryManager: Posición guardada para ", weapon_name, ": ", position)
 		weapon_position_map[weapon_name] = position
 	
 	# Procesar cada arma y colocarla en su posición guardada
@@ -134,7 +136,7 @@ func import_from_saved_data():
 		
 		# Obtener la posición guardada para esta arma específica
 		var target_position = saved_data.inventory_positions.get(weapon_name, i)
-		print("InventoryManager: Placing ", weapon_name, " at position ", target_position)
+		print("InventoryManager: Colocando arma ", weapon_name, " en posición ", target_position)
 		
 		# Crear el item para esta arma
 		var weapon_item = ItemFactory.create_item_from_node(weapon_node)
@@ -143,9 +145,9 @@ func import_from_saved_data():
 			var success = player_inventory.add_item(weapon_item, target_position)
 			
 			if success:
-				print("InventoryManager: Successfully added ", weapon_item.name, " to position ", target_position)
+				print("InventoryManager: Añadida arma ", weapon_item.name, " a la posición ", target_position)
 			else:
-				# Si falla (raro dada la limpieza previa), buscar slot alternativo
+				# Si falla, buscar slot alternativo
 				var alt_slot = player_inventory.get_first_empty_slot()
 				if alt_slot != -1:
 					print("InventoryManager: ERROR - Slot ", target_position, " ocupado, usando alternativa: ", alt_slot)
@@ -155,19 +157,53 @@ func import_from_saved_data():
 				else:
 					print("InventoryManager: ERROR - No se pudo colocar ", weapon_item.name, " - inventario lleno")
 	
-	# Actualizar la UI si es necesario
+	# ===== IMPORTACIÓN DE CONSUMIBLES =====
+	print("InventoryManager: Importando consumibles...")
+	for i in range(saved_data.items.size()):
+		var consumable_node = saved_data.items[i]
+		var consumable_name = consumable_node.name
+		
+		print("InventoryManager: Procesando consumible ", consumable_name)
+		
+		# Buscar si el consumible tiene una posición guardada
+		var target_position = saved_data.inventory_positions.get(consumable_name, -1)
+		if target_position == -1:
+			# Si no tiene posición guardada, buscar el primer slot vacío
+			target_position = player_inventory.get_first_empty_slot()
+			print("InventoryManager: Consumible sin posición guardada, usando slot vacío: ", target_position)
+		
+		# Crear el item para este consumible
+		var consumable_item = ItemFactory.create_item_from_node(consumable_node)
+		if consumable_item:
+			# Intentar colocar en la posición específica
+			if target_position != -1:
+				var success = player_inventory.add_item(consumable_item, target_position)
+				if success:
+					print("InventoryManager: Añadido consumible ", consumable_item.name, " a la posición ", target_position)
+				else:
+					# Si no se pudo colocar en la posición deseada, buscar otro slot
+					var alt_slot = player_inventory.get_first_empty_slot()
+					if alt_slot != -1:
+						print("InventoryManager: ERROR - Slot ", target_position, " ocupado, usando alternativa: ", alt_slot)
+						player_inventory.add_item(consumable_item, alt_slot)
+						# Actualizar la posición guardada
+						saved_data.inventory_positions[consumable_item.name] = alt_slot
+					else:
+						print("InventoryManager: ERROR - No se pudo añadir el consumible ", consumable_item.name, " - inventario lleno")
+			else:
+				print("InventoryManager: ERROR - No hay slots disponibles para el consumible ", consumable_item.name)
+		else:
+			print("InventoryManager: ERROR - No se pudo crear el item para el consumible ", consumable_name)
+	
+	# Actualizar la UI
 	player_inventory.emit_signal("inventory_updated")
 	
-	print("InventoryManager: Import from SavedData complete")
-	print("InventoryManager: Final inventory slots:")
+	print("InventoryManager: Importación desde SavedData completada")
+	print("InventoryManager: Estado final del inventario:")
 	for i in range(player_inventory.capacity):
 		var item = player_inventory.get_item(i)
 		if item:
-			print(" - Slot ", i, ": ", item.name)
-		else:
-			print(" - Slot ", i, ": vacío")
-	
-	print("InventoryManager: Final inventory positions in SavedData: ", saved_data.inventory_positions)
+			print(" - Slot ", i, ": ", item.name, " (tipo: ", item.item_type, ")")
 
 func export_to_saved_data() -> bool:
 	if not saved_data:
@@ -181,6 +217,7 @@ func export_to_saved_data() -> bool:
 	
 	print("InventoryManager: Exporting to SavedData")
 	
+	# ===== MANEJO DE ARMAS =====
 	# Verificar el estado actual de las armas antes de modificarlas
 	var current_weapons_count = saved_data.weapons.size()
 	print("InventoryManager: Armas actuales en SavedData: ", current_weapons_count)
@@ -192,25 +229,37 @@ func export_to_saved_data() -> bool:
 	var inventory_weapons = []
 	var inventory_positions = {}
 	
+	# ===== MANEJO DE CONSUMIBLES =====
+	# También necesitamos exportar los consumibles
+	var inventory_consumables = []
+	
 	print("\nINVENTARIO ACTUAL:")
 	for i in range(player_inventory.capacity):
 		var item = player_inventory.get_item(i)
 		if item:
 			print("- Slot ", i, ": ", item.name, " (tipo: ", item.item_type, ")")
+			
+			# Guardar posición para cualquier tipo de item
+			inventory_positions[item.name] = i
+			
+			# Manejar armas
 			if item.item_type == "weapon":
 				inventory_weapons.append(item)
-				inventory_positions[item.name] = i
-		else:
-			print("- Slot ", i, ": vacío")
+			
+			# Manejar consumibles
+			elif item.item_type == "consumable":
+				print("- Agregando consumible ", item.name, " al array de consumibles")
+				inventory_consumables.append(item)
 	
 	print("\nARMAS DETECTADAS: ", inventory_weapons.size())
+	print("CONSUMIBLES DETECTADOS: ", inventory_consumables.size())
 	print("POSICIONES DETECTADAS: ", inventory_positions)
 	
 	# Si no tenemos armas, mantener el estado actual
 	if inventory_weapons.size() == 0 and current_weapons_count > 0:
 		print("InventoryManager: ADVERTENCIA - No se detectaron armas en el inventario pero hay ", current_weapons_count, " armas en SavedData")
 		print("InventoryManager: Preservando armas existentes")
-		return false
+		inventory_weapons = saved_data.weapons
 	
 	# 2. SEGUNDO: crear nuevas instancias de armas basadas en las armas del inventario
 	var new_weapons = []
@@ -249,16 +298,47 @@ func export_to_saved_data() -> bool:
 		new_weapons.append(weapon_instance)
 		print("  AÑADIDA: ", weapon_instance.name, " a new_weapons")
 	
-	# 3. TERCERO: Actualizar SavedData con las nuevas armas y posiciones
+	# ===== MANEJO DE CONSUMIBLES =====
+	# 3. Crear instancias de consumibles a partir de los items en el inventario
+	var new_consumables = []
+	
+	print("\nPROCESANDO CONSUMIBLES:")
+	for consumable_item in inventory_consumables:
+		print("- Procesando consumible ", consumable_item.name)
+		
+		# Verificar que sea un ConsumableItem válido
+		if consumable_item is ConsumableItem:
+			# Instanciar la escena del consumible si es posible
+			if consumable_item.item_scene:
+				var consumable_instance = consumable_item.item_scene.instance()
+				consumable_instance.name = consumable_item.name
+				new_consumables.append(consumable_instance)
+				print("  AÑADIDO: ", consumable_instance.name, " a new_consumables")
+			else:
+				# Si no tiene escena, intentar cargarla
+				var possible_path = "res://Items/" + consumable_item.name + ".tscn"
+				if ResourceLoader.exists(possible_path):
+					var consumable_instance = load(possible_path).instance()
+					consumable_instance.name = consumable_item.name
+					new_consumables.append(consumable_instance)
+					print("  ESCENA RECUPERADA: Añadido ", consumable_instance.name, " a new_consumables")
+				else:
+					print("  ERROR: No se pudo encontrar la escena para ", consumable_item.name)
+		else:
+			print("  ERROR: No es un ConsumableItem válido")
+	
+	# 4. ACTUALIZAR SAVEDDATA
 	print("\nACTUALIZANDO SAVEDDATA:")
 	print("- Armas creadas: ", new_weapons.size())
-	print("- Posiciones detectadas: ", inventory_positions)
+	print("- Consumibles creados: ", new_consumables.size())
+	print("- Posiciones de armas: ", inventory_positions)
 	
 	# Guardar el equipped_weapon_index actual
 	var current_equipped_index = saved_data.equipped_weapon_index
 	
 	# Actualizar saved_data
 	saved_data.weapons = new_weapons
+	saved_data.items = new_consumables
 	saved_data.inventory_positions = inventory_positions
 	
 	# Asegurarse de que el equipped_weapon_index sea válido
@@ -273,6 +353,7 @@ func export_to_saved_data() -> bool:
 	# Verificar el guardado
 	print("\nEXPORTACIÓN COMPLETADA:")
 	print("- Armas guardadas: ", saved_data.weapons.size())
+	print("- Consumibles guardados: ", saved_data.items.size())
 	print("- Posiciones guardadas: ", saved_data.inventory_positions)
 	
 	if saved_data.weapons.size() == 0 and current_weapons_count > 0:
@@ -376,7 +457,6 @@ func _connect_inventory_signals():
 	print("InventoryManager: Todas las señales conectadas correctamente")
 
 # Manejar intercambio de items
-# Manejar intercambio de items
 func _on_inventory_items_swapped(from_index: int, to_index: int):
 	print("InventoryManager: ===== NUEVO MÉTODO DE INTERCAMBIO =====")
 	
@@ -421,12 +501,9 @@ func _on_inventory_items_swapped(from_index: int, to_index: int):
 			if item.get("item_type"):
 				print("    - item_type: ", item.item_type)
 				
-				# Si es un arma, guardar su posición
-				if item.item_type == "weapon":
-					updated_positions[item.name] = i
-					print("    - Guardada posición para ", item.name, ": ", i)
-				else:
-					print("    - No es un arma, item_type: ", item.item_type)
+				# Guardar posición para cualquier tipo de item
+				updated_positions[item.name] = i
+				print("    - Guardada posición para ", item.name, ": ", i)
 			else:
 				print("    - No tiene propiedad item_type")
 				
@@ -434,8 +511,6 @@ func _on_inventory_items_swapped(from_index: int, to_index: int):
 			if item is WeaponItem:
 				print("    - Es WeaponItem por herencia de clase")
 				updated_positions[item.name] = i
-		else:
-			print("  Slot ", i, ": Vacío")
 	
 	# Combinar las posiciones que encontramos con las existentes
 	var final_positions = saved_data.inventory_positions.duplicate()
@@ -445,9 +520,20 @@ func _on_inventory_items_swapped(from_index: int, to_index: int):
 	# Actualizar saved_data con las nuevas posiciones
 	saved_data.inventory_positions = final_positions
 	print("InventoryManager: inventory_positions actualizado: ", saved_data.inventory_positions)
+
+	# ¿Tenemos consumibles que guardar?
+	var has_consumables = false
+	for i in range(player_inventory.capacity):
+		var item = player_inventory.get_item(i)
+		if item and item.item_type == "consumable":
+			has_consumables = true
+			break
 	
-	# Guardar cambios de inmediato
-	saved_data.save_data()
+	if has_consumables:
+		export_to_saved_data()
+	else:
+		# Guardar solo las posiciones de armas
+		saved_data.save_data()
 	
 	# Verificar que la reconstrucción fue correcta
 	if item_now_at_to and saved_data.inventory_positions.get(item_now_at_to.name) != to_index:
@@ -459,8 +545,14 @@ func _on_inventory_items_swapped(from_index: int, to_index: int):
 func _on_item_added_to_inventory(item: Item, slot_index: int):
 	print("InventoryManager: Item añadido al inventario: ", item.name if item else "None", " en slot ", slot_index)
 	
-	# Si es un arma, actualizar su posición en SavedData
-	if item and item.item_type == "weapon" and saved_data:
+	if not saved_data:
+		print("InventoryManager: ERROR - SavedData no disponible")
+		return
+	
+	# === MANEJO DE ARMAS ===
+	if item and item.item_type == "weapon":
+		print("InventoryManager: Procesando arma: ", item.name)
+		
 		# Verificar que es un arma válida
 		if item is WeaponItem:
 			# Si no tiene weapon_scene, intentar recuperarla
@@ -472,7 +564,7 @@ func _on_item_added_to_inventory(item: Item, slot_index: int):
 					item.weapon_scene = load(weapon_path)
 					print("InventoryManager: Recuperada escena de arma para ", item.name)
 				else:
-					print("InventoryManager ERROR: No se pudo recuperar la escena para ", item.name)
+					print("InventoryManager: ERROR - No se pudo recuperar la escena para ", item.name)
 					
 		# Actualizar la posición en saved_data
 		saved_data.update_weapon_position(item.name, slot_index)
@@ -492,16 +584,42 @@ func _on_item_added_to_inventory(item: Item, slot_index: int):
 			# Actualizar saved_data con las nuevas posiciones
 			saved_data.inventory_positions = updated_positions
 			print("InventoryManager: Posiciones reconstruidas: ", saved_data.inventory_positions)
+	
+	# === MANEJO DE CONSUMIBLES ===
+	elif item and item.item_type == "consumable":
+		print("InventoryManager: Procesando consumible: ", item.name)
 		
-		# Guardar los cambios
+		# Verificar que es un consumible válido
+		if item is ConsumableItem:
+			print("InventoryManager: Consumible válido detectado. Exportando a SavedData")
+			# Forzar exportación a SavedData para guardar el consumible
+			export_to_saved_data()
+		else:
+			print("InventoryManager: ERROR - El item no es un ConsumableItem válido")
+	
+	# Guardar cambios en todos los casos
+	else:
+		# Para otros tipos de ítems, simplemente guardar
 		saved_data.save_data()
+	
+	# Depuración adicional
+	print("InventoryManager: Estado del inventario después de añadir el item:")
+	var player_inventory = get_inventory(PLAYER_INVENTORY)
+	if player_inventory:
+		for i in range(player_inventory.capacity):
+			var inv_item = player_inventory.get_item(i)
+			if inv_item:
+				print(" - Slot ", i, ": ", inv_item.name, " (tipo: ", inv_item.item_type, ")")
 
 # Manejador para item eliminado
 func _on_item_removed_from_inventory(item: Item, slot_index: int):
 	print("InventoryManager: Item eliminado del inventario: ", item.name if item else "None", " del slot ", slot_index)
 	
+	if not saved_data:
+		return
+		
 	# Si era un arma, actualizar SavedData
-	if item and item.item_type == "weapon" and saved_data:
+	if item and item.item_type == "weapon":
 		# Verificar si el arma sigue en el inventario pero en otro slot
 		var player_inventory = get_inventory(PLAYER_INVENTORY)
 		var found = false
@@ -518,5 +636,10 @@ func _on_item_removed_from_inventory(item: Item, slot_index: int):
 			saved_data.inventory_positions.erase(item.name)
 			print("InventoryManager: Eliminada referencia del arma en SavedData")
 			
-			# Guardar los cambios
-			saved_data.save_data()
+	# Si era un consumible, actualizar los items de SavedData
+	elif item and item.item_type == "consumable":
+		print("InventoryManager: Eliminado consumible. Exportando a SavedData")
+		export_to_saved_data()
+		
+	# Guardar los cambios
+	saved_data.save_data()

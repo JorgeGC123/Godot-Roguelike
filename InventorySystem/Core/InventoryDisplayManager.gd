@@ -24,8 +24,7 @@ func _find_player():
 	if players.size() > 0:
 		player_ref = weakref(players[0])
 		print("InventoryDisplayManager: Player found")
-	else:
-		print("InventoryDisplayManager: Player not found, will try again later")
+
 
 func _process(_delta):
 	# Si no tenemos referencia al jugador, intentar encontrarlo

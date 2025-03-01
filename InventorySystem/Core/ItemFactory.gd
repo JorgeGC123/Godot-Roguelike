@@ -16,6 +16,9 @@ func _load_item_database():
     _register_weapon_template("sword", "Espada", "Una espada básica", 10, 1.0, "res://Weapons/Sword.tscn")
     _register_weapon_template("crossbow", "Ballesta", "Una ballesta de largo alcance", 8, 0.8, "res://Weapons/Crossbow.tscn")
     
+    # Consumibles predefinidos
+    _register_consumable_template("HealthPotion", "Poción de Vida", "Restaura 1 punto de vida", 1, "res://Items/HealthPotion.tscn")
+    
     # Añadir más tipos de items según sea necesario
 
 # Registrar una plantilla de arma en la base de datos
@@ -29,6 +32,21 @@ func _register_weapon_template(id: String, name: String, description: String, da
         "damage": damage,
         "attack_speed": attack_speed,
         "weapon_scene_path": scene_path
+    }
+    
+    item_database[id] = template
+
+# Registrar una plantilla de consumible en la base de datos
+func _register_consumable_template(id: String, name: String, description: String, heal_amount: int, scene_path: String):
+    var template = {
+        "id": id,
+        "name": name,
+        "description": description,
+        "icon_path": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/props_itens/potion_red.png",
+        "item_type": "consumable",
+        "heal_amount": heal_amount,
+        "uses_left": 1,
+        "item_scene_path": scene_path
     }
     
     item_database[id] = template
@@ -49,6 +67,8 @@ func create_item_from_data(data: Dictionary):
     match item_type:
         "weapon":
             return _create_weapon_from_data(data)
+        "consumable":
+            return _create_consumable_from_data(data)
         # Otros tipos de items aquí
         _:
             return _create_base_item_from_data(data)
@@ -96,6 +116,32 @@ func _create_weapon_from_data(data: Dictionary) -> WeaponItem:
     
     return weapon
 
+# Crear un consumible
+func _create_consumable_from_data(data: Dictionary) -> ConsumableItem:
+    var consumable = ConsumableItem.new()
+    
+    # Propiedades base
+    consumable.id = data.get("id", "")
+    consumable.name = data.get("name", "Unknown Consumable")
+    consumable.description = data.get("description", "")
+    
+    var icon_path = data.get("icon_path", "")
+    if icon_path and ResourceLoader.exists(icon_path):
+        consumable.icon = load(icon_path)
+    
+    consumable.properties = data.get("properties", {}).duplicate()
+    consumable.item_type = "consumable"
+    
+    # Propiedades específicas de consumibles
+    consumable.heal_amount = data.get("heal_amount", 1)
+    consumable.uses_left = data.get("uses_left", 1)
+    
+    var scene_path = data.get("item_scene_path", "")
+    if scene_path and ResourceLoader.exists(scene_path):
+        consumable.item_scene = load(scene_path)
+    
+    return consumable
+
 # Crear un item duplicando un nodo existente
 func create_item_from_node(node: Node) -> Item:
     if not node:
@@ -104,8 +150,43 @@ func create_item_from_node(node: Node) -> Item:
     # Debugear el nodo para ayudar a diagnosticar
     print("ItemFactory: Creando item desde nodo: ", node.name, ", Clase: ", node.get_class())
     
+    # Si es una poción o consumible
+    if node.name.begins_with("Health") or node.name.begins_with("Potion"):
+        print("ItemFactory: Detectado como consumible: ", node.name)
+        var consumable_item = ConsumableItem.new()
+        
+        # Obtener el nombre base sin sufijos numéricos
+        var base_name = node.name.rstrip("0123456789")
+        
+        # Preservar el nombre completo con sufijos en el item
+        consumable_item.name = node.name
+        consumable_item.id = base_name  # ID es el nombre base sin sufijo
+        
+        # Configurar el item consumible
+        consumable_item.item_type = "consumable"
+        consumable_item.heal_amount = 1  # Valor por defecto para pociones de vida
+        
+        # Cargar escena - usando nombre base sin sufijos
+        var scene_path = "res://Items/" + base_name + ".tscn"
+        if ResourceLoader.exists(scene_path):
+            consumable_item.item_scene = load(scene_path)
+            print("ItemFactory: Cargada escena de consumible desde ", scene_path)
+        else:
+            print("ItemFactory ERROR: No se pudo cargar la escena para ", node.name, " desde ", scene_path)
+            
+        # Cargar icono
+        if node.has_node("Sprite"):
+            consumable_item.icon = node.get_node("Sprite").texture
+        elif node.has_node("AnimatedSprite"):
+            var sprite = node.get_node("AnimatedSprite")
+            if sprite.frames:
+                consumable_item.icon = sprite.frames.get_frame("idle", 0)
+        
+        print("ItemFactory: Creado ConsumableItem con item_type = ", consumable_item.item_type)
+        return consumable_item
+    
     # Si es una arma
-    if node.get_class() == "Weapon" or node.name.begins_with("War") or node.name.begins_with("Sword"):
+    elif node.get_class() == "Weapon" or node.name.begins_with("War") or node.name.begins_with("Sword"):
         print("ItemFactory: Detectado como arma: ", node.name)
         var weapon_item = WeaponItem.new()
         weapon_item.configure_from_weapon_node(node)

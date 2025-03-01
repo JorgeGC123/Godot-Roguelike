@@ -243,21 +243,100 @@ func update_weapon_position(weapon_name: String, position: int) -> void:
 	# Mostrar el estado actual de las posiciones
 	print("SavedData: Posiciones actualizadas: ", inventory_positions)
 
+# Método para actualizar la posición de cualquier item en el inventario
+func update_item_position(item_name: String, position: int) -> void:
+	print("SavedData: Actualizando posición del item '", item_name, "' a ", position)
+	
+	# Guardamos el nombre exacto del item con sufijos para mantener la referencia correcta
+	inventory_positions[item_name] = position
+	
+	# Mostrar el estado actual de las posiciones
+	print("SavedData: Posiciones actualizadas: ", inventory_positions)
+
 func items_to_dict() -> Array:
 	var item_dicts = []
+	print("SavedData: Serializando ", items.size(), " consumibles")
+	
 	for item in items:
-		item_dicts.append({
+		if not item or not is_instance_valid(item):
+			continue
+		
+		# Obtener la posición del item si existe
+		var position = -1
+		if inventory_positions.has(item.name):
+			position = inventory_positions[item.name]
+			print("SavedData: Usando posición guardada para consumible '", item.name, "': ", position)
+		
+		# Obtener la escena base sin sufijos numéricos
+		var base_name = "HealthPotion"  # Valor por defecto
+		if item.name:
+			base_name = item.name.rstrip("0123456789")
+		
+		var item_data = {
 			"name": item.name,
-			"type": item.get_class(),
-			# Añade aquí otras propiedades relevantes de los items
-		})
+			"type": "consumable",
+			"scene_path": "res://Items/" + base_name + ".tscn",
+			"heal_amount": 1,  # Valor por defecto para pociones
+			"inventory_position": position  # Incluir la posición en el JSON
+		}
+		
+		print("SavedData: Serializando consumible: ", item.name, ", escena: ", item_data.scene_path, ", posición: ", position)
+		item_dicts.append(item_data)
+	
 	return item_dicts
 
 func dict_to_items(item_dicts: Array) -> Array:
 	var loaded_items = []
+	var loaded_positions = {}
+	
+	print("SavedData: ===== CARGANDO CONSUMIBLES =====")
+	print("SavedData: Consumibles en JSON: ", item_dicts.size())
+	
+	# DEBUG: Mostrar datos cargados del JSON
 	for item_dict in item_dicts:
-		var item = load("res://Items/" + item_dict["name"] + ".tscn").instance()
-		item.name = item_dict["name"]
-		# Configura aquí otras propiedades relevantes de los items
-		loaded_items.append(item)
+		var item_name = item_dict.get("name", "UnknownItem")
+		var position = item_dict.get("inventory_position", -1)
+		print("SavedData: Consumible cargado: ", item_name, ", posición: ", position)
+		
+		# Si el item tiene una posición válida, guardarla
+		if position >= 0:
+			loaded_positions[item_name] = position
+	
+	# Crear consumibles a partir de los datos del JSON
+	for item_dict in item_dicts:
+		var item_name = item_dict.get("name", "UnknownItem")
+		var scene_path = item_dict.get("scene_path", "")
+		var position = item_dict.get("inventory_position", -1)
+		
+		# Si no se especificó una ruta de escena, intentar construirla
+		if scene_path.empty():
+			var base_name = "HealthPotion"  # Valor por defecto
+			if item_name:
+				base_name = item_name.rstrip("0123456789")
+			scene_path = "res://Items/" + base_name + ".tscn"
+		
+		print("SavedData: Cargando consumible ", item_name, " desde ", scene_path, " en posición ", position)
+		
+		# Verificar que la escena existe
+		if ResourceLoader.exists(scene_path):
+			var item_instance = load(scene_path).instance()
+			item_instance.name = item_name
+			
+			# Configurar propiedades adicionales
+			if item_dict.has("heal_amount") and item_instance.has_method("set"):
+				item_instance.set("heal_amount", item_dict["heal_amount"])
+			
+			loaded_items.append(item_instance)
+			print("SavedData: Consumible cargado exitosamente: ", item_instance.name)
+		else:
+			print("SavedData ERROR: No se encuentra la escena del consumible: ", scene_path)
+	
+	# Añadir las nuevas posiciones cargadas a inventory_positions
+	for item_name in loaded_positions.keys():
+		inventory_positions[item_name] = loaded_positions[item_name]
+	
+	print("SavedData: Consumibles cargados: ", loaded_items.size())
+	print("SavedData: Posiciones actualizadas: ", inventory_positions)
+	print("SavedData: ===== FIN CARGA CONSUMIBLES =====")
+	
 	return loaded_items

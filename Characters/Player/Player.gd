@@ -26,6 +26,14 @@ var breakableScene: Node2D = null
 
 export var DASH_STAMINA = 30
 
+# Método para curar al jugador (usado por las pociones)
+func heal(amount: int) -> void:
+	self.hp = min(self.hp + amount, max_hp)
+	# Puedes añadir efectos visuales o sonidos aquí
+	print("Player healed for ", amount, " HP. Current HP: ", self.hp)
+	# Actualizar HP en SavedData
+	SavedData.hp = self.hp
+
 func _ready() -> void:
 	emit_signal("weapon_picked_up", weapons.get_child(0).get_texture())
 	update_player_skin(SavedData.skin)
@@ -200,7 +208,51 @@ func pick_up_weapon(weapon: Node2D) -> void:
 	# Emitir señales para la UI
 	emit_signal("weapon_picked_up", weapon.get_texture())
 	emit_signal("weapon_switched", prev_index, new_index)
+
+# Método para recoger consumibles (pociones, etc.)
+func pick_up_consumable(consumable_node: Node2D) -> void:
+	print("Player: Recogiendo consumible ", consumable_node.name)
 	
+	# 1. Generar un nombre único para el consumible
+	var base_name = consumable_node.name
+	
+	# Contar cuántos consumibles de este tipo ya tenemos en el inventario
+	var count = 0
+	if InventoryManager:
+		var player_inventory = InventoryManager.get_inventory(InventoryManager.PLAYER_INVENTORY)
+		if player_inventory:
+			for i in range(player_inventory.capacity):
+				var item = player_inventory.get_item(i)
+				if item and item.item_type == "consumable" and item.name.begins_with(base_name):
+					count += 1
+	
+	# Asignar un sufijo numérico si ya tenemos alguno del mismo tipo
+	var unique_name = base_name
+	if count > 0:
+		unique_name = base_name + str(count)
+	
+	print("Player: Asignando nombre único al consumible: ", unique_name)
+	
+	# 2. Convertir el nodo a un ConsumableItem
+	var consumable_item = ItemFactory.create_item_from_node(consumable_node)
+	
+	# 3. Establecer el nombre único
+	if consumable_item:
+		consumable_item.name = unique_name
+		
+		# 4. Añadir el item al inventario
+		var added_to_inventory = false
+		if has_node("/root/InventoryManager"):
+			var inventory_manager = get_node("/root/InventoryManager")
+			added_to_inventory = inventory_manager.add_item_to_active(consumable_item)
+			print("Player: Item añadido al inventario: ", added_to_inventory)
+		
+		# 5. Añadir a SavedData para compatibilidad
+		if not added_to_inventory:
+			SavedData.items.append(consumable_item)
+	
+	# 6. Eliminar el nodo original del mundo
+	consumable_node.queue_free()
 
 func pick_up_breakable(breakable: Node) -> void:
 	if held_breakable and is_instance_valid(held_breakable):

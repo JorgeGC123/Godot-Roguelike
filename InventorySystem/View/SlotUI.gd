@@ -31,9 +31,7 @@ func _ready():
 
 # Establecer el item en el slot
 func set_item(new_item: Item):
-	# Debug
-	print("SlotUI: Setting item in slot ", index, ": ", new_item.name if new_item else "None")
-	
+
 	item = new_item
 	if item and item.icon:
 		item_texture.texture = item.icon
@@ -106,8 +104,6 @@ func get_drag_data(position):
 
 func can_drop_data(position, data):
 	var can_drop = data is Dictionary and data.has("source_index")
-	# Debug
-	print("Can drop at slot ", index, ": ", can_drop)
 	return can_drop
 
 func drop_data(position, data):
