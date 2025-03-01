@@ -271,3 +271,17 @@ func _on_inventory_item_selected(item, index: int) -> void:
 					
 			# Actualizar la visualización
 			_populate_inventory_display()
+
+# Cuando se equipa un item en el inventario
+func _on_inventory_item_equipped(item, index: int, equipment_type: String) -> void:
+	# Manejar equipamiento según el tipo
+	if equipment_type == "weapon":
+		# El cambio ya se ha actualizado en SavedData, solo necesitamos actualizar la UI
+		_populate_inventory_display()
+		
+	# Aquí se puede añadir manejo para otros tipos de equipamiento en el futuro
+	# elif equipment_type == "armor":
+	#     # Manejar equipamiento de armadura
+	
+	# Actualizamos la visualización de la UI
+	_populate_inventory_display()

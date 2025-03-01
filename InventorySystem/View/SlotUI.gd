@@ -41,6 +41,7 @@ func _ready():
 
 # Establecer el item en el slot
 func set_item(new_item: Item):
+	print("SlotUI[" + str(index) + "]: set_item llamado con item: ", new_item.name if new_item else "None")
 
 	item = new_item
 	if item and item.icon:

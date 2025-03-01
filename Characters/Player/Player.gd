@@ -42,6 +42,10 @@ func _ready() -> void:
 	if not InventoryDisplayManager.is_connected("inventory_closed", self, "_on_inventory_closed"):
 		InventoryDisplayManager.connect("inventory_closed", self, "_on_inventory_closed")
 	
+	# Conectar señal de equipamiento
+	if not InventoryDisplayManager.is_connected("item_equipped", self, "_on_item_equipped"):
+		InventoryDisplayManager.connect("item_equipped", self, "_on_item_equipped")
+	
 func _restore_previous_state() -> void:
 	self.hp = SavedData.hp
 	print("SavedData weapons: ", SavedData.weapons)
@@ -55,17 +59,18 @@ func _restore_previous_state() -> void:
 			weapon.hide()
 			
 			emit_signal("weapon_picked_up", weapon.get_texture())
-			emit_signal("weapon_switched", weapons.get_child_count() - 2, weapons.get_child_count() - 1)
 		
 		# Establecer el arma activa según el índice guardado
 		if weapons.get_child_count() > 0:
 			# Asegurarse que el índice sea válido
 			var weapon_index = min(SavedData.equipped_weapon_index, weapons.get_child_count() - 1)
+			SavedData.equipped_weapon_index = weapon_index  # Asegurar que tenemos el índice correcto
 			current_weapon = weapons.get_child(weapon_index)
 			current_weapon.show()
 			current_weapon.player = self
 			
-			emit_signal("weapon_switched", weapons.get_child_count() - 1, weapon_index)
+			print("Player: Arma equipada al inicio: ", current_weapon.name, " índice: ", weapon_index)
+			emit_signal("weapon_switched", -1, weapon_index)
 	else:
 		# No hay armas guardadas
 		current_weapon = null
@@ -170,8 +175,19 @@ func get_input() -> void:
 	elif Input.is_action_just_pressed("ui_throw") and held_breakable and is_instance_valid(held_breakable):
 		print("throweo el breakable bro (sin arma)")
 		_throw_breakable()
+
+# Manejar señales de equipamiento
+func _on_item_equipped(item, index, equipment_type):
+	print("Player: _on_item_equipped llamado para ", item.name, " en slot ", index, " tipo ", equipment_type)
 	
+	# Manejar diferentes tipos de equipamiento
+	if equipment_type == "weapon":
+		# Ya no necesitamos hacer nada aquí porque la señal item_equipped
+		# ya llama a switch_weapon a través de _handle_weapon_equipped en InventoryDisplayManager
+		pass
+	# Aquí se pueden manejar otros tipos de equipamiento en el futuro
 	
+# Función interna para cambiar entre armas con los botones
 func _switch_weapon(direction: int) -> void:
 	# Si no hay armas equipadas o no hay armas disponibles, no hacer nada
 	if not current_weapon or weapons.get_child_count() <= 0:
@@ -189,13 +205,38 @@ func _switch_weapon(direction: int) -> void:
 		if index > weapons.get_child_count() - 1:
 			index = 0
 			
-	current_weapon.hide()
-	current_weapon = weapons.get_child(index)
+	# Usar el nuevo método switch_weapon para cambiar de arma
+	switch_weapon(prev_index, index)
+	
+# El método switch_weapon ahora es público para poder ser llamado desde InventoryDisplayManager
+func switch_weapon(prev_index: int, new_index: int) -> void:
+	print("Player.switch_weapon llamado con prev_index=", prev_index, ", new_index=", new_index)
+	
+	# Verificar que tengamos armas para cambiar
+	if weapons.get_child_count() <= 0:
+		print("No hay armas disponibles para cambiar")
+		return
+		
+	# Asegurarse de que el índice sea válido
+	if new_index < 0 or new_index >= weapons.get_child_count():
+		print("El índice ", new_index, " está fuera de rango (max: ", weapons.get_child_count()-1, ")")
+		return
+	
+	# Ocultar el arma actual si existe
+	if current_weapon:
+		current_weapon.hide()
+	
+	# Cambiar al arma nueva
+	current_weapon = weapons.get_child(new_index)
 	current_weapon.show()
 	current_weapon.player = self
-	SavedData.equipped_weapon_index = index
 	
-	emit_signal("weapon_switched", prev_index, index)
+	# Actualizar SavedData (como respaldo, aunque podría ya estar actualizado)
+	SavedData.equipped_weapon_index = new_index
+	
+	# Emitir señal para actualizar UI
+	emit_signal("weapon_switched", prev_index, new_index)
+	print("Player: Arma cambiada de ", prev_index, " a ", new_index)
 	
 	
 func pick_up_weapon(weapon: Node2D) -> void:

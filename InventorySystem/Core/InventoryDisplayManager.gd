@@ -11,7 +11,7 @@ var player_ref = null
 signal inventory_opened
 signal inventory_closed
 signal item_selected(item, index)
-signal weapon_equipped(item, index)
+signal item_equipped(item, index, equipment_type)
 
 func _ready():
 	# Buscar el jugador - esto podría hacerse después en _process si el jugador no está disponible al inicio
@@ -52,7 +52,7 @@ func show_inventory():
 		# Configurar señales
 		inventory_ui_instance.connect("inventory_closed", self, "_on_inventory_closed")
 		inventory_ui_instance.connect("item_selected", self, "_on_item_selected")
-		inventory_ui_instance.connect("weapon_equipped", self, "_on_weapon_equipped")
+		inventory_ui_instance.connect("item_equipped", self, "_on_item_equipped")
 		
 		# Configurar UI con el inventario del jugador
 		if InventoryManager.has_method("get_inventory"):
@@ -78,6 +78,11 @@ func show_inventory():
 			inventory_ui_instance.show_inventory()
 		else:
 			print("InventoryDisplayManager: UI ya está visible")
+	
+	# Forzar actualización del inventario para sincronizar con estado actual
+	if inventory_ui_instance and inventory_ui_instance.visible:
+		print("InventoryDisplayManager: Forzando refresh() del inventario")
+		inventory_ui_instance.refresh()
 	
 	emit_signal("inventory_opened")
 
@@ -116,19 +121,36 @@ func _on_inventory_closed():
 func _on_item_selected(item, index):
 	emit_signal("item_selected", item, index)
 
-func _on_weapon_equipped(item, index):
-	emit_signal("weapon_equipped", item, index)
+# Handler genérico para equipamiento de items
+func _on_item_equipped(item, index, equipment_type):
+	# Propagar la señal
+	emit_signal("item_equipped", item, index, equipment_type)
 	
+	# Manejar comportamiento específico por tipo de equipamiento
+	if equipment_type == "weapon":
+		_handle_weapon_equipped(item, index)
+	# Aquí se pueden añadir manejadores para otros tipos de equipamiento
+	# elif equipment_type == "armor":
+	#     _handle_armor_equipped(item, index)
+
+# Manejar equipamiento específico de armas
+func _handle_weapon_equipped(item, index):
 	# Notificar al jugador del cambio
 	var player = _get_player()
 	if player and player.has_method("switch_weapon"):
 		# Guardar el índice anterior antes de actualizar SavedData
 		var prev_index = SavedData.equipped_weapon_index
 		
-		# El índice actual ya está actualizado en SavedData por el método _on_equip_slot_item_dropped
-		# Solo necesitamos notificar al jugador
+		# Actualizar el índice de arma equipada en SavedData
+		SavedData.equipped_weapon_index = index
+		
+		# Llamar al método del jugador para cambiar de arma
 		player.switch_weapon(prev_index, index)
-		print("InventoryDisplayManager: Notificado al jugador del cambio de arma")
+		print("InventoryDisplayManager: Notificado al jugador del cambio de arma - Desde slot ", prev_index, " a slot ", index)
+		
+		# Actualizar UI del inventario si está abierto
+		if inventory_ui_instance and inventory_ui_instance.visible:
+			inventory_ui_instance.refresh()
 
 # Obtener referencia al jugador
 func _get_player():
