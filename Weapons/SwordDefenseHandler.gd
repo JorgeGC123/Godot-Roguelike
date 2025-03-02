@@ -11,7 +11,7 @@ var sprite: Sprite
 
 # Configuración
 export var defense_stamina_cost: int = 20
-export var defense_distance: float = 10
+export var defense_distance: float = 5 # Reducido de 10 a 5 para que esté más cerca del jugador
 
 # Estado
 var is_defending: bool = false
@@ -62,6 +62,10 @@ func deactivate_defense() -> void:
 	# Volver a posición normal
 	if animation_player and is_instance_valid(animation_player):
 		animation_player.play("cancel_attack")
+		
+	# Restaurar posición original del arma (junto al jugador)
+	if weapon:
+		weapon.position = Vector2.ZERO
 	
 	# Actualizar estado
 	is_defending = false
