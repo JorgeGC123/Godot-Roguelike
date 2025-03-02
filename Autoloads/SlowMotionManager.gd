@@ -31,10 +31,25 @@ func _input(event):
 
 func toggle_slow_motion():
 	toggle_active = !toggle_active
-	if toggle_active:
-		start_slow_motion(toggle_slow_motion_scale)
+	
+	# Gestionar el efecto visual directamente
+	var effect_rect = get_node_or_null("CanvasLayer/VisualEffect")
+	if effect_rect:
+		var effect_tween = get_node("EffectTween")
+		effect_tween.stop_all()
+		
+		if toggle_active:
+			# Activar slow motion
+			start_slow_motion(toggle_slow_motion_scale)
+		else:
+			# Desactivar slow motion y forzar reset del efecto visual
+			effect_rect.material.set_shader_param("intensity", 0.0)
+			restore_normal_time()
 	else:
-		restore_normal_time()
+		if toggle_active:
+			start_slow_motion(toggle_slow_motion_scale)
+		else:
+			restore_normal_time()
 
 func _process(delta):
 	if _transitioning:
@@ -54,7 +69,7 @@ func _process(delta):
 			# Si hemos vuelto a la normalidad, emitir señal
 			if _target_scale == default_time_scale:
 				emit_signal("slow_motion_ended")
-				_on_slow_motion_ended()
+				_on_slow_motion_ended(true) # Forzar reset
 	
 	# Gestionar temporizador de duración
 	if _duration > 0:
@@ -87,6 +102,11 @@ func restore_normal_time() -> void:
 	_transitioning = true
 	_timer = 0.0
 	_duration = 0.0
+	
+	# Cancelar tweens anteriores para evitar conflictos
+	var effect_rect = get_node_or_null("CanvasLayer/VisualEffect")
+	if effect_rect:
+		get_node("EffectTween").stop_all()
 
 # Instantáneo - sin transición
 func set_time_scale_immediate(scale: float) -> void:
@@ -122,14 +142,19 @@ func _on_slow_motion_started(scale):
 			Tween.TRANS_SINE, Tween.EASE_OUT)
 		effect_tween.start()
 
-func _on_slow_motion_ended():
+func _on_slow_motion_ended(force_reset = false):
 	print("Modo cámara lenta DESACTIVADO")
 	# Desactivar efecto visual si existe
 	var effect_rect = get_node_or_null("CanvasLayer/VisualEffect")
 	if effect_rect:
 		var effect_tween = get_node("EffectTween")
 		effect_tween.stop_all()
-		effect_tween.interpolate_property(effect_rect.material, "shader_param/intensity",
-			effect_rect.material.get_shader_param("intensity"), 0.0, 0.2, 
-			Tween.TRANS_SINE, Tween.EASE_IN)
-		effect_tween.start()
+		
+		# Si forzamos reset, aplicamos inmediatamente
+		if force_reset:
+			effect_rect.material.set_shader_param("intensity", 0.0)
+		else:
+			effect_tween.interpolate_property(effect_rect.material, "shader_param/intensity",
+				effect_rect.material.get_shader_param("intensity"), 0.0, 0.2, 
+				Tween.TRANS_SINE, Tween.EASE_IN)
+			effect_tween.start()
