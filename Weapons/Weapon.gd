@@ -23,6 +23,16 @@ export var BASIC_ATTACK_STAMINA = 50
 export var CHARGED_ATTACK_STAMINA = 70
 export var ABILITY_STAMINA = 70
 
+# Métodos para acceder a los costes de stamina desde cualquier componente
+func get_basic_attack_cost() -> int:
+	return BASIC_ATTACK_STAMINA
+
+func get_charged_attack_cost() -> int:
+	return CHARGED_ATTACK_STAMINA
+
+func get_ability_cost() -> int:
+	return ABILITY_STAMINA
+
 # para multiplayer
 signal weapon_animation_changed(anim_name)
 signal weapon_moved(scale_y,rotation,hitbox_knockback)

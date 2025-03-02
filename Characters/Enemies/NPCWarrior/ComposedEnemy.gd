@@ -6,11 +6,6 @@ export var attack_range: float = 40.0
 export var ideal_attack_distance: float = 30.0  # Distancia ideal para atacar
 export var post_attack_recovery_time: float = 1.2  # Tiempo de recuperación después de un ataque
 
-# Constantes de stamina
-const BASIC_ATTACK_STAMINA: int = 5
-const CHARGED_ATTACK_STAMINA: int = 20
-const ABILITY_STAMINA: int = 30
-
 func _ready():
 	add_component("health", HealthComponent.new(self))
 	add_component("movement", MovementComponent.new(self))
@@ -27,7 +22,8 @@ func _ready():
 	# Configurar componente de stamina
 	var stamina_component = get_component("stamina")
 	stamina_component.max_stamina = 100
-	stamina_component.stamina_regen_rate = 15.0  # Regeneración más rápida que el jugador
+	stamina_component.stamina = 100
+	stamina_component.stamina_regen_rate = 10.0  # Aumentado para regeneración más rápida
 	stamina_component.stamina_regen_delay = 0.8  # Menos retraso en regeneración
 
 	yield(get_tree().create_timer(0.1), "timeout")
@@ -35,20 +31,13 @@ func _ready():
 	var weapon_component = EnemyWeaponComponent.new(self, weapon_scene)
 	add_component("weapon", weapon_component)
 	weapon_component.initialize()
-
-	# esto sería la hitbox tradicional de colisiono y boom me hace daño
-	# var hitbox_component = HitboxComponent.new(self)
-	# add_component("hitbox", hitbox_component)
-	# hitbox_component.damage = 1
-	# hitbox_component.knockback_force = 100
-	# hitbox_component.collision_layer = 1
-	# hitbox_component.collision_mask = 1
-	# hitbox_component.shape = CircleShape2D.new()
-	# hitbox_component.shape.radius = 12.0
-	# yield(get_tree(), "idle_frame")
-	# hitbox_component.set_deferred("monitorable", true)
-	# hitbox_component.set_deferred("monitoring", true)
-	# hitbox_component.initialize()
+	
+	# Configurar el arma para que use menos stamina que el jugador
+	if weapon_component.weapon:
+		weapon_component.weapon.BASIC_ATTACK_STAMINA = 50
+		weapon_component.weapon.CHARGED_ATTACK_STAMINA = 15
+		weapon_component.weapon.ABILITY_STAMINA = 25
+		print("Arma de enemigo configurada con costes personalizados de stamina")
 
 	var hurtbox_component = HurtboxComponent.new(self)
 	add_component("hurtbox", hurtbox_component)

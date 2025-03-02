@@ -28,7 +28,7 @@ var is_charging: bool = false
 var is_attacking: bool = false
 var charge_start_time: float = 0
 
-export var BASIC_ATTACK_STAMINA = 5
+export var BASIC_ATTACK_STAMINA = 50
 export var CHARGED_ATTACK_STAMINA = 70
 export var ABILITY_STAMINA = 70
 
@@ -84,17 +84,21 @@ func initialize():
 
 func get_input():
 	if entity is Player:
-		if Input.is_action_pressed("ui_attack") and not animation_player.is_playing() and entity.stamina > BASIC_ATTACK_STAMINA:
-			if entity.stamina > CHARGED_ATTACK_STAMINA:
+		# Mantenemos la comprobación directa para el jugador por razones de rendimiento
+		# Ya que esta función se llama cada frame
+		var player_stamina = entity.stamina
+		
+		if Input.is_action_pressed("ui_attack") and not animation_player.is_playing() and player_stamina > BASIC_ATTACK_STAMINA:
+			if player_stamina > CHARGED_ATTACK_STAMINA:
 				animation_player.play("charge")
 				emit_signal("weapon_animation_changed", "charge")
-		elif Input.is_action_just_released("ui_attack") and entity.stamina > BASIC_ATTACK_STAMINA:
+		elif Input.is_action_just_released("ui_attack") and player_stamina > BASIC_ATTACK_STAMINA:
 			animation_player.play("attack")
 			emit_signal("weapon_animation_changed", "attack")
-		if charge_particles.emitting and entity.stamina > CHARGED_ATTACK_STAMINA and Input.is_action_just_released("ui_attack"):
+		if charge_particles.emitting and player_stamina > CHARGED_ATTACK_STAMINA and Input.is_action_just_released("ui_attack"):
 			animation_player.play("strong_attack")
 			emit_signal("weapon_animation_changed", "strong_attack")
-		elif Input.is_action_just_pressed("ui_active_ability") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and entity.stamina > ABILITY_STAMINA:
+		elif Input.is_action_just_pressed("ui_active_ability") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and player_stamina > ABILITY_STAMINA:
 			can_active_ability = false
 			cool_down_timer.start()
 			animation_player.play("active_ability")
@@ -117,17 +121,53 @@ func move(direction: Vector2):
 
 
 func attack():
-	if not is_busy() and entity.stamina > BASIC_ATTACK_STAMINA:
+	# Verificar stamina disponible a través del sistema apropiado
+	var has_enough_stamina = false
+	
+	# Para compatibilidad con Player (acceso directo a stamina)
+	if entity.get("stamina") != null:
+		has_enough_stamina = entity.stamina > BASIC_ATTACK_STAMINA
+	# Para entidades basadas en componentes
+	elif entity.has_method("get_component"):
+		var stamina_component = entity.get_component("stamina")
+		if stamina_component:
+			has_enough_stamina = stamina_component.has_stamina(BASIC_ATTACK_STAMINA)
+	
+	if not is_busy() and has_enough_stamina:
 		animation_player.play("attack")
 		emit_signal("weapon_animation_changed", "attack")
 
 func strong_attack():
-	if not is_busy() and entity.stamina > CHARGED_ATTACK_STAMINA:
+	# Verificar stamina disponible a través del sistema apropiado
+	var has_enough_stamina = false
+	
+	# Para compatibilidad con Player (acceso directo a stamina)
+	if entity.get("stamina") != null:
+		has_enough_stamina = entity.stamina > CHARGED_ATTACK_STAMINA
+	# Para entidades basadas en componentes
+	elif entity.has_method("get_component"):
+		var stamina_component = entity.get_component("stamina")
+		if stamina_component:
+			has_enough_stamina = stamina_component.has_stamina(CHARGED_ATTACK_STAMINA)
+	
+	if not is_busy() and has_enough_stamina:
 		animation_player.play("strong_attack")
 		emit_signal("weapon_animation_changed", "strong_attack")
 
 func use_ability():
-	if not is_busy() and can_active_ability and entity.stamina > ABILITY_STAMINA:
+	# Verificar stamina disponible a través del sistema apropiado
+	var has_enough_stamina = false
+	
+	# Para compatibilidad con Player (acceso directo a stamina)
+	if entity.get("stamina") != null:
+		has_enough_stamina = entity.stamina > ABILITY_STAMINA
+	# Para entidades basadas en componentes
+	elif entity.has_method("get_component"):
+		var stamina_component = entity.get_component("stamina")
+		if stamina_component:
+			has_enough_stamina = stamina_component.has_stamina(ABILITY_STAMINA)
+	
+	if not is_busy() and can_active_ability and has_enough_stamina:
 		can_active_ability = false
 		cool_down_timer.start()
 		animation_player.play("active_ability")
@@ -161,9 +201,29 @@ func execute_attack():
 	is_charging = false
 	is_attacking = true
 	charge_particles.emitting = false
-	if entity.stamina >= entity.BASIC_ATTACK_STAMINA:
+	
+	# Comprobar si la entidad es Player o usa sistema de componentes
+	var has_enough_stamina = false
+	var stamina_component = null
+	
+	# Para compatibilidad con Player (acceso directo a stamina)
+	if entity.get("stamina") != null and entity.get("BASIC_ATTACK_STAMINA") != null:
+		has_enough_stamina = entity.stamina >= entity.BASIC_ATTACK_STAMINA
+	# Para entidades basadas en componentes
+	elif entity.has_method("get_component"):
+		stamina_component = entity.get_component("stamina")
+		if stamina_component:
+			has_enough_stamina = stamina_component.has_stamina(entity.BASIC_ATTACK_STAMINA)
+	
+	if has_enough_stamina:
 		animation_player.play("attack")
-		entity.reduce_stamina(entity.BASIC_ATTACK_STAMINA)
+		
+		# Consumir stamina según el sistema disponible
+		if stamina_component:
+			stamina_component.use_stamina(entity.BASIC_ATTACK_STAMINA)
+		elif entity.has_method("reduce_stamina"):
+			entity.reduce_stamina(entity.BASIC_ATTACK_STAMINA)
+		
 		emit_signal("attack_started")
 	else:
 		cancel_attack()
