@@ -141,6 +141,7 @@ func _initialize_slots():
 		# Configurar slot
 		slot_ui.index = i
 		slot_ui.connect("gui_input", self, "_on_Slot_gui_input", [i])
+		slot_ui.connect("double_clicked", self, "_on_Slot_double_clicked")
 		
 		# Conexiones específicas para drag & drop
 		slot_ui.connect("item_dropped", self, "_on_item_dropped")
@@ -160,6 +161,31 @@ func _initialize_slots():
 		grid_container.columns = 5
 	
 	print("Initialized ", slots.size(), " slots with ", grid_container.columns, " columns")
+
+# Manejar doble clic en un slot
+func _on_Slot_double_clicked(slot_index):
+	print("InventoryUI: _on_Slot_double_clicked - Slot ", slot_index)
+	
+	# Obtener el item en el slot
+	var item = inventory_model.get_item(slot_index)
+	if not item:
+		print("InventoryUI: No hay item en el slot ", slot_index)
+		return
+	
+	# Verificar el tipo de item
+	if item.item_type == "weapon":
+		# Equipar el arma
+		print("InventoryUI: Equipando arma por doble clic ", item.name, " de slot ", slot_index)
+		# Emitir señal de equipamiento (misma que con drag & drop)
+		emit_signal("item_equipped", item, slot_index, EQUIP_TYPE_WEAPON)
+		# Forzar actualización inmediata
+		call_deferred("refresh")
+		
+	elif item.item_type == "consumable" and item.can_use():
+		# Usar consumible (comportamiento original)
+		print("InventoryUI: Usando consumible ", item.name)
+		item.use()
+		emit_signal("item_used", item, slot_index)
 
 # Función para manejar drops entre slots normales del inventario
 func _on_item_dropped(source_index, target_index):
@@ -383,12 +409,7 @@ func _on_Slot_gui_input(event, slot_index):
 			if event.pressed:
 				# Seleccionar slot
 				select_slot(slot_index)
-			elif event.doubleclick:
-				# Usar item (doble clic)
-				var item = inventory_model.get_item(slot_index)
-				if item and item.can_use():
-					item.use()
-					emit_signal("item_used", item, slot_index)
+	
 
 # Handlers para señales del modelo de inventario
 func _on_item_added(item, slot_index):

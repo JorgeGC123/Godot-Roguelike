@@ -52,7 +52,8 @@ func use(player = null) -> bool:
 
 # Verificar si el arma puede ser usada (equipada)
 func can_use(player = null) -> bool:
-	return player != null and player.has_method("pick_up_weapon")
+	# Las armas siempre pueden ser equipadas
+	return true
 
 # Método para instanciar el arma en el mundo
 func instance_in_world(position: Vector2 = Vector2.ZERO) -> Node2D:

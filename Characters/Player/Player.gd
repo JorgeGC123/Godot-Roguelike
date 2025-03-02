@@ -225,11 +225,33 @@ func switch_weapon(prev_index: int, new_index: int) -> void:
 	# Ocultar el arma actual si existe
 	if current_weapon:
 		current_weapon.hide()
+		current_weapon.on_floor = false # Asegurar que el estado sea correcto
+		
+		# Desactivar explícitamente el PlayerDetector del arma anterior
+		if current_weapon.has_node("PlayerDetector"):
+			var detector = current_weapon.get_node("PlayerDetector")
+			detector.set_collision_mask_bit(0, false)
+			detector.set_collision_mask_bit(1, false)
+			
+			var detector_shape = detector.get_node("CollisionShape2D")
+			if detector_shape:
+				detector_shape.disabled = true
 	
 	# Cambiar al arma nueva
 	current_weapon = weapons.get_child(new_index)
+	current_weapon.on_floor = false  # Asegurar que no esté marcada como en el suelo
 	current_weapon.show()
 	current_weapon.player = self
+	
+	# Desactivar el PlayerDetector del arma nueva
+	if current_weapon.has_node("PlayerDetector"):
+		var detector = current_weapon.get_node("PlayerDetector")
+		detector.set_collision_mask_bit(0, false)
+		detector.set_collision_mask_bit(1, false)
+		
+		var detector_shape = detector.get_node("CollisionShape2D")
+		if detector_shape:
+			detector_shape.disabled = true
 	
 	# Actualizar SavedData (como respaldo, aunque podría ya estar actualizado)
 	SavedData.equipped_weapon_index = new_index
@@ -258,10 +280,22 @@ func pick_up_weapon(weapon: Node2D) -> void:
 	# Asignar el nombre único al arma
 	weapon.name = unique_name
 	
-	# 3. Convertir el nodo de arma a un WeaponItem usando ItemFactory
+	# 3. Asegurarse de que on_floor sea false y desactivar PlayerDetector
+	weapon.on_floor = false
+	if weapon.has_node("PlayerDetector"):
+		var player_detector = weapon.get_node("PlayerDetector")
+		player_detector.set_collision_mask_bit(0, false)
+		player_detector.set_collision_mask_bit(1, false)
+		
+		# También podemos desactivar el shape directamente
+		var detector_shape = player_detector.get_node("CollisionShape2D")
+		if detector_shape:
+			detector_shape.disabled = true
+	
+	# 4. Convertir el nodo de arma a un WeaponItem usando ItemFactory
 	var weapon_item = ItemFactory.create_item_from_node(weapon)
 	
-	# 4. Añadir el WeaponItem al inventario
+	# 5. Añadir el WeaponItem al inventario
 	var added_to_inventory = false
 	if has_node("/root/InventoryManager"):
 		var inventory_manager = get_node("/root/InventoryManager")
@@ -274,7 +308,7 @@ func pick_up_weapon(weapon: Node2D) -> void:
 		# Sincronizar con SavedData para retrocompatibilidad
 		SavedData.weapons.append(weapon.duplicate())
 	
-	# 5. Manejar la parte visual/mecánica
+	# 6. Manejar la parte visual/mecánica
 	var prev_index: int = SavedData.equipped_weapon_index
 	var new_index: int = weapons.get_child_count()
 	SavedData.equipped_weapon_index = new_index
@@ -402,6 +436,17 @@ func _drop_weapon() -> void:
 	if current_weapon != null:
 		weapons.call_deferred("remove_child", weapon_to_drop)
 	
+	# Preparar el arma para ser soltada en el suelo
+	weapon_to_drop.on_floor = true
+	
+	# Configurar el PlayerDetector para que detecte al jugador nuevamente
+	if weapon_to_drop.has_node("PlayerDetector"):
+		var detector = weapon_to_drop.get_node("PlayerDetector")
+		
+		# Importante: sólo activar la detección después de un frame para evitar
+		# que el jugador recoja el arma inmediatamente
+		call_deferred("_activate_detector_deferred", detector)
+	
 	# Añadirla al mundo
 	get_parent().call_deferred("add_child", weapon_to_drop)
 	weapon_to_drop.set_owner(get_parent())
@@ -419,6 +464,21 @@ func _drop_weapon() -> void:
 	weapon_to_drop.get_node("AnimationPlayer").play("throw")
 	weapon_to_drop.interpolate_pos(position, position + throw_dir * force)
 	weapon_to_drop.remove_child(hitbox_instance)
+
+# Método auxiliar para activar el detector después de un frame
+func _activate_detector_deferred(detector: Area2D) -> void:
+	# Esperar un frame
+	yield(get_tree(), "idle_frame")
+	yield(get_tree(), "idle_frame")  # Dos frames para estar seguros
+	
+	# Ahora activar la detección
+	if detector and is_instance_valid(detector):
+		var detector_shape = detector.get_node("CollisionShape2D")
+		if detector_shape:
+			detector_shape.disabled = false
+		
+		detector.set_collision_mask_bit(0, true)
+		detector.set_collision_mask_bit(1, true)
 		
 func cancel_attack() -> void:
 	if current_weapon:

@@ -6,8 +6,20 @@ var in_first_attack: bool = false
 var in_second_attack: bool = false
 
 func _ready() -> void:
-	# Forzar on_floor a true para que la espada sea recogible, sin importar cómo esté en la escena
-	on_floor = true
+	# Determinar si el arma está equipada basado en la jerarquía de nodos
+	var is_equipped = false
+	var parent = get_parent()
+	
+	# Verificar si el arma está en un nodo Weapons (equipada)
+	if parent and parent.name == "Weapons":
+		is_equipped = true
+	
+	# Solo activar on_floor si no está equipada
+	if not is_equipped:
+		on_floor = true
+	else:
+		# Cuando está equipada, asegurarse de que on_floor sea false
+		on_floor = false
 	
 	# Llamar al _ready de la clase padre (que ahora configurará correctamente el PlayerDetector)
 	._ready()
@@ -22,13 +34,20 @@ func _ready() -> void:
 		detector_shape.position = Vector2(-5, -8)
 		detector_shape.rotation = 1.5708  # ~90 grados en radianes
 	
-	# Asegurarnos de que el detector esté correctamente configurado para colisiones
-	detector_shape.disabled = false
-	player_detector.set_collision_mask_bit(1, true)  # Detectar al jugador
-	player_detector.set_collision_mask_bit(0, true)  # También detectar al mundo si es necesario
+	# Configurar detector según si está equipada o no
+	if is_equipped:
+		# Si está equipada, desactivar el detector
+		detector_shape.disabled = true
+		player_detector.set_collision_mask_bit(1, false)
+		player_detector.set_collision_mask_bit(0, false)
+	else:
+		# Si está en el suelo, activar el detector
+		detector_shape.disabled = false
+		player_detector.set_collision_mask_bit(1, true)  # Detectar al jugador
+		player_detector.set_collision_mask_bit(0, true)  # También detectar al mundo si es necesario
 	
 	# Imprimir estado para depuración
-	print("Sword ready - on_floor: ", on_floor)
+	print("Sword ready - is_equipped: ", is_equipped, ", on_floor: ", on_floor)
 	print("PlayerDetector shape: ", detector_shape.shape)
 	print("PlayerDetector disabled: ", detector_shape.disabled)
 

@@ -1,12 +1,27 @@
 class_name SlotUI
 extends TextureRect
 
+signal item_dropped(from_index, to_index)
+signal double_clicked(slot_index)
+
+# Variables para detectar doble clic
+var click_time = 0
+var double_click_threshold = 0.3 # tiempo en segundos entre clics para considerarlo doble clic
+
 # Implementamos un handler para eventos directos
 func _gui_input(event):
-	if event is InputEventMouseButton and event.pressed:
-		print("SlotUI[" + str(index) + "]: Recibido click directo")
-
-signal item_dropped(from_index, to_index)
+	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
+		if event.pressed:
+			print("SlotUI[" + str(index) + "]: Recibido click directo")
+			var current_time = OS.get_ticks_msec() / 1000.0
+			
+			# Verificar si es un doble clic
+			if current_time - click_time < double_click_threshold:
+				print("SlotUI[" + str(index) + "]: ¡DOBLE CLIC DETECTADO!")
+				emit_signal("double_clicked", index)
+			
+			# Guardar tiempo del clic actual para la próxima verificación
+			click_time = current_time
 
 export(StyleBox) var normal_style: StyleBox
 export(StyleBox) var hover_style: StyleBox

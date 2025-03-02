@@ -35,9 +35,22 @@ func _ready() -> void:
 	if charge_particles:
 		charge_particles.emitting = false
 
+	# Determinar si el arma está equipada según el árbol de nodos
+	var is_equipped = false
+	var parent = get_parent()
+	if parent and parent.name == "Weapons":
+		is_equipped = true
+		# Actualizar on_floor cuando está equipada
+		on_floor = false
+
+	# Configurar correctamente las colisiones y detección según el estado
 	if on_floor:
 		shape.disabled = true
-	if not on_floor:
+		# Activar el detector de jugador cuando está en el suelo
+		player_detector.set_collision_mask_bit(0, true)
+		player_detector.set_collision_mask_bit(1, true)
+	else:
+		# Si no está en el suelo (está equipada), desactivar la detección del jugador
 		shape.disabled = true
 		player_detector.set_collision_mask_bit(0, false)
 		player_detector.set_collision_mask_bit(1, false)
@@ -99,8 +112,14 @@ func is_busy() -> bool:
 
 func _on_PlayerDetector_body_entered(body: KinematicBody2D) -> void:
 	if body != null and body is Player:
+		# Desactivar inmediatamente el detector para evitar múltiples detecciones
 		player_detector.set_collision_mask_bit(0, false)
 		player_detector.set_collision_mask_bit(1, false)
+		
+		# Asegurarse de que on_floor sea false antes de recoger
+		on_floor = false
+		
+		# Permitir al jugador recogerla
 		body.pick_up_weapon(self)
 		position = Vector2.ZERO
 	else:
