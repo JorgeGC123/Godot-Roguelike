@@ -481,16 +481,39 @@ func verify_saved_data() -> bool:
 
 
 func remove_item_by_name_from_active(item_name: String) -> Item:
+	print("InventoryManager: Intentando eliminar item por nombre: ", item_name)
+	
 	var inventory = get_active_inventory()
 	if not inventory:
+		print("InventoryManager: ERROR - No hay inventario activo")
 		return null
 		
 	# Buscar item por nombre
 	for i in range(inventory.capacity):
 		var item = inventory.get_item(i)
 		if item and item.name == item_name:
+			print("InventoryManager: Encontrado item ", item_name, " en slot ", i)
+			
+			# Asegurarnos de que se elimine de SavedData
+			if saved_data and saved_data.inventory_positions.has(item_name):
+				print("InventoryManager: Eliminando posición de ", item_name, " de SavedData")
+				saved_data.inventory_positions.erase(item_name)
+				
+				# Buscar y eliminar de weapons si es un arma
+				if item.item_type == "weapon":
+					for j in range(saved_data.weapons.size()):
+						if saved_data.weapons[j].name == item_name:
+							print("InventoryManager: Eliminando arma de SavedData.weapons en índice ", j)
+							saved_data.weapons.remove(j)
+							break
+				
+				# Guardar cambios inmediatamente
+				saved_data.save_data()
+			
+			# Eliminar del inventario y retornar
 			return inventory.remove_item(i)
 	
+	print("InventoryManager: No se encontró item con nombre ", item_name)
 	return null
 
 

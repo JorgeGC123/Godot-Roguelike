@@ -410,19 +410,44 @@ func _drop_weapon() -> void:
 		return
 	
 	var weapon_to_drop: Node2D = current_weapon
+	var weapon_name = weapon_to_drop.name
+	var weapon_index = current_weapon.get_index()
 	
-	# Eliminar del sistema de inventario
+	print("Player: Soltando arma ", weapon_name, " en índice ", weapon_index)
+	
+	# 1. Eliminar del sistema de inventario
 	if has_node("/root/InventoryManager"):
 		var inventory_manager = get_node("/root/InventoryManager")
-		var removed_item = inventory_manager.remove_item_by_name_from_active(weapon_to_drop.name)
+		var removed_item = inventory_manager.remove_item_by_name_from_active(weapon_name)
 		if removed_item:
-			print("Removed weapon from inventory system:", weapon_to_drop.name)
+			print("Player: Arma eliminada del InventoryManager: ", weapon_name)
 	
-	# Eliminar de SavedData
-	var weapon_index = current_weapon.get_index()
-	SavedData.weapons.remove(weapon_index - 1)
+	# 2. Eliminar su posición del inventario en SavedData
+	if SavedData and SavedData.inventory_positions.has(weapon_name):
+		print("Player: Eliminando posición de ", weapon_name, " de SavedData.inventory_positions")
+		SavedData.inventory_positions.erase(weapon_name)
 	
-	# Cambiar a otra arma si quedan armas disponibles
+	# 3. Eliminar el arma de SavedData.weapons
+	# Buscar el arma en el array de SavedData.weapons por nombre
+	if SavedData:
+		var found_index = -1
+		for i in range(SavedData.weapons.size()):
+			if SavedData.weapons[i].name == weapon_name:
+				found_index = i
+				break
+		
+		if found_index != -1:
+			print("Player: Eliminando arma de SavedData.weapons en índice ", found_index)
+			SavedData.weapons.remove(found_index)
+		else:
+			print("Player: ADVERTENCIA - No se encontró el arma en SavedData.weapons")
+			# Esto puede indicar que el estado ya es inconsistente
+		
+		# Forzar guardado inmediatamente
+		SavedData.save_data()
+		print("Player: SavedData guardado después de eliminar el arma")
+	
+	# 4. Cambiar a otra arma si quedan armas disponibles
 	if weapons.get_child_count() > 1:
 		_switch_weapon(UP)
 	else:
@@ -430,16 +455,17 @@ func _drop_weapon() -> void:
 		weapons.call_deferred("remove_child", weapon_to_drop)
 		current_weapon = null
 	
+	# 5. Emitir señal de arma soltada
 	emit_signal("weapon_droped", weapon_index)
 	
-	# Si no era la última arma, eliminarla de weapons
+	# 6. Si no era la última arma, eliminarla de weapons
 	if current_weapon != null:
 		weapons.call_deferred("remove_child", weapon_to_drop)
 	
-	# Preparar el arma para ser soltada en el suelo
+	# 7. Preparar el arma para ser soltada en el suelo
 	weapon_to_drop.on_floor = true
 	
-	# Configurar el PlayerDetector para que detecte al jugador nuevamente
+	# 8. Configurar el PlayerDetector para que detecte al jugador nuevamente
 	if weapon_to_drop.has_node("PlayerDetector"):
 		var detector = weapon_to_drop.get_node("PlayerDetector")
 		
@@ -447,11 +473,12 @@ func _drop_weapon() -> void:
 		# que el jugador recoja el arma inmediatamente
 		call_deferred("_activate_detector_deferred", detector)
 	
-	# Añadirla al mundo
+	# 9. Añadirla al mundo
 	get_parent().call_deferred("add_child", weapon_to_drop)
 	weapon_to_drop.set_owner(get_parent())
 	yield(weapon_to_drop.tween, "tree_entered")
 	
+	# 10. Configurar y lanzar el arma
 	var throw_dir: Vector2 = (get_global_mouse_position() - position).normalized()
 	var force: int = 100
 	var hitbox_instance = Hitbox.new()
@@ -464,6 +491,11 @@ func _drop_weapon() -> void:
 	weapon_to_drop.get_node("AnimationPlayer").play("throw")
 	weapon_to_drop.interpolate_pos(position, position + throw_dir * force)
 	weapon_to_drop.remove_child(hitbox_instance)
+	
+	# 11. Forzar una sincronización con SavedData a través de InventoryManager
+	if has_node("/root/InventoryManager"):
+		var inventory_manager = get_node("/root/InventoryManager")
+		inventory_manager.save_all_inventories()
 
 # Método auxiliar para activar el detector después de un frame
 func _activate_detector_deferred(detector: Area2D) -> void:
