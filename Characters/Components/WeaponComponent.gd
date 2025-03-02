@@ -82,27 +82,34 @@ func initialize():
 	add_child(charge_timer)
 	update_weapon_position()
 
-func get_input():
-	if entity is Player:
-		# Mantenemos la comprobación directa para el jugador por razones de rendimiento
-		# Ya que esta función se llama cada frame
-		var player_stamina = entity.stamina
-		
-		if Input.is_action_pressed("ui_attack") and not animation_player.is_playing() and player_stamina > BASIC_ATTACK_STAMINA:
-			if player_stamina > CHARGED_ATTACK_STAMINA:
-				animation_player.play("charge")
-				emit_signal("weapon_animation_changed", "charge")
-		elif Input.is_action_just_released("ui_attack") and player_stamina > BASIC_ATTACK_STAMINA:
-			animation_player.play("attack")
-			emit_signal("weapon_animation_changed", "attack")
-		if charge_particles.emitting and player_stamina > CHARGED_ATTACK_STAMINA and Input.is_action_just_released("ui_attack"):
-			animation_player.play("strong_attack")
-			emit_signal("weapon_animation_changed", "strong_attack")
-		elif Input.is_action_just_pressed("ui_active_ability") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and player_stamina > ABILITY_STAMINA:
-			can_active_ability = false
-			cool_down_timer.start()
-			animation_player.play("active_ability")
-			emit_signal("weapon_animation_changed", "active_ability")
+# func get_input():
+# 	# Usar stamina_component para entidades basadas en componentes
+# 	var current_stamina = 0
+# 	var stamina_component = null
+	
+# 	# Intentar obtener la stamina actual usando el método más apropiado
+# 	if entity.has_method("get_component"):
+# 		stamina_component = entity.get_component("stamina")
+# 		if stamina_component:
+# 			current_stamina = stamina_component.get_current_stamina()
+# 	elif entity.get("stamina") != null:
+# 		current_stamina = entity.stamina
+	
+# 	if Input.is_action_pressed("ui_attack") and not animation_player.is_playing() and current_stamina > BASIC_ATTACK_STAMINA:
+# 		if current_stamina > CHARGED_ATTACK_STAMINA:
+# 			animation_player.play("charge")
+# 			emit_signal("weapon_animation_changed", "charge")
+# 	elif Input.is_action_just_released("ui_attack") and current_stamina > BASIC_ATTACK_STAMINA:
+# 		animation_player.play("attack")
+# 		emit_signal("weapon_animation_changed", "attack")
+# 	if charge_particles.emitting and current_stamina > CHARGED_ATTACK_STAMINA and Input.is_action_just_released("ui_attack"):
+# 		animation_player.play("strong_attack")
+# 		emit_signal("weapon_animation_changed", "strong_attack")
+# 	elif Input.is_action_just_pressed("ui_first_quickslot") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and current_stamina > ABILITY_STAMINA:
+# 		can_active_ability = false
+# 		cool_down_timer.start()
+# 		animation_player.play("active_ability")
+# 		emit_signal("weapon_animation_changed", "active_ability")
 
 func move(direction: Vector2):
 	if ranged_weapon:
@@ -278,20 +285,16 @@ func _on_Hitbox_area_entered(area:Area2D):
 			# Verificar si la otra arma está atacando
 			var other_animation_player = other_weapon.get_node("AnimationPlayer")
 			if other_animation_player and other_animation_player.is_playing():
-				# Determinar si el duelo es player vs enemy
+				# Determinar tipos de entidades para logs
 				var owner_type = "unknown"
 				var other_owner_type = "unknown"
 				
-				if entity is Player:
-					owner_type = "player"
-				else:
-					owner_type = "enemy"
+				# Identificar tipo sin depender de la clase Player específicamente
+				owner_type = entity.get_class()
 				
 				var other_entity = _find_owner_entity(other_weapon)
-				if other_entity is Player:
-					other_owner_type = "player"
-				else:
-					other_owner_type = "enemy"
+				if other_entity:
+					other_owner_type = other_entity.get_class()
 				
 				print("¡Colisión de armas detectada! " + owner_type + " (" + weapon.name + ") vs " + 
 					other_owner_type + " (" + other_weapon.name + ")")
@@ -306,9 +309,9 @@ func _find_parent_weapon(node:Node) -> Node:
 	return parent
 
 
-# Busca el dueño de un arma (Player o Enemy)
+# Busca el dueño de un arma (entidad controlable)
 func _find_owner_entity(weapon_node:Node) -> Node:
 	var parent = weapon_node.get_parent()
-	while parent and not (parent is Player or parent.get_class().find("Enemy") >= 0):
+	while parent and not (parent is KinematicBody2D or "Entity" in parent.get_class()):
 		parent = parent.get_parent()
 	return parent

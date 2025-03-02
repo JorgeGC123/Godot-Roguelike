@@ -87,7 +87,7 @@ func get_input() -> void:
 	if charge_particles.emitting and player.stamina > CHARGED_ATTACK_STAMINA and Input.is_action_just_released("ui_attack"):
 			animation_player.play("strong_attack")
 			emit_signal("weapon_animation_changed", "strong_attack")
-	elif Input.is_action_just_pressed("ui_active_ability") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and player.stamina > ABILITY_STAMINA:
+	elif Input.is_action_just_pressed("ui_first_quickslot") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and player.stamina > ABILITY_STAMINA:
 		can_active_ability = false
 		cool_down_timer.start()
 		ui.recharge_ability_animation(cool_down_timer.wait_time)

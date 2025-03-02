@@ -70,7 +70,7 @@ func get_input() -> void:
 		elif charge_particles.emitting and player.stamina > 50:
 			animation_player.play("strong_attack")
 			emit_signal("weapon_animation_changed", "strong_attack")
-	elif Input.is_action_just_pressed("ui_active_ability") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and player.stamina > 30:
+	elif Input.is_action_just_pressed("ui_first_quickslot") and animation_player.has_animation("active_ability") and not is_busy() and can_active_ability and player.stamina > 30:
 		can_active_ability = false
 		in_first_attack = false
 		in_second_attack = false
