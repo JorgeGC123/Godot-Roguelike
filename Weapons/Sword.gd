@@ -1,14 +1,88 @@
 extends Weapon
 
-onready var second_attack_timer: Timer = get_node("SecondAttackTimer")  # Asumiendo que has añadido este nodo
+# Importamos explícitamente el script para evitar problemas de referencia
+const SwordDefenseHandlerScript = preload("res://Weapons/SwordDefenseHandler.gd")
+
+onready var second_attack_timer: Timer = get_node("SecondAttackTimer")
+var defense_handler = null
 
 var in_first_attack: bool = false
 var in_second_attack: bool = false
 
+# Procesamiento continuo para actualizar la defensa
+func _process(delta):
+	# Actualizar la posición defensiva si está activa
+	if defense_handler and defense_handler.is_defending:
+		defense_handler.update_defense_position()
+
+# Función para capturar eventos de input directamente
+func _input(event):
+	# Capturar botón derecho del ratón
+	if event is InputEventMouseButton and event.button_index == 2:
+		if event.pressed: # Botón presionado
+			print("DEBUG: Botón derecho presionado")
+			
+			# Verificar que player esté inicializado
+			if player == null:
+				print("ERROR: player es null en Sword._input")
+				# Intentar inicializar player desde el árbol
+				var potential_player = get_parent().get_parent()
+				if potential_player is Player:
+					player = potential_player
+					print("DEBUG: player recuperado del árbol: ", player)
+				else:
+					print("ERROR: No se pudo recuperar player del árbol")
+					return
+			
+			# Solo proceder si tenemos lo necesario
+			if player and defense_handler and player.stamina > 20 and not is_busy():
+				print("DEBUG: Condiciones cumplidas, activando defensa")
+				# Cancelar ataques activos
+				in_first_attack = false
+				in_second_attack = false
+				
+				# Verificar handler
+				print("DEBUG: defense_handler.player antes: ", defense_handler.player)
+				defense_handler.player = player # Asegurar que handler tiene la referencia actualizada
+				
+				# Activar defensa
+				var success = defense_handler.activate_defense()
+				print("DEBUG: Resultado de activate_defense: ", success)
+				
+				# Consumir el evento
+				get_tree().set_input_as_handled()
+		else: # Botón liberado
+			print("DEBUG: Botón derecho liberado")
+			# Desactivar defensa si estaba activa
+			if defense_handler:
+				defense_handler.deactivate_defense()
+				# Consumir el evento
+				get_tree().set_input_as_handled()
+
 func _ready() -> void:
+	# Intentar inicializar player
+	var parent = get_parent()
+	if parent and parent.name == "Weapons":
+		var potential_player = parent.get_parent()
+		if potential_player is Player and player == null:
+			player = potential_player
+			print("DEBUG: player inicializado desde _ready: ", player)
+	
+	# Instanciar el manejador de defensa
+	print("DEBUG: Creando defense_handler")
+	defense_handler = SwordDefenseHandlerScript.new(self)
+	if defense_handler != null:
+		print("DEBUG: defense_handler creado exitosamente")
+		# Asegurarnos que tenga el player actualizado
+		if player != null and defense_handler.player == null:
+			defense_handler.player = player
+			print("DEBUG: Actualizada referencia a player en defense_handler")
+	else:
+		print("ERROR: No se pudo crear defense_handler")
+	
 	# Determinar si el arma está equipada basado en la jerarquía de nodos
 	var is_equipped = false
-	var parent = get_parent()
+
 	
 	# Verificar si el arma está en un nodo Weapons (equipada)
 	if parent and parent.name == "Weapons":
@@ -54,6 +128,22 @@ func _ready() -> void:
 func get_input() -> void:
 	if is_busy_with_active_ability():
 		return
+	
+	# Nueva habilidad defensiva con botón derecho usando el handler
+	if Input.is_action_just_pressed("ui_active_ability") and not is_busy() and player.stamina > 20:
+		print("DEBUG: Botón derecho presionado, intentando activar defensa")
+		# Cancelar cualquier ataque en progreso
+		in_first_attack = false
+		in_second_attack = false
+		# Verificar handler
+		if defense_handler == null:
+			print("ERROR: defense_handler es null!")
+			return
+		# Delegar la defensa al handler
+		var success = defense_handler.activate_defense()
+		print("DEBUG: Resultado de activate_defense: ", success)
+		return
+		
 	if Input.is_action_just_pressed("ui_attack") and player.stamina > 20:
 		if in_first_attack:
 			animation_player.play("attack2")
@@ -116,3 +206,8 @@ func _on_AnimationPlayer_animation_started(anim_name:String):
 		stamina_tax(50)
 	elif anim_name == "active_ability":
 		stamina_tax(30)
+		
+func _exit_tree() -> void:
+	# Aseguramos la limpieza adecuada
+	if defense_handler:
+		defense_handler.cleanup()

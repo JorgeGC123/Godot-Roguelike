@@ -194,6 +194,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Characters/Components/StaminaComponent.gd"
 }, {
+"base": "Reference",
+"class": "SwordDefenseHandler",
+"language": "GDScript",
+"path": "res://Weapons/SwordDefenseHandler.gd"
+}, {
 "base": "Node2D",
 "class": "Weapon",
 "language": "GDScript",
@@ -252,6 +257,7 @@ _global_script_class_icons={
 "PlayerDash": "",
 "SlotUI": "",
 "StaminaComponent": "",
+"SwordDefenseHandler": "",
 "Weapon": "res://Art/v1.1 dungeon crawler 16x16 pixel pack/heroes/knight/weapon_sword_1.png",
 "WeaponComponent": "",
 "WeaponHitbox": "",
@@ -429,3 +435,7 @@ common/enable_pause_aware_picking=true
 quality/driver/driver_name="GLES2"
 threads/thread_model=2
 environment/default_environment="res://default_env.tres"
+
+[res:]
+
+/Weapons/SwordDefenseHandler.gd},config_version=4
